@@ -5,6 +5,9 @@ import clientPromise from "@/lib/mongodb";
 
 export const { handlers, signIn, signOut, auth } = NextAuth({
   adapter: MongoDBAdapter(clientPromise),
+  session: {
+    strategy: "database",
+  },
   providers: [
     Discord({
       clientId: process.env.DISCORD_CLIENT_ID!,
@@ -17,19 +20,23 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
     }),
   ],
   callbacks: {
-    async jwt({ token, account }) {
-      if (account?.access_token) {
-        token.accessToken = account.access_token;
-      }
-      return token;
-    },
-    async session({ session, token }) {
+    async session({ session, user }) {
       if (session.user) {
-        session.user.id = token.sub!;
+        session.user.id = user.id;
       }
-      if (token.accessToken) {
-        session.accessToken = token.accessToken as string;
+
+      // Fetch access token from MongoDB accounts table
+      const client = await clientPromise;
+      const db = client.db();
+      const account = await db.collection("accounts").findOne({
+        userId: user.id,
+        provider: "discord",
+      });
+
+      if (account?.access_token) {
+        session.accessToken = account.access_token as string;
       }
+
       return session;
     },
   },

@@ -13,13 +13,20 @@ interface Guild {
 export default async function DashboardPage() {
   const session = await auth()
 
+  // DEBUG: Log session to console
+  console.log("=== DASHBOARD SESSION ===")
+  console.log("Session exists:", !!session)
+  console.log("Session user:", session?.user)
+  console.log("Access token exists:", !!session?.accessToken)
+  console.log("========================")
+
   if (!session) {
+    console.log("No session found, redirecting to login...")
     redirect("/login")
   }
 
   let guilds: Guild[] = []
 
-  // Fetch guilds if we have access token
   if (session.accessToken) {
     try {
       const baseUrl = process.env.NEXTAUTH_URL || "http://localhost:3000"
