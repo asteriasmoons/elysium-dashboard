@@ -1,7 +1,7 @@
-import NextAuth from "next-auth";
-import Discord from "next-auth/providers/discord";
-import { MongoDBAdapter } from "@auth/mongodb-adapter";
-import clientPromise from "@/lib/mongodb";
+import NextAuth from "next-auth"
+import Discord from "next-auth/providers/discord"
+import { MongoDBAdapter } from "@auth/mongodb-adapter"
+import clientPromise from "@/lib/mongodb"
 
 export const { handlers, signIn, signOut, auth } = NextAuth({
   adapter: MongoDBAdapter(clientPromise),
@@ -22,26 +22,33 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
   callbacks: {
     async session({ session, user }) {
       if (session.user) {
-        session.user.id = user.id;
+        session.user.id = user.id
       }
-
-      // Fetch access token from MongoDB accounts table
-      const client = await clientPromise;
-      const db = client.db();
+      
+      // DEBUG: Fetch access token from MongoDB
+      console.log("=== FETCHING ACCESS TOKEN ===")
+      console.log("User ID:", user.id)
+      
+      const client = await clientPromise
+      const db = client.db()
       const account = await db.collection("accounts").findOne({
         userId: user.id,
         provider: "discord",
-      });
-
+      })
+      
+      console.log("Account found:", !!account)
+      console.log("Account data:", account)
+      console.log("============================")
+      
       if (account?.access_token) {
-        session.accessToken = account.access_token as string;
+        session.accessToken = account.access_token as string
       }
-
-      return session;
+      
+      return session
     },
   },
   pages: {
     signIn: "/login",
   },
   trustHost: true,
-});
+})
