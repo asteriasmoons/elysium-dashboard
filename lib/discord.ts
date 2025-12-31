@@ -13,17 +13,23 @@ export interface Guild {
 }
 
 /**
- * Fetch user's guilds from Discord API
+ * Fetch user's guilds from Discord API (requires USER OAuth token)
  */
 export async function fetchUserGuilds(accessToken: string): Promise<Guild[]> {
-  const rest = new REST({ version: "10" }).setToken(accessToken);
+  if (!accessToken) {
+    throw new Error("fetchUserGuilds: accessToken is missing");
+  }
+
+  const rest = new REST({ version: "10", authPrefix: "Bearer" }).setToken(
+    accessToken
+  );
 
   try {
     const guilds = (await rest.get(Routes.userGuilds())) as Guild[];
     return guilds;
   } catch (error) {
     console.error("Error fetching user guilds:", error);
-    return [];
+    throw error;
   }
 }
 
@@ -45,29 +51,45 @@ export function filterManageableGuilds(guilds: Guild[]): Guild[] {
 }
 
 /**
- * Check if bot is in a guild using bot token
+ * Check if bot is in a guild using BOT token
  */
 export async function isBotInGuild(guildId: string): Promise<boolean> {
-  if (!process.env.DISCORD_BOT_TOKEN) {
+  const botToken = process.env.DISCORD_BOT_TOKEN;
+
+  if (!botToken) {
     console.error("DISCORD_BOT_TOKEN not set");
     return false;
   }
 
-  const rest = new REST({ version: "10" }).setToken(
-    process.env.DISCORD_BOT_TOKEN
+  if (!guildId) {
+    throw new Error("isBotInGuild: guildId is missing");
+  }
+
+  const rest = new REST({ version: "10", authPrefix: "Bot" }).setToken(
+    botToken
   );
 
   try {
     await rest.get(Routes.guild(guildId));
     return true;
   } catch (error) {
-    // 404 means bot is not in the guild
-    return false;
+    // Narrow safely without using `any`
+    if (
+      typeof error === "object" &&
+      error !== null &&
+      "status" in error &&
+      (error as { status?: number }).status === 404
+    ) {
+      return false;
+    }
+
+    console.error(`Error checking bot presence for guild ${guildId}:`, error);
+    throw error;
   }
 }
 
 /**
- * Get Discord CDN avatar URL
+ * Get Discord CDN guild icon URL
  */
 export function getGuildIconUrl(guild: Guild): string | null {
   if (!guild.icon) return null;
