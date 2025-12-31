@@ -1,6 +1,7 @@
 import { auth } from "@/lib/auth"
 import { redirect } from "next/navigation"
 import { GuildCard } from "@/components/GuildCard"
+import { fetchUserGuilds, filterManageableGuilds, isBotInGuild, getGuildIconUrl } from "@/lib/discord"
 
 interface Guild {
   id: string
@@ -13,34 +14,43 @@ interface Guild {
 export default async function DashboardPage() {
   const session = await auth()
 
-  // DEBUG: Log session to console
-  console.log("=== DASHBOARD SESSION ===")
-  console.log("Session exists:", !!session)
-  console.log("Session user:", session?.user)
-  console.log("Access token exists:", !!session?.accessToken)
-  console.log("========================")
-
   if (!session) {
-    console.log("No session found, redirecting to login...")
     redirect("/login")
   }
 
   let guilds: Guild[] = []
 
+  // Fetch guilds directly (no API route needed)
   if (session.accessToken) {
     try {
-      const baseUrl = process.env.NEXTAUTH_URL || "http://localhost:3000"
-      const res = await fetch(`${baseUrl}/api/guilds`, {
-        headers: {
-          Cookie: `next-auth.session-token=${session.accessToken}`,
-        },
-        cache: "no-store",
-      })
+      console.log("=== FETCHING GUILDS ===")
+      
+      const allGuilds = await fetchUserGuilds(session.accessToken)
+      console.log("Total guilds from Discord:", allGuilds.length)
+      
+      const manageableGuilds = filterManageableGuilds(allGuilds)
+      console.log("Manageable guilds:", manageableGuilds.length)
+      console.log("Manageable guild names:", manageableGuilds.map(g => g.name))
 
-      if (res.ok) {
-        const data = await res.json()
-        guilds = data.guilds || []
-      }
+      const guildsWithBotStatus = await Promise.all(
+        manageableGuilds.map(async (guild) => {
+          const botPresent = await isBotInGuild(guild.id)
+          console.log(`Bot in "${guild.name}":`, botPresent)
+          return {
+            id: guild.id,
+            name: guild.name,
+            icon: getGuildIconUrl(guild),
+            owner: guild.owner,
+            permissions: guild.permissions,
+            botPresent,
+          }
+        })
+      )
+
+      guilds = guildsWithBotStatus.filter(g => g.botPresent)
+      console.log("Guilds with bot:", guilds.length)
+      console.log("===================")
+      
     } catch (error) {
       console.error("Error fetching guilds:", error)
     }
@@ -65,7 +75,7 @@ export default async function DashboardPage() {
           >
             <button
               type="submit"
-              className="px-4 py-2 bg-red-500 text-white rounded hover:bg-red-600 transition-colors"
+              className="px-4 py-2 bg-slate-600 text-white rounded hover:bg-slate-700 transition-colors"
             >
               Sign Out
             </button>
@@ -81,7 +91,7 @@ export default async function DashboardPage() {
                 No servers found where you have manage permissions and the Elysium bot is installed.
               </p>
               
-                <a href={`https://discord.com/api/oauth2/authorize?client_id=${process.env.DISCORD_CLIENT_ID}&permissions=8&scope=bot`}
+               <a href={`https://discord.com/api/oauth2/authorize?client_id=${process.env.DISCORD_CLIENT_ID}&permissions=8&scope=bot`}
                 target="_blank"
                 rel="noopener noreferrer"
                 className="text-blue-500 hover:underline"
