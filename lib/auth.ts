@@ -17,9 +17,18 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
     }),
   ],
   callbacks: {
-    async session({ session, user }) {
+    async jwt({ token, account }) {
+      if (account?.access_token) {
+        token.accessToken = account.access_token;
+      }
+      return token;
+    },
+    async session({ session, token }) {
       if (session.user) {
-        session.user.id = user.id;
+        session.user.id = token.sub!;
+      }
+      if (token.accessToken) {
+        session.accessToken = token.accessToken as string;
       }
       return session;
     },
@@ -27,5 +36,5 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
   pages: {
     signIn: "/login",
   },
-  trustHost: true, // ← ADD THIS LINE
+  trustHost: true,
 });
