@@ -1,6 +1,8 @@
 import { auth } from "@/lib/auth";
 import { redirect } from "next/navigation";
 
+export const runtime = "nodejs";
+
 export default async function DashboardPage() {
   const session = await auth();
 
