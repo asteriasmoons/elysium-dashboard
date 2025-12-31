@@ -3,6 +3,9 @@ import { redirect } from "next/navigation"
 import { GuildCard } from "@/components/GuildCard"
 import { fetchUserGuilds, filterManageableGuilds, isBotInGuild, getGuildIconUrl } from "@/lib/discord"
 
+import styles from "./dashboard.module.css";
+
+
 interface Guild {
   id: string
   name: string
@@ -57,50 +60,48 @@ export default async function DashboardPage() {
   }
 
   return (
-    <div className="min-h-screen p-8 bg-gray-50">
-      <div className="max-w-7xl mx-auto">
-        <div className="flex justify-between items-center mb-8">
+    <div className={styles.page}>
+      <div className={styles.container}>
+        <div className={styles.headerRow}>
           <div>
-            <h1 className="text-3xl font-bold">Dashboard</h1>
-            <p className="text-gray-600 mt-2">
-              Welcome, {session.user?.name}!
-            </p>
+            <h1 className={styles.title}>Dashboard</h1>
+            <p className={styles.subtitle}>Welcome, {session.user?.name}!</p>
           </div>
+
           <form
             action={async () => {
-              "use server"
-              const { signOut } = await import("@/lib/auth")
-              await signOut({ redirectTo: "/" })
+              "use server";
+              const { signOut } = await import("@/lib/auth");
+              await signOut({ redirectTo: "/" });
             }}
           >
-            <button
-              type="submit"
-              className="px-4 py-2 bg-slate-600 text-white rounded hover:bg-slate-700 transition-colors"
-            >
+            <button type="submit" className={styles.signOutButton}>
               Sign Out
             </button>
           </form>
         </div>
 
-        <div className="bg-white rounded-lg shadow p-6 mb-8">
-          <h2 className="text-xl font-semibold mb-4">Your Servers</h2>
-          
+        <div className={styles.panel}>
+          <h2 className={styles.panelTitle}>Your Servers</h2>
+
           {guilds.length === 0 ? (
-            <div className="text-center py-12">
-              <p className="text-gray-500 mb-4">
-                No servers found where you have manage permissions and the Elysium bot is installed.
+            <div className={styles.emptyState}>
+              <p className={styles.emptyText}>
+                No servers found where you have manage permissions and the
+                Elysium bot is installed.
               </p>
-              
-               <a href={`https://discord.com/api/oauth2/authorize?client_id=${process.env.DISCORD_CLIENT_ID}&permissions=8&scope=bot`}
+
+              <a
+                href={`https://discord.com/api/oauth2/authorize?client_id=${process.env.DISCORD_CLIENT_ID}&permissions=8&scope=bot`}
                 target="_blank"
                 rel="noopener noreferrer"
-                className="text-blue-500 hover:underline"
+                className={styles.inviteLink}
               >
                 Invite Elysium Bot to your server
               </a>
             </div>
           ) : (
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+            <div className={styles.grid}>
               {guilds.map((guild) => (
                 <GuildCard
                   key={guild.id}

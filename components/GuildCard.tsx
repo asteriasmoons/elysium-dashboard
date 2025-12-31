@@ -1,13 +1,6 @@
 import Image from "next/image";
 import Link from "next/link";
-import {
-  Card,
-  CardContent,
-  CardDescription,
-  CardHeader,
-  CardTitle,
-} from "@/components/ui/card";
-import { Button } from "@/components/ui/button";
+import styles from "./GuildCard.module.css";
 
 interface GuildCardProps {
   id: string;
@@ -18,35 +11,33 @@ interface GuildCardProps {
 
 export function GuildCard({ id, name, icon, owner }: GuildCardProps) {
   return (
-    <Card className="hover:shadow-lg transition-shadow">
-      <CardHeader className="flex flex-row items-center gap-4">
-        <div className="w-16 h-16 rounded-full bg-linear-to-br from-blue-400 to-purple-500 flex items-center justify-center overflow-hidden">
+    <div className={styles.card}>
+      <div className={styles.header}>
+        <div className={styles.icon}>
           {icon ? (
             <Image
               src={icon}
               alt={name}
               width={64}
               height={64}
-              className="object-cover"
+              className={styles.image}
             />
           ) : (
-            <span className="text-white text-2xl font-bold">
+            <span className={styles.fallback}>
               {name.charAt(0).toUpperCase()}
             </span>
           )}
         </div>
-        <div className="flex-1">
-          <CardTitle className="text-lg">{name}</CardTitle>
-          <CardDescription>
-            {owner ? "👑 Owner" : "⚙️ Administrator"}
-          </CardDescription>
+
+        <div className={styles.meta}>
+          <h3 className={styles.name}>{name}</h3>
+          <p className={styles.role}>{owner ? "Owner" : "Administrator"}</p>
         </div>
-      </CardHeader>
-      <CardContent>
-        <Link href={`/dashboard/${id}`}>
-          <Button className="w-full">Manage Server</Button>
-        </Link>
-      </CardContent>
-    </Card>
+      </div>
+
+      <Link href={`/dashboard/${id}`} className={styles.manageLink}>
+        Manage Server
+      </Link>
+    </div>
   );
 }
