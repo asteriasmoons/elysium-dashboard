@@ -1,17 +1,54 @@
 .card {
-  background: rgba(255, 255, 255, 0.04);
-  border: 1px solid rgba(255, 255, 255, 0.10);
+  position: relative;
+  background: var(--panel);
+  border: 1px solid var(--stroke);
   border-radius: 18px;
   padding: 20px;
   display: flex;
   flex-direction: column;
   gap: 16px;
-  transition: box-shadow 180ms ease, border-color 180ms ease;
+
+  backdrop-filter: blur(14px);
+  -webkit-backdrop-filter: blur(14px);
+
+  transition: transform 180ms ease, box-shadow 180ms ease, border-color 180ms ease;
+  overflow: hidden;
 }
 
 .card:hover {
-  border-color: rgba(255, 255, 255, 0.18);
-  box-shadow: 0 14px 36px rgba(0, 0, 0, 0.35);
+  transform: translateY(-2px);
+  border-color: var(--stroke-strong);
+  box-shadow: 0 16px 40px rgba(0, 0, 0, 0.40);
+}
+
+/* Gradient border effect (subtle): a thin “ring” that appears on hover */
+.card::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  padding: 1px;
+  border-radius: 18px;
+  background: var(--brand-gradient);
+  opacity: 0;
+  pointer-events: none;
+
+  /* Standard mask (for spec completeness) */
+  mask:
+    linear-gradient(#000 0 0) content-box,
+    linear-gradient(#000 0 0);
+  mask-composite: exclude;
+
+  /* WebKit mask (actually used by Safari/Chromium) */
+  -webkit-mask:
+    linear-gradient(#000 0 0) content-box,
+    linear-gradient(#000 0 0);
+  -webkit-mask-composite: xor;
+
+  transition: opacity 180ms ease;
+}
+
+.card:hover::after {
+  opacity: 0.55;
 }
 
 .header {
@@ -24,12 +61,13 @@
   width: 64px;
   height: 64px;
   border-radius: 50%;
-  background: linear-gradient(135deg, #7c7cff, #b983ff);
+  background: var(--brand-gradient);
   display: flex;
   align-items: center;
   justify-content: center;
   overflow: hidden;
   flex-shrink: 0;
+  box-shadow: 0 10px 25px rgba(0, 0, 0, 0.35);
 }
 
 .image {
@@ -54,13 +92,13 @@
   margin: 0;
   font-size: 1.1rem;
   font-weight: 700;
-  color: #f4f4f5;
+  color: var(--text);
 }
 
 .role {
   margin: 0;
   font-size: 0.9rem;
-  color: rgba(244, 244, 245, 0.65);
+  color: var(--muted);
 }
 
 .manageLink {
@@ -69,15 +107,24 @@
   text-align: center;
   padding: 12px 14px;
   border-radius: 12px;
+
   background: rgba(255, 255, 255, 0.06);
-  color: #f4f4f5;
+  color: var(--text);
   text-decoration: none;
-  font-weight: 600;
+  font-weight: 700;
+
   border: 1px solid rgba(255, 255, 255, 0.10);
-  transition: background 160ms ease, border-color 160ms ease;
+  transition: transform 140ms ease, border-color 140ms ease, background 140ms ease;
 }
 
 .manageLink:hover {
   background: rgba(255, 255, 255, 0.10);
   border-color: rgba(255, 255, 255, 0.18);
 }
+
+/* Focus ring that uses your gradient (feels premium) */
+.manageLink:focus-visible {
+  outline: none;
+  box-shadow: 0 0 0 2px rgba(11, 11, 15, 0.85), 0 0 0 5px rgba(126, 126, 255, 0.28);
+}
+
