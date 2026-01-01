@@ -14,7 +14,11 @@ function getErrorMessage(value: unknown): string {
   return "Something went wrong.";
 }
 
-export default function NewEntryClient() {
+interface NewEntryClientProps {
+  guildId?: string;
+}
+
+export default function NewEntryClient({ guildId }: NewEntryClientProps) {
   const router = useRouter();
 
   const [title, setTitle] = useState("");
@@ -42,7 +46,7 @@ export default function NewEntryClient() {
       }
 
       if ("id" in data && typeof data.id === "string") {
-        router.push(`/dashboard/journal/${data.id}`);
+        router.push(`/dashboard/journal/${data.id}${guildId ? `?guildId=${guildId}` : ""}`);
         return;
       }
 
@@ -67,7 +71,7 @@ export default function NewEntryClient() {
             <button
               type="button"
               className={styles.secondary}
-              onClick={() => router.push("/dashboard/journal")}
+              onClick={() => router.push(guildId ? `/dashboard/${guildId}/features` : "/dashboard/journal")}
             >
               Back
             </button>
