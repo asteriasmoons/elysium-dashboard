@@ -34,7 +34,7 @@ export default async function GuildHomePage({
             implement over time.
           </p>
 
-          <FeatureGrid guildId={params.guildId} features={FEATURES} />
+          <FeatureGrid features={FEATURES} guildId={params.guildId} />
         </div>
       </div>
     </div>
