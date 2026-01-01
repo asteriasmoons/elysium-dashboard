@@ -1,25 +1,33 @@
 import clientPromise from "@/lib/mongodb";
-import { ObjectId } from "mongodb";
+import { ObjectId, type Document } from "mongodb";
 
 export const JOURNAL_COLLECTION = "journalentries";
+
+// Free-tier limit
 export const FREE_JOURNAL_LIMIT = 10;
 
+// Validation limits
 export const TITLE_MAX = 120;
 export const ENTRY_MAX = 8000;
 
-export interface JournalDoc {
+export interface JournalDoc extends Document {
   _id: ObjectId;
-  userId: string;        // Discord user id (numbers as string)
-  title?: string;        // optional because older docs may not have it
+  userId: string;
+  title?: string; // some older entries may not have title
   entry: string;
   createdAt: Date;
 }
 
 function requireUserId(userId: string | null | undefined): string {
-  if (!userId) throw new Error("Missing userId");
-  return userId;
+  const trimmed = (userId ?? "").trim();
+  if (!trimmed) throw new Error("Missing userId");
+  return trimmed;
 }
 
+/**
+ * For this dashboard we ONLY trust the Discord id we stored at session.user.id.
+ * This must match the `userId` string stored in your bot's journalentries.
+ */
 export function getSessionUserId(session: unknown): string {
   if (typeof session !== "object" || session === null) {
     throw new Error("Invalid session object");
@@ -28,16 +36,18 @@ export function getSessionUserId(session: unknown): string {
   const s = session as Record<string, unknown>;
   const user = s["user"];
 
-  if (typeof user === "object" && user !== null) {
-    const u = user as Record<string, unknown>;
-    const id = u["id"];
-    if (typeof id === "string" && id.length > 0) return id;
+  if (typeof user !== "object" || user === null) {
+    throw new Error("Missing session.user");
   }
 
-  const topUserId = s["userId"];
-  if (typeof topUserId === "string" && topUserId.length > 0) return topUserId;
+  const u = user as Record<string, unknown>;
+  const id = u["id"];
 
-  throw new Error("Unable to determine current user id from session");
+  if (typeof id === "string" && id.trim().length > 0) {
+    return id.trim();
+  }
+
+  throw new Error("Missing session.user.id");
 }
 
 export async function listUserEntries(userId: string): Promise<JournalDoc[]> {
@@ -68,9 +78,12 @@ export async function getUserEntryById(
   const client = await clientPromise;
   const db = client.db();
 
-  if (!ObjectId.isValid(entryId)) return null;
+  if (!ObjectId.isValid(entryId)) {
+    return null;
+  }
 
   const _id = new ObjectId(entryId);
+
   return db
     .collection<JournalDoc>(JOURNAL_COLLECTION)
     .findOne({ _id, userId: uid });
@@ -119,6 +132,8 @@ export async function updateUserEntry(
 ): Promise<boolean> {
   const uid = requireUserId(userId);
 
+  if (!ObjectId.isValid(entryId)) return false;
+
   const trimmedTitle = String(title ?? "").trim();
   const trimmedEntry = String(entry ?? "").trim();
 
@@ -129,18 +144,15 @@ export async function updateUserEntry(
   if (trimmedEntry.length > ENTRY_MAX)
     throw new Error(`Entry must be <= ${ENTRY_MAX} characters`);
 
-  if (!ObjectId.isValid(entryId)) return false;
-
   const client = await clientPromise;
   const db = client.db();
 
   const _id = new ObjectId(entryId);
-  const result = await db
-    .collection(JOURNAL_COLLECTION)
-    .updateOne(
-      { _id, userId: uid },
-      { $set: { title: trimmedTitle, entry: trimmedEntry } }
-    );
+
+  const result = await db.collection(JOURNAL_COLLECTION).updateOne(
+    { _id, userId: uid },
+    { $set: { title: trimmedTitle, entry: trimmedEntry } }
+  );
 
   return result.matchedCount > 0;
 }
@@ -157,6 +169,7 @@ export async function deleteUserEntry(
   const db = client.db();
 
   const _id = new ObjectId(entryId);
+
   const result = await db
     .collection(JOURNAL_COLLECTION)
     .deleteOne({ _id, userId: uid });
