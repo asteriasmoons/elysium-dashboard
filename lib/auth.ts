@@ -2,48 +2,54 @@ import NextAuth from "next-auth";
 import Discord from "next-auth/providers/discord";
 import { MongoDBAdapter } from "@auth/mongodb-adapter";
 import clientPromise from "@/lib/mongodb";
+import { ObjectId } from "mongodb";
 
-export const { handlers, signIn, signOut, auth } = NextAuth({
+export const { handlers, auth, signIn, signOut } = NextAuth({
   adapter: MongoDBAdapter(clientPromise),
+
   session: {
     strategy: "database",
   },
+
   providers: [
     Discord({
       clientId: process.env.DISCORD_CLIENT_ID!,
       clientSecret: process.env.DISCORD_CLIENT_SECRET!,
       authorization: {
         params: {
-          scope: "identify guilds",
+          // 🔴 REQUIRED scopes for dashboards
+          scope: "identify guilds guilds.members.read",
         },
       },
     }),
   ],
+
   callbacks: {
     async session({ session, user }) {
-      // Persist discord id on session.user.id
       if (session.user) {
         session.user.id = user.id;
       }
 
-      // Pull access_token from DB adapter's Account record
+      // Pull Discord access token from DB
       const client = await clientPromise;
       const db = client.db();
 
       const account = await db.collection("accounts").findOne({
-        userId: user.id,
+        userId: new ObjectId(user.id),
         provider: "discord",
       });
 
-      if (account && typeof account.access_token === "string") {
-        session.accessToken = account.access_token;
+      if (account?.access_token) {
+        session.accessToken = account.access_token as string;
       }
 
       return session;
     },
   },
+
   pages: {
     signIn: "/login",
   },
+
   trustHost: true,
 });

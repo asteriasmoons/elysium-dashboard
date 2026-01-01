@@ -1,56 +1,53 @@
-import { auth } from "@/lib/auth"
-import { NextResponse } from "next/server"
-import { fetchUserGuilds, filterManageableGuilds, isBotInGuild, getGuildIconUrl } from "@/lib/discord"
+import { auth } from "@/lib/auth";
+import { NextResponse } from "next/server";
+
+interface DiscordGuild {
+  id: string;
+  name: string;
+  icon: string | null;
+  owner: boolean;
+  permissions: string;
+}
+
+const MANAGE_GUILD = 0x20;
 
 export async function GET() {
-  const session = await auth()
+  const session = await auth();
 
-  if (!session?.user) {
-    return NextResponse.json({ error: "Unauthorized" }, { status: 401 })
+  if (!session || !session.accessToken) {
+    return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
   }
 
-  const accessToken = session.accessToken
-  
-  if (!accessToken) {
-    return NextResponse.json({ error: "No access token" }, { status: 400 })
-  }
+  const res = await fetch("https://discord.com/api/users/@me/guilds", {
+    headers: {
+      Authorization: `Bearer ${session.accessToken}`,
+    },
+    cache: "no-store",
+  });
 
-  try {
-    console.log("=== FETCHING GUILDS ===")
-    console.log("Access token exists:", !!accessToken)
-    
-    const allGuilds = await fetchUserGuilds(accessToken)
-    console.log("Total guilds from Discord:", allGuilds.length)
-    
-    const manageableGuilds = filterManageableGuilds(allGuilds)
-    console.log("Manageable guilds:", manageableGuilds.length)
-    console.log("Manageable guild names:", manageableGuilds.map(g => g.name))
-
-    const guildsWithBotStatus = await Promise.all(
-      manageableGuilds.map(async (guild) => {
-        const botPresent = await isBotInGuild(guild.id)
-        console.log(`Bot in "${guild.name}":`, botPresent)
-        return {
-          id: guild.id,
-          name: guild.name,
-          icon: getGuildIconUrl(guild),
-          owner: guild.owner,
-          permissions: guild.permissions,
-          botPresent,
-        }
-      })
-    )
-
-    const guildsWithBot = guildsWithBotStatus.filter(g => g.botPresent)
-    console.log("Guilds with bot:", guildsWithBot.length)
-    console.log("===================")
-
-    return NextResponse.json({ guilds: guildsWithBot })
-  } catch (error) {
-    console.error("Error fetching guilds:", error)
+  if (!res.ok) {
     return NextResponse.json(
       { error: "Failed to fetch guilds" },
       { status: 500 }
-    )
+    );
   }
+
+  const guilds: DiscordGuild[] = await res.json();
+
+  // Only guilds user owns or can manage
+  const manageable = guilds.filter(
+    (g) =>
+      g.owner || (Number(g.permissions) & MANAGE_GUILD) === MANAGE_GUILD
+  );
+
+  return NextResponse.json(
+    manageable.map((g) => ({
+      id: g.id,
+      name: g.name,
+      icon: g.icon
+        ? `https://cdn.discordapp.com/icons/${g.id}/${g.icon}.png`
+        : null,
+      owner: g.owner,
+    }))
+  );
 }
