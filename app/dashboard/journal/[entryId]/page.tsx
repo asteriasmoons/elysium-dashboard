@@ -40,7 +40,7 @@ export default async function JournalEntryPage({
     return (
       <EntryClient
         entryId={doc._id.toString()}
-        initialTitle={doc.title}
+        initialTitle={doc.title ?? "Untitled"}
         initialEntry={doc.entry}
         createdAt={doc.createdAt.toISOString()}
       />
