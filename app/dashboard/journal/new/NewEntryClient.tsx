@@ -46,7 +46,9 @@ export default function NewEntryClient({ guildId }: NewEntryClientProps) {
       }
 
       if ("id" in data && typeof data.id === "string") {
-        router.push(`/dashboard/journal/${data.id}${guildId ? `?guildId=${guildId}` : ""}`);
+        router.push(
+          `/dashboard/journal/${data.id}${guildId ? `?guildId=${guildId}` : ""}`
+        );
         return;
       }
 
@@ -71,7 +73,13 @@ export default function NewEntryClient({ guildId }: NewEntryClientProps) {
             <button
               type="button"
               className={styles.secondary}
-              onClick={() => router.push(guildId ? `/dashboard/${guildId}/features` : "/dashboard/journal")}
+              onClick={() =>
+                router.push(
+                  guildId
+                    ? `/dashboard/${guildId}/features`
+                    : "/dashboard/journal"
+                )
+              }
             >
               Back
             </button>
@@ -109,7 +117,7 @@ export default function NewEntryClient({ guildId }: NewEntryClientProps) {
           >
             {saving ? "Creating…" : "Create Entry"}
           </button>
-      </div>
+        </div>
       </div>
     </div>
   );
