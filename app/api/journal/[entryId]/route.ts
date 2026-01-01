@@ -13,10 +13,9 @@ function getErrorMessage(err: unknown): string {
   return "Unknown error";
 }
 
-export async function GET(
-  _req: Request,
-  { params }: { params: { entryId: string } }
-) {
+type RouteContext = { params: Promise<{ entryId: string }> };
+
+export async function GET(_req: Request, context: RouteContext) {
   const session = await auth();
   if (!session) {
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
@@ -25,7 +24,9 @@ export async function GET(
   const userId = getSessionUserId(session);
 
   try {
-    const doc = await getUserEntryById(userId, params.entryId);
+    const { entryId } = await context.params;
+
+    const doc = await getUserEntryById(userId, entryId);
     if (!doc) {
       return NextResponse.json({ error: "Not found" }, { status: 404 });
     }
@@ -44,10 +45,7 @@ export async function GET(
   }
 }
 
-export async function PATCH(
-  req: Request,
-  { params }: { params: { entryId: string } }
-) {
+export async function PATCH(req: Request, context: RouteContext) {
   const session = await auth();
   if (!session) {
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
@@ -56,11 +54,12 @@ export async function PATCH(
   const userId = getSessionUserId(session);
 
   try {
+    const { entryId } = await context.params;
     const body = (await req.json()) as { title?: string; entry?: string };
 
     const ok = await updateUserEntry(
       userId,
-      params.entryId,
+      entryId,
       body.title ?? "",
       body.entry ?? ""
     );
@@ -78,10 +77,7 @@ export async function PATCH(
   }
 }
 
-export async function DELETE(
-  _req: Request,
-  { params }: { params: { entryId: string } }
-) {
+export async function DELETE(_req: Request, context: RouteContext) {
   const session = await auth();
   if (!session) {
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
@@ -90,7 +86,9 @@ export async function DELETE(
   const userId = getSessionUserId(session);
 
   try {
-    const ok = await deleteUserEntry(userId, params.entryId);
+    const { entryId } = await context.params;
+
+    const ok = await deleteUserEntry(userId, entryId);
     if (!ok) {
       return NextResponse.json({ error: "Not found" }, { status: 404 });
     }
