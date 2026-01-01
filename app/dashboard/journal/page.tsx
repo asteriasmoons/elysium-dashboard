@@ -19,6 +19,7 @@ export default async function JournalPage() {
   if (!session) redirect("/login");
 
   const userId = getSessionUserId(session);
+  console.log("[Journal list] userId:", userId);
 
   let entries: JournalEntryDTO[] = [];
   let loadError: string | null = null;

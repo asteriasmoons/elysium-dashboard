@@ -18,6 +18,7 @@ export default async function JournalEntryPage({
   if (!session) redirect("/login");
 
   const userId = getSessionUserId(session);
+  console.log("[Journal entry] userId:", userId, "entryId:", params.entryId);
 
   try {
     const doc = await getUserEntryById(userId, params.entryId);
