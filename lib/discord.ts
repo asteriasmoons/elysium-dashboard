@@ -12,13 +12,19 @@ export interface Guild {
 }
 
 export async function fetchUserGuilds(accessToken: string): Promise<Guild[]> {
-  const rest = new REST({ version: "10" }).setToken(accessToken)
+  console.log("fetchUserGuilds called with token:", accessToken.substring(0, 20) + "...")
+  
+  const rest = new REST({ version: "10", authPrefix: "Bearer" }).setToken(accessToken)
   
   try {
     const guilds = await rest.get(Routes.userGuilds()) as Guild[]
+    console.log("Discord API returned guilds:", guilds.length)
+    console.log("First guild:", guilds[0])
     return guilds
-  } catch (error) {
-    console.error("Error fetching user guilds:", error)
+  } catch (error: any) {
+    console.error("fetchUserGuilds failed:", error.message)
+    console.error("Error status:", error.status)
+    console.error("Error body:", error.rawError)
     return []
   }
 }

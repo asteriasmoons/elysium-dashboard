@@ -13,11 +13,7 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
     Discord({
       clientId: process.env.DISCORD_CLIENT_ID!,
       clientSecret: process.env.DISCORD_CLIENT_SECRET!,
-      authorization: {
-        params: {
-          scope: "identify guilds",
-        },
-      },
+      authorization: "https://discord.com/api/oauth2/authorize?scope=identify+guilds",
     }),
   ],
   callbacks: {
@@ -26,13 +22,14 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
         session.user.id = user.id
       }
       
-      // Fetch access token from MongoDB - CONVERT userId to ObjectId
       const client = await clientPromise
       const db = client.db()
       const account = await db.collection("accounts").findOne({
         userId: new ObjectId(user.id),
         provider: "discord",
       })
+      
+      console.log("Account scope from DB:", account?.scope)
       
       if (account?.access_token) {
         session.accessToken = account.access_token as string
