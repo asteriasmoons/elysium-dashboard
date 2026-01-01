@@ -14,7 +14,11 @@ function getErrorMessage(value: unknown): string {
   return "Something went wrong.";
 }
 
-export default function NewEntryClient() {
+interface NewEntryClientProps {
+  guildId?: string;
+}
+
+export default function NewEntryClient({ guildId }: NewEntryClientProps) {
   const router = useRouter();
   const searchParams = useSearchParams();
   const guildId = searchParams.get("guildId");
@@ -44,7 +48,6 @@ export default function NewEntryClient() {
       }
 
       if ("id" in data && typeof data.id === "string") {
-        // Include guildId in the redirect so the back button works from detail page too
         router.push(`/dashboard/journal/${data.id}${guildId ? `?guildId=${guildId}` : ""}`);
         return;
       }
