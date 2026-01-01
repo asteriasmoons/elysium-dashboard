@@ -4,12 +4,20 @@ import { MongoDBAdapter } from "@auth/mongodb-adapter";
 import clientPromise from "@/lib/mongodb";
 import { ObjectId } from "mongodb";
 
-type AccountDoc = {
+type AccountsDoc = {
   userId: ObjectId;
   provider: string;
-  providerAccountId: string;
+  providerAccountId: string; // <- Discord numeric id as string
   access_token?: string;
 };
+
+function toObjectId(value: string): ObjectId | null {
+  try {
+    return new ObjectId(value);
+  } catch {
+    return null;
+  }
+}
 
 export const { handlers, signIn, signOut, auth } = NextAuth({
   adapter: MongoDBAdapter(clientPromise),
@@ -29,40 +37,33 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
   ],
   callbacks: {
     async session({ session, user }) {
-      // user.id here is the Adapter user id (Mongo), not Discord.
-      // We must look up the Discord account to get providerAccountId (Discord numeric id).
       const client = await clientPromise;
       const db = client.db();
+
+      const adapterUserId = typeof user.id === "string" ? user.id : "";
+      const adapterObjectId = toObjectId(adapterUserId);
 
       let discordId: string | null = null;
       let accessToken: string | null = null;
 
-      // user.id is a string, but accounts.userId is an ObjectId
-      const adapterUserObjectId = new ObjectId(user.id);
+      if (adapterObjectId) {
+        const account = await db.collection<AccountsDoc>("accounts").findOne({
+          userId: adapterObjectId,
+          provider: "discord",
+        });
 
-      const account = await db.collection<AccountDoc>("accounts").findOne({
-        userId: adapterUserObjectId,
-        provider: "discord",
-      });
-
-      if (account && typeof account.providerAccountId === "string") {
-        discordId = account.providerAccountId;
-      }
-
-      if (account && typeof account.access_token === "string") {
-        accessToken = account.access_token;
+        if (account?.providerAccountId) {
+          discordId = account.providerAccountId;
+        }
+        if (account?.access_token) {
+          accessToken = account.access_token;
+        }
       }
 
       // Ensure session.user exists
       if (session.user) {
-        // This is the critical change:
-        // Make session.user.id be the Discord numeric id so your journal queries match the bot.
-        if (discordId) {
-          session.user.id = discordId;
-        } else {
-          // Fallback: keep adapter id if discordId isn't found (shouldn't happen, but safe)
-          session.user.id = user.id;
-        }
+        // CRITICAL: Set this to Discord numeric id (matches journalentries.userId)
+        session.user.id = discordId ?? adapterUserId;
       }
 
       if (accessToken) {
