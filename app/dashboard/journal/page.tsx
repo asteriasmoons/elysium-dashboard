@@ -9,21 +9,33 @@ import {
 } from "@/lib/journalAccess";
 import { JournalGrid, JournalEntryDTO } from "@/components/JournalGrid";
 
+function getErrorMessage(err: unknown): string {
+  if (err instanceof Error) return err.message;
+  return "Failed to load journal entries.";
+}
+
 export default async function JournalPage() {
   const session = await auth();
   if (!session) redirect("/login");
 
   const userId = getSessionUserId(session);
 
-  const docs = await listUserEntries(userId);
+  let entries: JournalEntryDTO[] = [];
+  let loadError: string | null = null;
 
-  const entries: JournalEntryDTO[] = docs.map((d) => ({
-    id: d._id.toString(),
-    userId: d.userId,
-    title: d.title,
-    entry: d.entry,
-    createdAt: d.createdAt,
-  }));
+  try {
+    const docs = await listUserEntries(userId);
+
+    entries = docs.map((d) => ({
+      id: d._id.toString(),
+      userId: d.userId,
+      title: d.title,
+      entry: d.entry,
+      createdAt: d.createdAt,
+    }));
+  } catch (err: unknown) {
+    loadError = getErrorMessage(err);
+  }
 
   return (
     <div className={styles.page}>
@@ -48,7 +60,14 @@ export default async function JournalPage() {
         </div>
 
         <div className={styles.panel}>
-          <JournalGrid entries={entries} />
+          {loadError ? (
+            <div className={styles.empty}>
+              <p className={styles.emptyText}>Your journal couldn’t load.</p>
+              <p className={styles.emptySubtext}>{loadError}</p>
+            </div>
+          ) : (
+            <JournalGrid entries={entries} />
+          )}
         </div>
       </div>
     </div>

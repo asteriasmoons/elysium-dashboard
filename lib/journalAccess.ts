@@ -1,4 +1,4 @@
-import clientPromise from "@/lib/mongo";
+import clientPromise from "@/lib/mongodb";
 import { ObjectId, type Document } from "mongodb";
 
 export const JOURNAL_COLLECTION = "journalentries";
