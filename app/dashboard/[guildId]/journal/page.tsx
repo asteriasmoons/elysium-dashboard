@@ -17,6 +17,8 @@ export default async function JournalPage({
   if (!session) redirect("/login");
 
   const userId = getSessionUserId(session);
+  console.log("DASHBOARD userId:", userId);
+
   const entries = await listUserEntries(userId);
 
   return (
