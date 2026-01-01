@@ -9,7 +9,7 @@ interface DiscordGuild {
   permissions: string;
 }
 
-const MANAGE_GUILD = 0x20n;
+const MANAGE_GUILD = 0x20; // Regular number
 
 export async function GET() {
   const session = await auth();
@@ -42,7 +42,7 @@ export async function GET() {
 
   const manageable = guilds.filter(
     (g) =>
-      g.owner || (BigInt(g.permissions) & MANAGE_GUILD) === MANAGE_GUILD
+      g.owner || (BigInt(g.permissions) & BigInt(MANAGE_GUILD)) === BigInt(MANAGE_GUILD)
   );
 
   return NextResponse.json(
