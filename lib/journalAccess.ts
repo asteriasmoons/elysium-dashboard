@@ -13,20 +13,20 @@ export const ENTRY_MAX = 8000;
 export interface JournalDoc extends Document {
   _id: ObjectId;
   userId: string;
-  title: string;
+  title?: string;
   entry: string;
   createdAt: Date;
 }
 
 function requireUserId(userId: string | null | undefined): string {
-  if (!userId) throw new Error("Missing userId");
-  return userId;
+  const trimmed = String(userId ?? "").trim();
+  if (!trimmed) throw new Error("Missing userId");
+  return trimmed;
 }
 
 /**
  * Extract the Discord user id from the Auth.js v5 session.
- * IMPORTANT: Journal entries in your existing database were saved with the Discord numeric id,
- * so we must use session.user.id only (no fallbacks like email/name).
+ * Journal entries in your existing database use the Discord numeric id string.
  */
 export function getSessionUserId(session: unknown): string {
   if (typeof session !== "object" || session === null) {
@@ -43,8 +43,8 @@ export function getSessionUserId(session: unknown): string {
   const u = user as Record<string, unknown>;
   const id = u["id"];
 
-  if (typeof id === "string" && id.length > 0) {
-    return id;
+  if (typeof id === "string" && id.trim().length > 0) {
+    return id.trim();
   }
 
   throw new Error("Session user id is missing");
@@ -70,6 +70,10 @@ export async function countUserEntries(userId: string): Promise<number> {
   return db.collection(JOURNAL_COLLECTION).countDocuments({ userId: uid });
 }
 
+/**
+ * Fetch entry by id, then verify ownership.
+ * This gives us a precise error if the document exists but userId doesn't match.
+ */
 export async function getUserEntryById(
   userId: string,
   entryId: string
@@ -79,9 +83,24 @@ export async function getUserEntryById(
   const db = client.db();
 
   const _id = new ObjectId(entryId);
-  return db
+
+  // Step 1: fetch by _id only (truth check)
+  const doc = await db
     .collection<JournalDoc>(JOURNAL_COLLECTION)
-    .findOne({ _id, userId: uid });
+    .findOne({ _id });
+
+  if (!doc) return null;
+
+  // Step 2: verify ownership (and make mismatch obvious)
+  const docUserId = String(doc.userId ?? "").trim();
+
+  if (docUserId !== uid) {
+    throw new Error(
+      `Entry ownership mismatch. Session userId=${uid} but entry userId=${docUserId}`
+    );
+  }
+
+  return doc;
 }
 
 export async function createUserEntry(
@@ -96,12 +115,10 @@ export async function createUserEntry(
 
   if (!trimmedTitle) throw new Error("Title is required");
   if (!trimmedEntry) throw new Error("Entry is required");
-  if (trimmedTitle.length > TITLE_MAX) {
+  if (trimmedTitle.length > TITLE_MAX)
     throw new Error(`Title must be <= ${TITLE_MAX} characters`);
-  }
-  if (trimmedEntry.length > ENTRY_MAX) {
+  if (trimmedEntry.length > ENTRY_MAX)
     throw new Error(`Entry must be <= ${ENTRY_MAX} characters`);
-  }
 
   const currentCount = await countUserEntries(uid);
   if (currentCount >= FREE_JOURNAL_LIMIT) {
@@ -134,12 +151,10 @@ export async function updateUserEntry(
 
   if (!trimmedTitle) throw new Error("Title is required");
   if (!trimmedEntry) throw new Error("Entry is required");
-  if (trimmedTitle.length > TITLE_MAX) {
+  if (trimmedTitle.length > TITLE_MAX)
     throw new Error(`Title must be <= ${TITLE_MAX} characters`);
-  }
-  if (trimmedEntry.length > ENTRY_MAX) {
+  if (trimmedEntry.length > ENTRY_MAX)
     throw new Error(`Entry must be <= ${ENTRY_MAX} characters`);
-  }
 
   const client = await clientPromise;
   const db = client.db();
