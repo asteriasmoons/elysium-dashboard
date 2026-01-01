@@ -6,7 +6,7 @@ export const JOURNAL_COLLECTION = "journalentries";
 // Free-tier limit
 export const FREE_JOURNAL_LIMIT = 10;
 
-// Validation limits (adjust whenever)
+// Validation limits
 export const TITLE_MAX = 120;
 export const ENTRY_MAX = 8000;
 
@@ -25,8 +25,7 @@ function requireUserId(userId: string | null | undefined): string {
 }
 
 /**
- * Extract the Discord user id from the Auth.js v5 session.
- * Journal entries in your existing database use the Discord numeric id string.
+ * Extract the Discord numeric user ID from Auth.js v5 session
  */
 export function getSessionUserId(session: unknown): string {
   if (typeof session !== "object" || session === null) {
@@ -37,7 +36,7 @@ export function getSessionUserId(session: unknown): string {
   const user = s["user"];
 
   if (typeof user !== "object" || user === null) {
-    throw new Error("Session user is missing");
+    throw new Error("Session user missing");
   }
 
   const u = user as Record<string, unknown>;
@@ -47,7 +46,7 @@ export function getSessionUserId(session: unknown): string {
     return id.trim();
   }
 
-  throw new Error("Session user id is missing");
+  throw new Error("Session user id missing");
 }
 
 export async function listUserEntries(userId: string): Promise<JournalDoc[]> {
@@ -71,8 +70,8 @@ export async function countUserEntries(userId: string): Promise<number> {
 }
 
 /**
- * Fetch entry by id, then verify ownership.
- * This gives us a precise error if the document exists but userId doesn't match.
+ * Fetch entry by _id ONLY first, then verify ownership.
+ * Includes debug logging to verify DB + collection at runtime.
  */
 export async function getUserEntryById(
   userId: string,
@@ -84,19 +83,37 @@ export async function getUserEntryById(
 
   const _id = new ObjectId(entryId);
 
-  // Step 1: fetch by _id only (truth check)
+  // ---- TEMP DEBUG LOGGING ----
+  console.log("[journalAccess] DB name:", db.databaseName);
+  console.log("[journalAccess] Collection:", JOURNAL_COLLECTION);
+
+  try {
+    const collections = await db
+      .listCollections({ name: JOURNAL_COLLECTION }, { nameOnly: true })
+      .toArray();
+    console.log(
+      "[journalAccess] Collection exists:",
+      collections.length > 0
+    );
+  } catch {
+    console.log("[journalAccess] listCollections failed");
+  }
+  // ---------------------------
+
+  // Step 1: fetch by _id ONLY
   const doc = await db
     .collection<JournalDoc>(JOURNAL_COLLECTION)
     .findOne({ _id });
 
+  console.log("[journalAccess] findOne({_id}) found:", Boolean(doc));
+
   if (!doc) return null;
 
-  // Step 2: verify ownership (and make mismatch obvious)
+  // Step 2: verify ownership
   const docUserId = String(doc.userId ?? "").trim();
-
   if (docUserId !== uid) {
     throw new Error(
-      `Entry ownership mismatch. Session userId=${uid} but entry userId=${docUserId}`
+      `Entry ownership mismatch. Session userId=${uid}, entry userId=${docUserId}`
     );
   }
 
@@ -184,5 +201,5 @@ export async function deleteUserEntry(
     .collection(JOURNAL_COLLECTION)
     .deleteOne({ _id, userId: uid });
 
-  return result.deletedCount > 0;
+  return result.deletedCount === 1;
 }
