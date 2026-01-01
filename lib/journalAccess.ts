@@ -24,39 +24,30 @@ function requireUserId(userId: string | null | undefined): string {
 }
 
 /**
- * Extract a stable user identifier from the Auth.js v5 session.
- * Typed as unknown so strict TS stays happy.
+ * Extract the Discord user id from the Auth.js v5 session.
+ * IMPORTANT: Journal entries in your existing database were saved with the Discord numeric id,
+ * so we must use session.user.id only (no fallbacks like email/name).
  */
 export function getSessionUserId(session: unknown): string {
   if (typeof session !== "object" || session === null) {
     throw new Error("Invalid session object");
   }
 
-  // session.user
   const s = session as Record<string, unknown>;
   const user = s["user"];
 
-  if (typeof user === "object" && user !== null) {
-    const u = user as Record<string, unknown>;
-
-    const id = u["id"];
-    if (typeof id === "string" && id.length > 0) return id;
-
-    const sub = u["sub"];
-    if (typeof sub === "string" && sub.length > 0) return sub;
-
-    const email = u["email"];
-    if (typeof email === "string" && email.length > 0) return email;
-
-    const name = u["name"];
-    if (typeof name === "string" && name.length > 0) return name;
+  if (typeof user !== "object" || user === null) {
+    throw new Error("Session user is missing");
   }
 
-  // session.userId fallback (some apps store it top-level)
-  const topUserId = s["userId"];
-  if (typeof topUserId === "string" && topUserId.length > 0) return topUserId;
+  const u = user as Record<string, unknown>;
+  const id = u["id"];
 
-  throw new Error("Unable to determine current user id from session");
+  if (typeof id === "string" && id.length > 0) {
+    return id;
+  }
+
+  throw new Error("Session user id is missing");
 }
 
 export async function listUserEntries(userId: string): Promise<JournalDoc[]> {
@@ -105,10 +96,12 @@ export async function createUserEntry(
 
   if (!trimmedTitle) throw new Error("Title is required");
   if (!trimmedEntry) throw new Error("Entry is required");
-  if (trimmedTitle.length > TITLE_MAX)
+  if (trimmedTitle.length > TITLE_MAX) {
     throw new Error(`Title must be <= ${TITLE_MAX} characters`);
-  if (trimmedEntry.length > ENTRY_MAX)
+  }
+  if (trimmedEntry.length > ENTRY_MAX) {
     throw new Error(`Entry must be <= ${ENTRY_MAX} characters`);
+  }
 
   const currentCount = await countUserEntries(uid);
   if (currentCount >= FREE_JOURNAL_LIMIT) {
@@ -141,10 +134,12 @@ export async function updateUserEntry(
 
   if (!trimmedTitle) throw new Error("Title is required");
   if (!trimmedEntry) throw new Error("Entry is required");
-  if (trimmedTitle.length > TITLE_MAX)
+  if (trimmedTitle.length > TITLE_MAX) {
     throw new Error(`Title must be <= ${TITLE_MAX} characters`);
-  if (trimmedEntry.length > ENTRY_MAX)
+  }
+  if (trimmedEntry.length > ENTRY_MAX) {
     throw new Error(`Entry must be <= ${ENTRY_MAX} characters`);
+  }
 
   const client = await clientPromise;
   const db = client.db();
