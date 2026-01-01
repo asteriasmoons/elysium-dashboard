@@ -7,13 +7,23 @@ import {
   listUserEntries,
   FREE_JOURNAL_LIMIT,
 } from "@/lib/journalAccess";
+import { JournalGrid, JournalEntryDTO } from "@/components/JournalGrid";
 
 export default async function JournalPage() {
   const session = await auth();
   if (!session) redirect("/login");
 
   const userId = getSessionUserId(session);
-  const entries = await listUserEntries(userId);
+
+  const docs = await listUserEntries(userId);
+
+  const entries: JournalEntryDTO[] = docs.map((d) => ({
+    id: d._id.toString(),
+    userId: d.userId,
+    title: d.title,
+    entry: d.entry,
+    createdAt: d.createdAt,
+  }));
 
   return (
     <div className={styles.page}>
@@ -30,6 +40,7 @@ export default async function JournalPage() {
             <Link href="/dashboard" className={styles.secondaryLink}>
               Back
             </Link>
+
             <Link href="/dashboard/journal/new" className={styles.primaryLink}>
               New Entry
             </Link>
@@ -37,43 +48,7 @@ export default async function JournalPage() {
         </div>
 
         <div className={styles.panel}>
-          {entries.length === 0 ? (
-            <div className={styles.empty}>
-              <p className={styles.emptyTitle}>No entries yet</p>
-              <p className={styles.emptyText}>
-                Create your first journal entry to begin.
-              </p>
-              <Link href="/dashboard/journal/new" className={styles.emptyCta}>
-                New Entry
-              </Link>
-            </div>
-          ) : (
-            <div className={styles.grid}>
-              {entries.map((e) => {
-                const id = e._id.toString();
-                return (
-                  <Link
-                    key={id}
-                    href={`/dashboard/journal/${id}`}
-                    className={styles.card}
-                  >
-                    <div className={styles.cardTop}>
-                      <h3 className={styles.cardTitle}>{e.title}</h3>
-                      <span className={styles.badge}>Entry</span>
-                    </div>
-
-                    <p className={styles.preview}>
-                      {e.entry.length > 0
-                        ? e.entry.slice(0, 120)
-                        : "No content."}
-                    </p>
-
-                    <div className={styles.cta}>Edit</div>
-                  </Link>
-                );
-              })}
-            </div>
-          )}
+          <JournalGrid entries={entries} />
         </div>
       </div>
     </div>
