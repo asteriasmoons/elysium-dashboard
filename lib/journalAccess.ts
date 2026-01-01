@@ -1,32 +1,25 @@
 import clientPromise from "@/lib/mongodb";
-import { ObjectId, type Document } from "mongodb";
+import { ObjectId } from "mongodb";
 
 export const JOURNAL_COLLECTION = "journalentries";
-
-// Free-tier limit
 export const FREE_JOURNAL_LIMIT = 10;
 
-// Validation limits
 export const TITLE_MAX = 120;
 export const ENTRY_MAX = 8000;
 
-export interface JournalDoc extends Document {
+export interface JournalDoc {
   _id: ObjectId;
-  userId: string;
-  title?: string;
+  userId: string;        // Discord user id (numbers as string)
+  title?: string;        // optional because older docs may not have it
   entry: string;
   createdAt: Date;
 }
 
 function requireUserId(userId: string | null | undefined): string {
-  const trimmed = String(userId ?? "").trim();
-  if (!trimmed) throw new Error("Missing userId");
-  return trimmed;
+  if (!userId) throw new Error("Missing userId");
+  return userId;
 }
 
-/**
- * Extract the Discord numeric user ID from Auth.js v5 session
- */
 export function getSessionUserId(session: unknown): string {
   if (typeof session !== "object" || session === null) {
     throw new Error("Invalid session object");
@@ -35,18 +28,16 @@ export function getSessionUserId(session: unknown): string {
   const s = session as Record<string, unknown>;
   const user = s["user"];
 
-  if (typeof user !== "object" || user === null) {
-    throw new Error("Session user missing");
+  if (typeof user === "object" && user !== null) {
+    const u = user as Record<string, unknown>;
+    const id = u["id"];
+    if (typeof id === "string" && id.length > 0) return id;
   }
 
-  const u = user as Record<string, unknown>;
-  const id = u["id"];
+  const topUserId = s["userId"];
+  if (typeof topUserId === "string" && topUserId.length > 0) return topUserId;
 
-  if (typeof id === "string" && id.trim().length > 0) {
-    return id.trim();
-  }
-
-  throw new Error("Session user id missing");
+  throw new Error("Unable to determine current user id from session");
 }
 
 export async function listUserEntries(userId: string): Promise<JournalDoc[]> {
@@ -69,10 +60,6 @@ export async function countUserEntries(userId: string): Promise<number> {
   return db.collection(JOURNAL_COLLECTION).countDocuments({ userId: uid });
 }
 
-/**
- * Fetch entry by _id ONLY first, then verify ownership.
- * Includes debug logging to verify DB + collection at runtime.
- */
 export async function getUserEntryById(
   userId: string,
   entryId: string
@@ -81,43 +68,12 @@ export async function getUserEntryById(
   const client = await clientPromise;
   const db = client.db();
 
+  if (!ObjectId.isValid(entryId)) return null;
+
   const _id = new ObjectId(entryId);
-
-  // ---- TEMP DEBUG LOGGING ----
-  console.log("[journalAccess] DB name:", db.databaseName);
-  console.log("[journalAccess] Collection:", JOURNAL_COLLECTION);
-
-  try {
-    const collections = await db
-      .listCollections({ name: JOURNAL_COLLECTION }, { nameOnly: true })
-      .toArray();
-    console.log(
-      "[journalAccess] Collection exists:",
-      collections.length > 0
-    );
-  } catch {
-    console.log("[journalAccess] listCollections failed");
-  }
-  // ---------------------------
-
-  // Step 1: fetch by _id ONLY
-  const doc = await db
+  return db
     .collection<JournalDoc>(JOURNAL_COLLECTION)
-    .findOne({ _id });
-
-  console.log("[journalAccess] findOne({_id}) found:", Boolean(doc));
-
-  if (!doc) return null;
-
-  // Step 2: verify ownership
-  const docUserId = String(doc.userId ?? "").trim();
-  if (docUserId !== uid) {
-    throw new Error(
-      `Entry ownership mismatch. Session userId=${uid}, entry userId=${docUserId}`
-    );
-  }
-
-  return doc;
+    .findOne({ _id, userId: uid });
 }
 
 export async function createUserEntry(
@@ -173,6 +129,8 @@ export async function updateUserEntry(
   if (trimmedEntry.length > ENTRY_MAX)
     throw new Error(`Entry must be <= ${ENTRY_MAX} characters`);
 
+  if (!ObjectId.isValid(entryId)) return false;
+
   const client = await clientPromise;
   const db = client.db();
 
@@ -193,6 +151,8 @@ export async function deleteUserEntry(
 ): Promise<boolean> {
   const uid = requireUserId(userId);
 
+  if (!ObjectId.isValid(entryId)) return false;
+
   const client = await clientPromise;
   const db = client.db();
 
@@ -201,5 +161,5 @@ export async function deleteUserEntry(
     .collection(JOURNAL_COLLECTION)
     .deleteOne({ _id, userId: uid });
 
-  return result.deletedCount === 1;
+  return result.deletedCount > 0;
 }
