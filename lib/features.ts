@@ -25,7 +25,7 @@ export const FEATURES: FeatureItem[] = [
     key: "journal",
     title: "Journal",
     description: "Prompts, entries, and templates for your server.",
-    href: (id) => `/dashboard/${id}/journal`,
+    href: (id) => `/dashboard/journal/${id}`,
     status: "planned",
   },
   {
