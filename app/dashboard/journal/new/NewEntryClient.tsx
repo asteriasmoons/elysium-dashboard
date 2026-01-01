@@ -1,7 +1,7 @@
 "use client";
 
 import { useState } from "react";
-import { useRouter } from "next/navigation";
+import { useRouter, useSearchParams } from "next/navigation";
 import styles from "./new.module.css";
 
 type CreateResponse = { id: string } | { error: string };
@@ -16,6 +16,8 @@ function getErrorMessage(value: unknown): string {
 
 export default function NewEntryClient() {
   const router = useRouter();
+  const searchParams = useSearchParams();
+  const guildId = searchParams.get("guildId");
 
   const [title, setTitle] = useState("");
   const [entry, setEntry] = useState("");
@@ -42,7 +44,8 @@ export default function NewEntryClient() {
       }
 
       if ("id" in data && typeof data.id === "string") {
-        router.push(`/dashboard/journal/${data.id}`);
+        // Include guildId in the redirect so the back button works from detail page too
+        router.push(`/dashboard/journal/${data.id}${guildId ? `?guildId=${guildId}` : ""}`);
         return;
       }
 
@@ -67,7 +70,7 @@ export default function NewEntryClient() {
             <button
               type="button"
               className={styles.secondary}
-              onClick={() => router.push("/dashboard/journal")}
+              onClick={() => router.push(guildId ? `/dashboard/${guildId}/features` : "/dashboard/journal")}
             >
               Back
             </button>
