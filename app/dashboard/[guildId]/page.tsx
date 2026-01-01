@@ -1,8 +1,9 @@
 import { auth } from "@/lib/auth";
 import { redirect, notFound } from "next/navigation";
 import styles from "./guild.module.css";
-import FeatureGrid from "@/components/FeatureGrid";
 import Link from "next/link";
+import { FEATURES } from "@/lib/features";
+import { FeatureGrid } from "@/components/FeatureGrid";
 
 export default async function GuildHomePage({
   params,
@@ -37,7 +38,7 @@ export default async function GuildHomePage({
         </div>
 
         <div className={styles.panel}>
-          <FeatureGrid guildId={guildId} />
+          <FeatureGrid features={FEATURES} guildId={guildId} />
         </div>
       </div>
     </div>
