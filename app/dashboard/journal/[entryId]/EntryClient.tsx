@@ -19,13 +19,11 @@ export default function EntryClient({
   initialTitle,
   initialEntry,
   createdAt,
-  isNew = false,
 }: {
   entryId: string;
   initialTitle: string;
   initialEntry: string;
   createdAt: string;
-  isNew?: boolean;
 }) {
   const router = useRouter();
 
@@ -36,19 +34,16 @@ export default function EntryClient({
   const [notice, setNotice] = useState<string | null>(null);
 
   async function save() {
+    setSaving(true);
     setError(null);
     setNotice(null);
-    setSaving(true);
 
     try {
-      const res = await fetch(
-        isNew ? "/api/journal" : `/api/journal/${entryId}`,
-        {
-          method: isNew ? "POST" : "PATCH",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ title, entry }),
-        }
-      );
+      const res = await fetch(`/api/journal/${entryId}`, {
+        method: "PATCH",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ title, entry }),
+      });
 
       const data = (await res.json()) as ApiResponse;
 
@@ -58,16 +53,11 @@ export default function EntryClient({
         return;
       }
 
-      if (isNew && "id" in data) {
-        router.push(`/dashboard/journal/${data.id}`);
-        return;
-      }
-
       setNotice("Saved.");
       setSaving(false);
     } catch {
-      setSaving(false);
       setError("Failed to save.");
+      setSaving(false);
     }
   }
 
@@ -88,13 +78,9 @@ export default function EntryClient({
       <div className={styles.container}>
         <div className={styles.topRow}>
           <div>
-            <h1 className={styles.title}>
-              {isNew ? "New Entry" : "Edit Entry"}
-            </h1>
+            <h1 className={styles.title}>Edit Entry</h1>
             <p className={styles.subtitle}>
-              {isNew
-                ? "Create a new journal entry"
-                : `Created ${new Date(createdAt).toLocaleString()}`}
+              Created {new Date(createdAt).toLocaleString()}
             </p>
           </div>
 
@@ -107,15 +93,9 @@ export default function EntryClient({
               Back
             </button>
 
-            {!isNew && (
-              <button
-                type="button"
-                className={styles.danger}
-                onClick={remove}
-              >
-                Delete
-              </button>
-            )}
+            <button type="button" className={styles.danger} onClick={remove}>
+              Delete
+            </button>
           </div>
         </div>
 
@@ -126,7 +106,6 @@ export default function EntryClient({
               className={styles.input}
               value={title}
               onChange={(e) => setTitle(e.target.value)}
-              maxLength={120}
             />
           </label>
 
@@ -136,7 +115,6 @@ export default function EntryClient({
               className={styles.textarea}
               value={entry}
               onChange={(e) => setEntry(e.target.value)}
-              maxLength={8000}
             />
           </label>
 
@@ -149,7 +127,7 @@ export default function EntryClient({
             onClick={save}
             disabled={saving}
           >
-            {saving ? "Saving…" : "Save"}
+            {saving ? "Saving…" : "Save Changes"}
           </button>
         </div>
       </div>

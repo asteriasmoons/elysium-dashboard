@@ -13,23 +13,21 @@ export default async function JournalEntryPage({
 
   const userId = getSessionUserId(session);
 
+  let doc;
   try {
-    const doc = await getUserEntryById(userId, params.entryId);
-    if (!doc) notFound();
-
-    return (
-      <EntryClient
-        entryId={doc._id.toString()}
-        initialTitle={doc.title}
-        initialEntry={doc.entry}
-        createdAt={doc.createdAt.toISOString()}
-      />
-    );
+    doc = await getUserEntryById(userId, params.entryId);
   } catch {
     notFound();
   }
-<<<<<<< HEAD:app/dashboard/journal/[entryId]/page.tsx
+
+  if (!doc) notFound();
+
+  return (
+    <EntryClient
+      entryId={doc._id.toString()}
+      initialTitle={doc.title}
+      initialEntry={doc.entry}
+      createdAt={doc.createdAt.toISOString()}
+    />
+  );
 }
-=======
-}
->>>>>>> 4db9da847ffeffe5c77040e715fdbae4656eb177:app/dashboard/[guildId]/journal/[entryId]/page.tsx
