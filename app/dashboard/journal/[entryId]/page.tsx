@@ -1,13 +1,7 @@
 import { auth } from "@/lib/auth";
-import { redirect } from "next/navigation";
-import EntryClient from "./EntryClient";
-import styles from "./entry.module.css";
+import { redirect, notFound } from "next/navigation";
 import { getSessionUserId, getUserEntryById } from "@/lib/journalAccess";
-
-function getErrorMessage(err: unknown): string {
-  if (err instanceof Error) return err.message;
-  return "Failed to load this entry.";
-}
+import EntryClient from "./EntryClient";
 
 export default async function JournalEntryPage({
   params,
@@ -18,40 +12,16 @@ export default async function JournalEntryPage({
   if (!session) redirect("/login");
 
   const userId = getSessionUserId(session);
+  const doc = await getUserEntryById(userId, params.entryId);
 
-  try {
-    const doc = await getUserEntryById(userId, params.entryId);
+  if (!doc) notFound();
 
-    if (!doc) {
-      return (
-        <div className={styles.page}>
-          <div className={styles.container}>
-            <h1 className={styles.title}>Entry not found</h1>
-            <p className={styles.subtitle}>
-              This entry could not be loaded. It may not exist, or it may belong
-              to a different account.
-            </p>
-          </div>
-        </div>
-      );
-    }
-
-    return (
-      <EntryClient
-        entryId={doc._id.toString()}
-        initialTitle={doc.title ?? "Untitled"}
-        initialEntry={doc.entry}
-        createdAt={doc.createdAt.toISOString()}
-      />
-    );
-  } catch (err: unknown) {
-    return (
-      <div className={styles.page}>
-        <div className={styles.container}>
-          <h1 className={styles.title}>Couldn’t open entry</h1>
-          <p className={styles.subtitle}>{getErrorMessage(err)}</p>
-        </div>
-      </div>
-    );
-  }
+  return (
+    <EntryClient
+      entryId={doc._id.toString()}
+      initialTitle={doc.title ?? "Untitled"}
+      initialEntry={doc.entry ?? ""}
+      createdAt={doc.createdAt.toISOString()}
+    />
+  );
 }
