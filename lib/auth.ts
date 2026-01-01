@@ -22,20 +22,31 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
   ],
   callbacks: {
     async session({ session, user }) {
-      if (session.user) {
-        session.user.id = user.id;
-      }
+      if (!session.user) return session;
 
-      // Fetch access token from MongoDB - CONVERT userId to ObjectId
       const client = await clientPromise;
       const db = client.db();
-      const account = await db.collection("accounts").findOne({
+
+      type AccountDoc = {
+        userId: ObjectId;
+        provider: string;
+        providerAccountId?: string;
+        access_token?: string;
+      };
+
+      const account = await db.collection<AccountDoc>("accounts").findOne({
         userId: new ObjectId(user.id),
         provider: "discord",
       });
 
+      // THIS is the critical fix:
+      // use Discord's numeric user ID, not Auth's ObjectId
+      if (account?.providerAccountId) {
+        session.user.id = account.providerAccountId;
+      }
+
       if (account?.access_token) {
-        session.accessToken = account.access_token as string;
+        session.accessToken = account.access_token;
       }
 
       return session;
