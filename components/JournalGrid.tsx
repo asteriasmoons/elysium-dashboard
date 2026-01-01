@@ -9,7 +9,15 @@ export interface JournalEntryDTO {
   createdAt: string | Date;
 }
 
-export function JournalGrid({ entries }: { entries: JournalEntryDTO[] }) {
+export function JournalGrid({ 
+  entries, 
+  guildId 
+}: { 
+  entries: JournalEntryDTO[];
+  guildId?: string;
+}) {
+  const newEntryUrl = `/dashboard/journal/new${guildId ? `?guildId=${guildId}` : ''}`;
+  
   if (!entries || entries.length === 0) {
     return (
       <div className={styles.empty}>
@@ -17,7 +25,7 @@ export function JournalGrid({ entries }: { entries: JournalEntryDTO[] }) {
         <p className={styles.emptySubtext}>
           Create your first entry to start building your journal.
         </p>
-        <Link className={styles.emptyCta} href="/dashboard/journal/new">
+        <Link className={styles.emptyCta} href={newEntryUrl}>
           New Entry
         </Link>
       </div>
@@ -28,11 +36,12 @@ export function JournalGrid({ entries }: { entries: JournalEntryDTO[] }) {
     <div className={styles.grid}>
       {entries.map((e) => {
         const preview = e.entry?.slice(0, 120) ?? "";
+        const entryUrl = `/dashboard/journal/${e.id}${guildId ? `?guildId=${guildId}` : ''}`;
 
         return (
           <Link
             key={e.id}
-            href={`/dashboard/journal/${e.id}`}
+            href={entryUrl}
             className={styles.card}
           >
             <div className={styles.cardTop}>

@@ -15,11 +15,13 @@ function getErrorMessage(value: unknown): string {
 }
 
 export default function EntryClient({
+  guildId,
   entryId,
   initialTitle,
   initialEntry,
   createdAt,
 }: {
+  guildId?: string;
   entryId: string;
   initialTitle: string;
   initialEntry: string;
@@ -32,6 +34,8 @@ export default function EntryClient({
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [notice, setNotice] = useState<string | null>(null);
+
+  const backUrl = `/dashboard/journal${guildId ? `?guildId=${guildId}` : ''}`;
 
   async function save() {
     setSaving(true);
@@ -67,7 +71,7 @@ export default function EntryClient({
 
     try {
       await fetch(`/api/journal/${entryId}`, { method: "DELETE" });
-      router.push("/dashboard/journal");
+      router.push(backUrl);
     } catch {
       setError("Failed to delete.");
     }
@@ -88,7 +92,7 @@ export default function EntryClient({
             <button
               type="button"
               className={styles.secondary}
-              onClick={() => router.push("/dashboard/journal")}
+              onClick={() => router.push(backUrl)}
             >
               Back
             </button>
