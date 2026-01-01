@@ -15,4 +15,8 @@ export default async function NewJournalEntryPage() {
       isNew
     />
   );
+<<<<<<< HEAD
 }
+=======
+}
+>>>>>>> 4db9da847ffeffe5c77040e715fdbae4656eb177

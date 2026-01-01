@@ -28,4 +28,8 @@ export default async function JournalEntryPage({
   } catch {
     notFound();
   }
+<<<<<<< HEAD:app/dashboard/journal/[entryId]/page.tsx
 }
+=======
+}
+>>>>>>> 4db9da847ffeffe5c77040e715fdbae4656eb177:app/dashboard/[guildId]/journal/[entryId]/page.tsx
