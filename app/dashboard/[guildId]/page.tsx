@@ -1,5 +1,5 @@
 import { auth } from "@/lib/auth";
-import { redirect, notFound } from "next/navigation";
+import { redirect } from "next/navigation";
 import styles from "./guild.module.css";
 import Link from "next/link";
 import { FEATURES } from "@/lib/features";
@@ -14,10 +14,6 @@ export default async function GuildHomePage({
   if (!session) redirect("/login");
 
   const guildId = params.guildId;
-
-  if (!guildId || guildId === "undefined") {
-    notFound();
-  }
 
   return (
     <div className={styles.page}>
