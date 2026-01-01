@@ -3,17 +3,15 @@ import { ObjectId, type Document } from "mongodb";
 
 export const JOURNAL_COLLECTION = "journalentries";
 
-// Free-tier limit
 export const FREE_JOURNAL_LIMIT = 10;
 
-// Validation limits
 export const TITLE_MAX = 120;
 export const ENTRY_MAX = 8000;
 
 export interface JournalDoc extends Document {
   _id: ObjectId;
   userId: string;
-  title?: string; // some older entries may not have title
+  title?: string;
   entry: string;
   createdAt: Date;
 }
@@ -24,30 +22,19 @@ function requireUserId(userId: string | null | undefined): string {
   return trimmed;
 }
 
-/**
- * For this dashboard we ONLY trust the Discord id we stored at session.user.id.
- * This must match the `userId` string stored in your bot's journalentries.
- */
 export function getSessionUserId(session: unknown): string {
   if (typeof session !== "object" || session === null) {
     throw new Error("Invalid session object");
   }
 
   const s = session as Record<string, unknown>;
-  const user = s["user"];
+  const discordId = s["discordId"];
 
-  if (typeof user !== "object" || user === null) {
-    throw new Error("Missing session.user");
+  if (typeof discordId === "string" && discordId.trim().length > 0) {
+    return discordId.trim();
   }
 
-  const u = user as Record<string, unknown>;
-  const id = u["id"];
-
-  if (typeof id === "string" && id.trim().length > 0) {
-    return id.trim();
-  }
-
-  throw new Error("Missing session.user.id");
+  throw new Error("Missing session.discordId");
 }
 
 export async function listUserEntries(userId: string): Promise<JournalDoc[]> {

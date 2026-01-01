@@ -29,10 +29,12 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
         provider: "discord",
       })
       
-      console.log("Account scope from DB:", account?.scope)
-      
       if (account?.access_token) {
         session.accessToken = account.access_token as string
+      }
+      
+      if (account?.providerAccountId) {
+        session.discordId = account.providerAccountId as string
       }
       
       return session
