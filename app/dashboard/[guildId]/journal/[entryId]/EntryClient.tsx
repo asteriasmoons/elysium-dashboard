@@ -4,14 +4,24 @@ import { useState } from "react";
 import { useRouter } from "next/navigation";
 import styles from "./entry.module.css";
 
+type ApiOk = { ok: true };
+type ApiError = { error: string };
+type ApiResponse = ApiOk | ApiError;
+
+function getErrorMessage(value: unknown): string {
+  if (value && typeof value === "object" && "error" in value) {
+    const v = value as { error?: unknown };
+    if (typeof v.error === "string") return v.error;
+  }
+  return "Something went wrong.";
+}
+
 export default function EntryClient({
-  guildId,
   entryId,
   initialTitle,
   initialEntry,
   createdAt,
 }: {
-  guildId: string;
   entryId: string;
   initialTitle: string;
   initialEntry: string;
@@ -19,15 +29,18 @@ export default function EntryClient({
 }) {
   const router = useRouter();
 
-  const [title, setTitle] = useState(initialTitle);
-  const [entry, setEntry] = useState(initialEntry);
+  const [title, setTitle] = useState<string>(initialTitle);
+  const [entry, setEntry] = useState<string>(initialEntry);
+
+  const [saving, setSaving] = useState<boolean>(false);
+  const [deleting, setDeleting] = useState<boolean>(false);
+
   const [error, setError] = useState<string | null>(null);
+  const [notice, setNotice] = useState<string | null>(null);
 
-  const [saving, setSaving] = useState(false);
-  const [deleting, setDeleting] = useState(false);
-
-  async function save() {
+  async function handleSave(): Promise<void> {
     setError(null);
+    setNotice(null);
     setSaving(true);
 
     try {
@@ -37,23 +50,26 @@ export default function EntryClient({
         body: JSON.stringify({ title, entry }),
       });
 
-      const data = await res.json();
+      const data = (await res.json()) as ApiResponse;
+
       if (!res.ok) {
-        setError(data?.error || "Failed to save");
+        setError(getErrorMessage(data));
         setSaving(false);
         return;
       }
 
-      router.refresh();
       setSaving(false);
+      setNotice("Saved.");
     } catch {
-      setError("Failed to save");
       setSaving(false);
+      setError("Failed to save.");
     }
   }
 
-  async function remove() {
+  async function handleDelete(): Promise<void> {
     setError(null);
+    setNotice(null);
+
     const ok = window.confirm("Delete this entry? This cannot be undone.");
     if (!ok) return;
 
@@ -61,19 +77,18 @@ export default function EntryClient({
 
     try {
       const res = await fetch(`/api/journal/${entryId}`, { method: "DELETE" });
-      const data = await res.json();
+      const data = (await res.json()) as ApiResponse;
 
       if (!res.ok) {
-        setError(data?.error || "Failed to delete");
+        setError(getErrorMessage(data));
         setDeleting(false);
         return;
       }
 
-      router.push(`/dashboard/${guildId}/journal`);
-      router.refresh();
+      router.push("/dashboard/journal");
     } catch {
-      setError("Failed to delete");
       setDeleting(false);
+      setError("Failed to delete.");
     }
   }
 
@@ -92,7 +107,7 @@ export default function EntryClient({
             <button
               type="button"
               className={styles.secondary}
-              onClick={() => router.push(`/dashboard/${guildId}/journal`)}
+              onClick={() => router.push("/dashboard/journal")}
             >
               Back
             </button>
@@ -100,7 +115,7 @@ export default function EntryClient({
             <button
               type="button"
               className={styles.danger}
-              onClick={remove}
+              onClick={handleDelete}
               disabled={deleting}
             >
               {deleting ? "Deleting..." : "Delete"}
@@ -131,11 +146,12 @@ export default function EntryClient({
             </label>
 
             {error ? <div className={styles.error}>{error}</div> : null}
+            {notice ? <div className={styles.notice}>{notice}</div> : null}
 
             <button
               type="button"
               className={styles.primary}
-              onClick={save}
+              onClick={handleSave}
               disabled={saving}
             >
               {saving ? "Saving..." : "Save Changes"}
