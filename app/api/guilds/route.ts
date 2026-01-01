@@ -9,7 +9,7 @@ interface DiscordGuild {
   permissions: string;
 }
 
-const MANAGE_GUILD = 0x20;
+const MANAGE_GUILD = 0x20n;
 
 export async function GET() {
   const session = await auth();
@@ -26,18 +26,23 @@ export async function GET() {
   });
 
   if (!res.ok) {
+    const errorText = await res.text();
+    console.error("Discord API error:", res.status, errorText);
     return NextResponse.json(
-      { error: "Failed to fetch guilds" },
+      { 
+        error: "Failed to fetch guilds",
+        status: res.status,
+        details: errorText 
+      },
       { status: 500 }
     );
   }
 
   const guilds: DiscordGuild[] = await res.json();
 
-  // Only guilds user owns or can manage
   const manageable = guilds.filter(
     (g) =>
-      g.owner || (Number(g.permissions) & MANAGE_GUILD) === MANAGE_GUILD
+      g.owner || (BigInt(g.permissions) & MANAGE_GUILD) === MANAGE_GUILD
   );
 
   return NextResponse.json(
