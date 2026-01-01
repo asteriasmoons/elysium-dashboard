@@ -1,7 +1,7 @@
 import { auth } from "@/lib/auth";
 import { redirect } from "next/navigation";
 import styles from "./guild.module.css";
-import { FEATURES } from "@/lib/features";
+import FeatureGrid from "@/components/FeatureGrid";
 import { FeatureGrid } from "@/components/FeatureGrid";
 import Link from "next/link";
 
