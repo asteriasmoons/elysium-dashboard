@@ -4,9 +4,7 @@ import { useState } from "react";
 import { useRouter } from "next/navigation";
 import styles from "./entry.module.css";
 
-type ApiOk = { ok: true };
-type ApiError = { error: string };
-type ApiResponse = ApiOk | ApiError;
+type ApiResponse = { ok: true } | { error: string };
 
 function getErrorMessage(value: unknown): string {
   if (value && typeof value === "object" && "error" in value) {
@@ -21,34 +19,36 @@ export default function EntryClient({
   initialTitle,
   initialEntry,
   createdAt,
+  isNew = false,
 }: {
   entryId: string;
   initialTitle: string;
   initialEntry: string;
   createdAt: string;
+  isNew?: boolean;
 }) {
   const router = useRouter();
 
-  const [title, setTitle] = useState<string>(initialTitle);
-  const [entry, setEntry] = useState<string>(initialEntry);
-
-  const [saving, setSaving] = useState<boolean>(false);
-  const [deleting, setDeleting] = useState<boolean>(false);
-
+  const [title, setTitle] = useState(initialTitle);
+  const [entry, setEntry] = useState(initialEntry);
+  const [saving, setSaving] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [notice, setNotice] = useState<string | null>(null);
 
-  async function handleSave(): Promise<void> {
+  async function save() {
     setError(null);
     setNotice(null);
     setSaving(true);
 
     try {
-      const res = await fetch(`/api/journal/${entryId}`, {
-        method: "PATCH",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ title, entry }),
-      });
+      const res = await fetch(
+        isNew ? "/api/journal" : `/api/journal/${entryId}`,
+        {
+          method: isNew ? "POST" : "PATCH",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ title, entry }),
+        }
+      );
 
       const data = (await res.json()) as ApiResponse;
 
@@ -58,36 +58,27 @@ export default function EntryClient({
         return;
       }
 
-      setSaving(false);
+      if (isNew && "id" in data) {
+        router.push(`/dashboard/journal/${data.id}`);
+        return;
+      }
+
       setNotice("Saved.");
+      setSaving(false);
     } catch {
       setSaving(false);
       setError("Failed to save.");
     }
   }
 
-  async function handleDelete(): Promise<void> {
-    setError(null);
-    setNotice(null);
-
+  async function remove() {
     const ok = window.confirm("Delete this entry? This cannot be undone.");
     if (!ok) return;
 
-    setDeleting(true);
-
     try {
-      const res = await fetch(`/api/journal/${entryId}`, { method: "DELETE" });
-      const data = (await res.json()) as ApiResponse;
-
-      if (!res.ok) {
-        setError(getErrorMessage(data));
-        setDeleting(false);
-        return;
-      }
-
+      await fetch(`/api/journal/${entryId}`, { method: "DELETE" });
       router.push("/dashboard/journal");
     } catch {
-      setDeleting(false);
       setError("Failed to delete.");
     }
   }
@@ -97,9 +88,13 @@ export default function EntryClient({
       <div className={styles.container}>
         <div className={styles.topRow}>
           <div>
-            <h1 className={styles.title}>Entry</h1>
+            <h1 className={styles.title}>
+              {isNew ? "New Entry" : "Edit Entry"}
+            </h1>
             <p className={styles.subtitle}>
-              Created {new Date(createdAt).toLocaleString()}
+              {isNew
+                ? "Create a new journal entry"
+                : `Created ${new Date(createdAt).toLocaleString()}`}
             </p>
           </div>
 
@@ -112,51 +107,50 @@ export default function EntryClient({
               Back
             </button>
 
-            <button
-              type="button"
-              className={styles.danger}
-              onClick={handleDelete}
-              disabled={deleting}
-            >
-              {deleting ? "Deleting..." : "Delete"}
-            </button>
+            {!isNew && (
+              <button
+                type="button"
+                className={styles.danger}
+                onClick={remove}
+              >
+                Delete
+              </button>
+            )}
           </div>
         </div>
 
         <div className={styles.panel}>
-          <div className={styles.form}>
-            <label className={styles.label}>
-              Title
-              <input
-                className={styles.input}
-                value={title}
-                onChange={(e) => setTitle(e.target.value)}
-                maxLength={120}
-              />
-            </label>
+          <label className={styles.label}>
+            Title
+            <input
+              className={styles.input}
+              value={title}
+              onChange={(e) => setTitle(e.target.value)}
+              maxLength={120}
+            />
+          </label>
 
-            <label className={styles.label}>
-              Entry
-              <textarea
-                className={styles.textarea}
-                value={entry}
-                onChange={(e) => setEntry(e.target.value)}
-                maxLength={8000}
-              />
-            </label>
+          <label className={styles.label}>
+            Entry
+            <textarea
+              className={styles.textarea}
+              value={entry}
+              onChange={(e) => setEntry(e.target.value)}
+              maxLength={8000}
+            />
+          </label>
 
-            {error ? <div className={styles.error}>{error}</div> : null}
-            {notice ? <div className={styles.notice}>{notice}</div> : null}
+          {error && <div className={styles.error}>{error}</div>}
+          {notice && <div className={styles.notice}>{notice}</div>}
 
-            <button
-              type="button"
-              className={styles.primary}
-              onClick={handleSave}
-              disabled={saving}
-            >
-              {saving ? "Saving..." : "Save Changes"}
-            </button>
-          </div>
+          <button
+            type="button"
+            className={styles.primary}
+            onClick={save}
+            disabled={saving}
+          >
+            {saving ? "Saving…" : "Save"}
+          </button>
         </div>
       </div>
     </div>

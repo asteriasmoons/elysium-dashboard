@@ -22,7 +22,7 @@ export default async function JournalPage() {
           <div>
             <h1 className={styles.title}>Journal</h1>
             <p className={styles.subtitle}>
-              {entries.length} of {FREE_JOURNAL_LIMIT} entries used.
+              {entries.length} of {FREE_JOURNAL_LIMIT} entries used
             </p>
           </div>
 
@@ -30,7 +30,6 @@ export default async function JournalPage() {
             <Link href="/dashboard" className={styles.secondaryLink}>
               Back
             </Link>
-
             <Link href="/dashboard/journal/new" className={styles.primaryLink}>
               New Entry
             </Link>
@@ -38,16 +37,11 @@ export default async function JournalPage() {
         </div>
 
         <div className={styles.panel}>
-          <h2 className={styles.panelTitle}>Entries</h2>
-          <p className={styles.panelSubtitle}>
-            Entries are private to your account and shown newest first.
-          </p>
-
           {entries.length === 0 ? (
             <div className={styles.empty}>
-              <p className={styles.emptyTitle}>No entries yet.</p>
+              <p className={styles.emptyTitle}>No entries yet</p>
               <p className={styles.emptyText}>
-                Create your first entry to begin.
+                Create your first journal entry to begin.
               </p>
               <Link href="/dashboard/journal/new" className={styles.emptyCta}>
                 New Entry
