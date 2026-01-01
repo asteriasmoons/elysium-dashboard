@@ -1,17 +1,7 @@
 import { auth } from "@/lib/auth";
 import { redirect } from "next/navigation";
-<<<<<<< HEAD
-import { getSessionUserId, getUserEntryById } from "@/lib/journalAccess";
-import EntryClient from "./[entryId]/EntryClient";
-
-export default async function EntryPage({
-  params,
-}: {
-  params: { guildId: string; entryId: string };
-}) {
-=======
 import Link from "next/link";
-import styles from "./../journal.module.css";
+import styles from "./journal.module.css";
 import {
   getSessionUserId,
   listUserEntries,
@@ -19,26 +9,10 @@ import {
 } from "@/lib/journalAccess";
 
 export default async function JournalPage() {
->>>>>>> 4db9da847ffeffe5c77040e715fdbae4656eb177
   const session = await auth();
   if (!session) redirect("/login");
 
   const userId = getSessionUserId(session);
-<<<<<<< HEAD
-
-  const doc = await getUserEntryById(userId, params.entryId);
-  if (!doc) redirect(`/dashboard/${params.guildId}/journal`);
-
-  return (
-    <EntryClient
-      entryId={params.entryId}
-      initialTitle={doc.title}
-      initialEntry={doc.entry}
-      createdAt={doc.createdAt.toISOString()}
-    />
-  );
-}
-=======
   const entries = await listUserEntries(userId);
 
   return (
@@ -105,4 +79,3 @@ export default async function JournalPage() {
     </div>
   );
 }
->>>>>>> 4db9da847ffeffe5c77040e715fdbae4656eb177

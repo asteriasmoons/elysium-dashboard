@@ -1,22 +1,10 @@
 import { auth } from "@/lib/auth";
 import { redirect } from "next/navigation";
-import EntryClient from "../[entryId]/EntryClient";
+import NewEntryClient from "./NewEntryClient";
 
 export default async function NewJournalEntryPage() {
   const session = await auth();
   if (!session) redirect("/login");
 
-  return (
-    <EntryClient
-      entryId="new"
-      initialTitle=""
-      initialEntry=""
-      createdAt={new Date().toISOString()}
-      isNew
-    />
-  );
-<<<<<<< HEAD
+  return <NewEntryClient />;
 }
-=======
-}
->>>>>>> 4db9da847ffeffe5c77040e715fdbae4656eb177

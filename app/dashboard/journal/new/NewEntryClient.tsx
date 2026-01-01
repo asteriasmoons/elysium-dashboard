@@ -4,17 +4,27 @@ import { useState } from "react";
 import { useRouter } from "next/navigation";
 import styles from "./new.module.css";
 
-export default function NewEntryClient({ guildId }: { guildId: string }) {
+type CreateResponse = { id: string } | { error: string };
+
+function getErrorMessage(value: unknown): string {
+  if (value && typeof value === "object" && "error" in value) {
+    const v = value as { error?: unknown };
+    if (typeof v.error === "string") return v.error;
+  }
+  return "Something went wrong.";
+}
+
+export default function NewEntryClient() {
   const router = useRouter();
+
   const [title, setTitle] = useState("");
   const [entry, setEntry] = useState("");
-  const [error, setError] = useState<string | null>(null);
   const [saving, setSaving] = useState(false);
+  const [error, setError] = useState<string | null>(null);
 
-  async function onSubmit(e: React.FormEvent) {
-    e.preventDefault();
-    setError(null);
+  async function create() {
     setSaving(true);
+    setError(null);
 
     try {
       const res = await fetch("/api/journal", {
@@ -23,19 +33,24 @@ export default function NewEntryClient({ guildId }: { guildId: string }) {
         body: JSON.stringify({ title, entry }),
       });
 
-      const data = await res.json();
+      const data = (await res.json()) as CreateResponse;
 
       if (!res.ok) {
-        setError(data?.error || "Failed to create entry");
         setSaving(false);
+        setError(getErrorMessage(data));
         return;
       }
 
-      router.push(`/dashboard/${guildId}/journal/${data.id}`);
-      router.refresh();
-    } catch {
-      setError("Failed to create entry");
+      if ("id" in data && typeof data.id === "string") {
+        router.push(`/dashboard/journal/${data.id}`);
+        return;
+      }
+
       setSaving(false);
+      setError("Failed to create entry.");
+    } catch {
+      setSaving(false);
+      setError("Failed to create entry.");
     }
   }
 
@@ -45,51 +60,52 @@ export default function NewEntryClient({ guildId }: { guildId: string }) {
         <div className={styles.topRow}>
           <div>
             <h1 className={styles.title}>New Entry</h1>
-            <p className={styles.subtitle}>
-              Create a journal entry for your account.
-            </p>
+            <p className={styles.subtitle}>Create a new journal entry.</p>
           </div>
 
-          <button
-            type="button"
-            className={styles.secondary}
-            onClick={() => router.push(`/dashboard/${guildId}/journal`)}
-          >
-            Back
-          </button>
+          <div className={styles.actions}>
+            <button
+              type="button"
+              className={styles.secondary}
+              onClick={() => router.push("/dashboard/journal")}
+            >
+              Back
+            </button>
+          </div>
         </div>
 
         <div className={styles.panel}>
-          <form className={styles.form} onSubmit={onSubmit}>
-            <label className={styles.label}>
-              Title
-              <input
-                className={styles.input}
-                value={title}
-                onChange={(e) => setTitle(e.target.value)}
-                placeholder="Entry title"
-                maxLength={120}
-              />
-            </label>
+          <label className={styles.label}>
+            Title
+            <input
+              className={styles.input}
+              value={title}
+              onChange={(e) => setTitle(e.target.value)}
+              maxLength={120}
+            />
+          </label>
 
-            <label className={styles.label}>
-              Entry
-              <textarea
-                className={styles.textarea}
-                value={entry}
-                onChange={(e) => setEntry(e.target.value)}
-                placeholder="Write your entry..."
-                maxLength={8000}
-              />
-            </label>
+          <label className={styles.label}>
+            Entry
+            <textarea
+              className={styles.textarea}
+              value={entry}
+              onChange={(e) => setEntry(e.target.value)}
+              maxLength={8000}
+            />
+          </label>
 
-            {error ? <div className={styles.error}>{error}</div> : null}
+          {error && <div className={styles.error}>{error}</div>}
 
-            <button className={styles.primary} type="submit" disabled={saving}>
-              {saving ? "Saving..." : "Create Entry"}
-            </button>
-          </form>
-        </div>
+          <button
+            type="button"
+            className={styles.primary}
+            onClick={create}
+            disabled={saving}
+          >
+            {saving ? "Creating…" : "Create Entry"}
+          </button>
+      </div>
       </div>
     </div>
   );
