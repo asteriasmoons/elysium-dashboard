@@ -28,6 +28,7 @@ export default function MoodGrid({ guildId }: MoodGridProps) {
       try {
         const res = await fetch("/api/mood?limit=12");
         const data = await res.json();
+		console.log("API Response:", data);
         setLogs(data.logs || []);
       } catch (error) {
         console.error("Error fetching mood logs:", error);
