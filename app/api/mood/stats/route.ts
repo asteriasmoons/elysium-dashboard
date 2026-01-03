@@ -3,12 +3,28 @@ import { NextResponse } from "next/server";
 import clientPromise from "@/lib/mongodb";
 import { WithId, Document } from "mongodb";
 
+function getSessionUserId(session: unknown): string {
+  if (typeof session !== "object" || session === null) {
+    throw new Error("Invalid session object");
+  }
+
+  const s = session as Record<string, unknown>;
+  const discordId = s["discordId"];
+
+  if (typeof discordId === "string" && discordId.trim().length > 0) {
+    return discordId.trim();
+  }
+
+  throw new Error("Missing session.discordId");
+}
+
 export async function GET(request: Request) {
   const session = await auth();
-  if (!session?.user?.id) {
+  if (!session) {
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
   }
 
+  const userId = getSessionUserId(session);
   const { searchParams } = new URL(request.url);
   const period = searchParams.get("period") || "week";
 
@@ -27,9 +43,7 @@ export async function GET(request: Request) {
       startDate = new Date(now.getTime() - 30 * 24 * 60 * 60 * 1000);
     }
 
-    const query: { userId: string; timestamp?: { $gte: Date } } = {
-      userId: session.user.id,
-    };
+    const query: { userId: string; timestamp?: { $gte: Date } } = { userId };
     if (startDate) {
       query.timestamp = { $gte: startDate };
     }

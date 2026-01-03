@@ -2,12 +2,28 @@ import { auth } from "@/lib/auth";
 import { NextResponse } from "next/server";
 import clientPromise from "@/lib/mongodb";
 
+function getSessionUserId(session: unknown): string {
+  if (typeof session !== "object" || session === null) {
+    throw new Error("Invalid session object");
+  }
+
+  const s = session as Record<string, unknown>;
+  const discordId = s["discordId"];
+
+  if (typeof discordId === "string" && discordId.trim().length > 0) {
+    return discordId.trim();
+  }
+
+  throw new Error("Missing session.discordId");
+}
+
 export async function GET(request: Request) {
   const session = await auth();
-  if (!session?.user?.id) {
+  if (!session) {
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
   }
 
+  const userId = getSessionUserId(session);
   const { searchParams } = new URL(request.url);
   const limit = parseInt(searchParams.get("limit") || "20");
 
@@ -17,7 +33,7 @@ export async function GET(request: Request) {
 
     const logs = await db
       .collection("moodlogs")
-      .find({ userId: session.user.id })
+      .find({ userId })
       .sort({ timestamp: -1 })
       .limit(limit)
       .toArray();
@@ -34,9 +50,11 @@ export async function GET(request: Request) {
 
 export async function POST(request: Request) {
   const session = await auth();
-  if (!session?.user?.id) {
+  if (!session) {
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
   }
+
+  const userId = getSessionUserId(session);
 
   try {
     const body = await request.json();
@@ -53,8 +71,8 @@ export async function POST(request: Request) {
     const db = client.db();
 
     const newLog = {
-      userId: session.user.id,
-      guildId: null, // Web logs don't have guildId
+      userId,
+      guildId: null,
       timestamp: new Date(),
       moods,
       activities: activities || [],

@@ -3,15 +3,31 @@ import { NextResponse } from "next/server";
 import clientPromise from "@/lib/mongodb";
 import { ObjectId } from "mongodb";
 
+function getSessionUserId(session: unknown): string {
+  if (typeof session !== "object" || session === null) {
+    throw new Error("Invalid session object");
+  }
+
+  const s = session as Record<string, unknown>;
+  const discordId = s["discordId"];
+
+  if (typeof discordId === "string" && discordId.trim().length > 0) {
+    return discordId.trim();
+  }
+
+  throw new Error("Missing session.discordId");
+}
+
 export async function GET(
   request: Request,
   { params }: { params: Promise<{ id: string }> }
 ) {
   const session = await auth();
-  if (!session?.user?.id) {
+  if (!session) {
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
   }
 
+  const userId = getSessionUserId(session);
   const { id } = await params;
 
   try {
@@ -20,7 +36,7 @@ export async function GET(
 
     const log = await db.collection("moodlogs").findOne({
       _id: new ObjectId(id),
-      userId: session.user.id,
+      userId,
     });
 
     if (!log) {
@@ -39,10 +55,11 @@ export async function DELETE(
   { params }: { params: Promise<{ id: string }> }
 ) {
   const session = await auth();
-  if (!session?.user?.id) {
+  if (!session) {
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
   }
 
+  const userId = getSessionUserId(session);
   const { id } = await params;
 
   try {
@@ -51,7 +68,7 @@ export async function DELETE(
 
     const result = await db.collection("moodlogs").deleteOne({
       _id: new ObjectId(id),
-      userId: session.user.id,
+      userId,
     });
 
     if (result.deletedCount === 0) {

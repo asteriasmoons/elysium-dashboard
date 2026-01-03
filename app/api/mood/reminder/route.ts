@@ -2,18 +2,35 @@ import { auth } from "@/lib/auth";
 import { NextResponse } from "next/server";
 import clientPromise from "@/lib/mongodb";
 
+function getSessionUserId(session: unknown): string {
+  if (typeof session !== "object" || session === null) {
+    throw new Error("Invalid session object");
+  }
+
+  const s = session as Record<string, unknown>;
+  const discordId = s["discordId"];
+
+  if (typeof discordId === "string" && discordId.trim().length > 0) {
+    return discordId.trim();
+  }
+
+  throw new Error("Missing session.discordId");
+}
+
 export async function GET() {
   const session = await auth();
-  if (!session?.user?.id) {
+  if (!session) {
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
   }
+
+  const userId = getSessionUserId(session);
 
   try {
     const client = await clientPromise;
     const db = client.db();
 
     const setting = await db.collection("moodremindersettings").findOne({
-      userId: session.user.id,
+      userId,
     });
 
     if (!setting) {
@@ -38,9 +55,11 @@ export async function GET() {
 
 export async function PUT(request: Request) {
   const session = await auth();
-  if (!session?.user?.id) {
+  if (!session) {
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
   }
+
+  const userId = getSessionUserId(session);
 
   try {
     const body = await request.json();
@@ -52,10 +71,10 @@ export async function PUT(request: Request) {
     const setting = await db
       .collection("moodremindersettings")
       .findOneAndUpdate(
-        { userId: session.user.id },
+        { userId },
         {
           $set: {
-            userId: session.user.id,
+            userId,
             isEnabled,
             hour,
             minute,
