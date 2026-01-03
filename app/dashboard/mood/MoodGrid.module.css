@@ -1,0 +1,236 @@
+:root {
+  --brand-gradient: linear-gradient(
+    90deg,
+    #7e7eff 10%,
+    #7e7eff 32%,
+    #f6f65a 38%,
+    #e019d4 60%,
+    #00dbff 72%,
+    #00dbff 100%
+  );
+}
+
+.page {
+  min-height: 100vh;
+  padding: 32px;
+  background: #0b0b0f;
+  color: #f4f4f5;
+}
+
+.container {
+  max-width: 1200px;
+  margin: 0 auto;
+}
+
+.topRow {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  margin-bottom: 24px;
+}
+
+.title {
+  font-size: 2rem;
+  font-weight: 800;
+  margin: 0;
+}
+
+.subtitle {
+  color: rgba(244, 244, 245, 0.7);
+  margin: 4px 0 0;
+}
+
+.actions {
+  display: flex;
+  gap: 12px;
+}
+
+.secondary {
+  padding: 10px 14px;
+  border-radius: 12px;
+  border: none;
+  background: rgba(255, 255, 255, 0.06);
+  color: #f4f4f5;
+  font-weight: 700;
+  cursor: pointer;
+  transition: background 160ms ease;
+}
+
+.secondary:hover {
+  background: rgba(255, 255, 255, 0.10);
+}
+
+.buttonRow {
+  display: flex;
+  gap: 12px;
+  margin-bottom: 28px;
+}
+
+.actionButton {
+  display: inline-block;
+  padding: 12px 18px;
+  border-radius: 14px;
+  background: rgba(255, 255, 255, 0.08);
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  color: rgba(244, 244, 245, 0.92);
+  font-weight: 700;
+  text-decoration: none;
+  transition: all 160ms ease;
+}
+
+.actionButton:hover {
+  background: rgba(255, 255, 255, 0.12);
+  border-color: rgba(255, 255, 255, 0.18);
+  transform: translateY(-1px);
+}
+
+.loading {
+  text-align: center;
+  padding: 60px 20px;
+  color: rgba(244, 244, 245, 0.68);
+  font-size: 1.1rem;
+}
+
+.grid {
+  display: grid;
+  gap: 14px;
+  grid-template-columns: repeat(1, minmax(0, 1fr));
+}
+
+@media (min-width: 720px) {
+  .grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+
+@media (min-width: 1024px) {
+  .grid {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+  }
+}
+
+.card {
+  position: relative;
+  display: block;
+  text-decoration: none;
+  color: inherit;
+
+  background: rgba(255, 255, 255, 0.04);
+  border: 1px solid rgba(255, 255, 255, 0.10);
+  border-radius: 16px;
+  padding: 14px 14px 12px;
+
+  backdrop-filter: blur(14px);
+  -webkit-backdrop-filter: blur(14px);
+
+  transition: transform 160ms ease, border-color 160ms ease, box-shadow 160ms ease;
+  overflow: hidden;
+}
+
+.card:hover {
+  transform: translateY(-2px);
+  border-color: rgba(255, 255, 255, 0.18);
+  box-shadow: 0 14px 34px rgba(0, 0, 0, 0.35);
+}
+
+.card::before {
+  content: "";
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 3px;
+  background: var(--brand-gradient);
+  opacity: 0.55;
+}
+
+.cardTop {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+  margin-top: 6px;
+}
+
+.cardTitle {
+  margin: 0;
+  font-size: 0.98rem;
+  font-weight: 780;
+  color: rgba(244, 244, 245, 0.95);
+  letter-spacing: 0.2px;
+}
+
+.badge {
+  font-size: 0.72rem;
+  font-weight: 700;
+  padding: 5px 9px;
+  border-radius: 999px;
+  color: rgba(244, 244, 245, 0.85);
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  background: rgba(255, 255, 255, 0.06);
+  white-space: nowrap;
+}
+
+.moods {
+  margin: 10px 0 0;
+  font-size: 0.86rem;
+  line-height: 1.25rem;
+  color: rgba(244, 244, 245, 0.95);
+  font-weight: 600;
+}
+
+.activities {
+  margin: 6px 0 0;
+  font-size: 0.82rem;
+  color: rgba(244, 244, 245, 0.68);
+}
+
+.note {
+  margin: 8px 0 0;
+  font-size: 0.82rem;
+  line-height: 1.2rem;
+  color: rgba(244, 244, 245, 0.60);
+  font-style: italic;
+}
+
+.cta {
+  margin-top: 12px;
+  font-weight: 700;
+  font-size: 0.85rem;
+  color: rgba(244, 244, 245, 0.85);
+  padding-top: 10px;
+  border-top: 1px solid rgba(255, 255, 255, 0.10);
+}
+
+.empty {
+  border: 1px dashed rgba(255, 255, 255, 0.18);
+  border-radius: 16px;
+  padding: 22px;
+  background: rgba(255, 255, 255, 0.03);
+}
+
+.emptyText {
+  margin: 0;
+  font-weight: 800;
+  font-size: 1rem;
+}
+
+.emptySubtext {
+  margin: 8px 0 14px;
+  color: rgba(244, 244, 245, 0.68);
+}
+
+.emptyCta {
+  display: inline-block;
+  text-decoration: none;
+  font-weight: 800;
+  padding: 10px 14px;
+  border-radius: 12px;
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  background: rgba(255, 255, 255, 0.06);
+  color: rgba(244, 244, 245, 0.92);
+}
+
+.emptyCta:hover {
+  background: rgba(255, 255, 255, 0.10);
+}

@@ -1,0 +1,275 @@
+.page {
+  min-height: 100vh;
+  padding: 32px;
+  background: #0b0b0f;
+  color: #f4f4f5;
+}
+
+.container {
+  max-width: 1000px;
+  margin: 0 auto;
+}
+
+.topRow {
+  display: flex;
+  justify-content: space-between;
+  margin-bottom: 24px;
+}
+
+.title {
+  font-size: 2rem;
+  font-weight: 800;
+  margin: 0;
+}
+
+.subtitle {
+  color: rgba(244, 244, 245, 0.7);
+  margin: 4px 0 0;
+}
+
+.actions {
+  display: flex;
+  gap: 12px;
+}
+
+.secondary {
+  padding: 10px 14px;
+  border-radius: 12px;
+  border: none;
+  background: rgba(255, 255, 255, 0.06);
+  color: #f4f4f5;
+  font-weight: 700;
+  cursor: pointer;
+  transition: background 160ms ease;
+}
+
+.secondary:hover {
+  background: rgba(255, 255, 255, 0.10);
+}
+
+.periodSelector {
+  display: flex;
+  gap: 10px;
+  margin-bottom: 28px;
+  flex-wrap: wrap;
+}
+
+.periodButton {
+  padding: 10px 16px;
+  border-radius: 10px;
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  background: rgba(255, 255, 255, 0.04);
+  color: rgba(244, 244, 245, 0.80);
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 160ms ease;
+}
+
+.periodButton:hover {
+  background: rgba(255, 255, 255, 0.08);
+  border-color: rgba(255, 255, 255, 0.18);
+}
+
+.periodActive {
+  padding: 10px 16px;
+  border-radius: 10px;
+  border: 1px solid rgba(126, 126, 255, 0.4);
+  background: rgba(126, 126, 255, 0.15);
+  color: rgba(244, 244, 245, 0.95);
+  font-weight: 700;
+  cursor: pointer;
+}
+
+.loading {
+  text-align: center;
+  padding: 60px 20px;
+  color: rgba(244, 244, 245, 0.68);
+  font-size: 1.1rem;
+}
+
+.error {
+  color: #ff6b6b;
+  padding: 20px;
+  text-align: center;
+  background: rgba(255, 107, 107, 0.1);
+  border-radius: 12px;
+  border: 1px solid rgba(255, 107, 107, 0.3);
+}
+
+.empty {
+  text-align: center;
+  padding: 60px 20px;
+}
+
+.emptyText {
+  font-size: 1.2rem;
+  font-weight: 700;
+  margin: 0 0 8px 0;
+  color: rgba(244, 244, 245, 0.90);
+}
+
+.emptySubtext {
+  color: rgba(244, 244, 245, 0.65);
+  margin: 0;
+}
+
+.summaryBox {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+  gap: 16px;
+  margin-bottom: 28px;
+}
+
+.summaryItem {
+  background: rgba(255, 255, 255, 0.05);
+  padding: 20px;
+  border-radius: 14px;
+  border: 1px solid rgba(255, 255, 255, 0.10);
+  text-align: center;
+}
+
+.summaryNumber {
+  font-size: 2.5rem;
+  font-weight: 800;
+  color: rgba(244, 244, 245, 0.95);
+  margin-bottom: 6px;
+}
+
+.summaryLabel {
+  font-size: 0.88rem;
+  color: rgba(244, 244, 245, 0.70);
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  font-weight: 600;
+}
+
+.panel {
+  background: rgba(255, 255, 255, 0.05);
+  padding: 24px;
+  border-radius: 18px;
+  margin-bottom: 20px;
+}
+
+.panelTitle {
+  font-size: 1.3rem;
+  font-weight: 800;
+  margin: 0 0 4px 0;
+  color: rgba(244, 244, 245, 0.95);
+}
+
+.panelSubtitle {
+  margin: 0 0 20px 0;
+  color: rgba(244, 244, 245, 0.65);
+  font-size: 0.9rem;
+}
+
+.noData {
+  color: rgba(244, 244, 245, 0.60);
+  font-style: italic;
+  margin: 0;
+}
+
+.statsList {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.statItem {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.statLabel {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.statMood {
+  font-weight: 700;
+  color: rgba(244, 244, 245, 0.95);
+  font-size: 0.95rem;
+}
+
+.statActivity {
+  font-weight: 700;
+  color: rgba(244, 244, 245, 0.95);
+  font-size: 0.95rem;
+}
+
+.statCount {
+  font-size: 0.85rem;
+  color: rgba(244, 244, 245, 0.68);
+  font-weight: 600;
+}
+
+.statBar {
+  height: 8px;
+  background: rgba(255, 255, 255, 0.08);
+  border-radius: 999px;
+  overflow: hidden;
+}
+
+.statBarFill {
+  height: 100%;
+  background: linear-gradient(90deg, #7e7eff, #e019d4);
+  border-radius: 999px;
+  transition: width 400ms ease;
+}
+
+.statBarFillActivity {
+  height: 100%;
+  background: linear-gradient(90deg, #00dbff, #f6f65a);
+  border-radius: 999px;
+  transition: width 400ms ease;
+}
+
+.connectionsList {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.connectionItem {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 12px 16px;
+  background: rgba(255, 255, 255, 0.04);
+  border-radius: 10px;
+  border: 1px solid rgba(255, 255, 255, 0.08);
+}
+
+.connectionMood {
+  padding: 6px 12px;
+  border-radius: 999px;
+  background: rgba(126, 126, 255, 0.15);
+  border: 1px solid rgba(126, 126, 255, 0.3);
+  font-weight: 700;
+  font-size: 0.88rem;
+  color: rgba(244, 244, 245, 0.95);
+}
+
+.connectionArrow {
+  color: rgba(244, 244, 245, 0.50);
+  font-weight: 700;
+}
+
+.connectionActivity {
+  padding: 6px 12px;
+  border-radius: 999px;
+  background: rgba(255, 255, 255, 0.08);
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  font-weight: 700;
+  font-size: 0.88rem;
+  color: rgba(244, 244, 245, 0.90);
+}
+
+.connectionCount {
+  margin-left: auto;
+  font-size: 0.85rem;
+  color: rgba(244, 244, 245, 0.68);
+  font-weight: 600;
+}

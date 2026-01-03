@@ -1,0 +1,154 @@
+.page {
+  min-height: 100vh;
+  padding: 32px;
+  background: #0b0b0f;
+  color: #f4f4f5;
+}
+
+.container {
+  max-width: 900px;
+  margin: 0 auto;
+}
+
+.loading {
+  text-align: center;
+  padding: 60px 20px;
+  color: rgba(244, 244, 245, 0.68);
+  font-size: 1.1rem;
+}
+
+.topRow {
+  display: flex;
+  justify-content: space-between;
+  margin-bottom: 24px;
+}
+
+.title {
+  font-size: 2rem;
+  font-weight: 800;
+  margin: 0;
+}
+
+.subtitle {
+  color: rgba(244, 244, 245, 0.7);
+  margin: 4px 0 0;
+  font-size: 0.95rem;
+}
+
+.actions {
+  display: flex;
+  gap: 12px;
+}
+
+.secondary {
+  padding: 10px 14px;
+  border-radius: 12px;
+  border: none;
+  background: rgba(255, 255, 255, 0.06);
+  color: #f4f4f5;
+  font-weight: 700;
+  cursor: pointer;
+  transition: background 160ms ease;
+}
+
+.secondary:hover {
+  background: rgba(255, 255, 255, 0.10);
+}
+
+.delete {
+  padding: 10px 14px;
+  border-radius: 12px;
+  border: none;
+  background: rgba(255, 107, 107, 0.15);
+  color: #df6bff;
+  font-weight: 700;
+  cursor: pointer;
+  transition: all 160ms ease;
+}
+
+.delete:hover:not(:disabled) {
+  background: rgba(255, 107, 107, 0.25);
+}
+
+.delete:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.panel {
+  background: rgba(255, 255, 255, 0.05);
+  padding: 24px;
+  border-radius: 18px;
+}
+
+.section {
+  margin-bottom: 28px;
+}
+
+.section:last-child {
+  margin-bottom: 0;
+}
+
+.sectionTitle {
+  font-size: 1rem;
+  font-weight: 700;
+  margin: 0 0 12px 0;
+  color: rgba(244, 244, 245, 0.90);
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  font-size: 0.85rem;
+}
+
+.tagContainer {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.tag {
+  display: inline-block;
+  padding: 8px 14px;
+  border-radius: 999px;
+  background: rgba(126, 126, 255, 0.15);
+  border: 1px solid rgba(126, 126, 255, 0.3);
+  color: rgba(244, 244, 245, 0.95);
+  font-size: 0.88rem;
+  font-weight: 600;
+}
+
+.tagActivity {
+  display: inline-block;
+  padding: 8px 14px;
+  border-radius: 999px;
+  background: rgba(255, 255, 255, 0.08);
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  color: rgba(244, 244, 245, 0.90);
+  font-size: 0.88rem;
+  font-weight: 600;
+}
+
+.noteContent {
+  padding: 16px;
+  background: rgba(255, 255, 255, 0.04);
+  border-radius: 12px;
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  color: rgba(244, 244, 245, 0.85);
+  line-height: 1.6;
+  white-space: pre-wrap;
+}
+
+.error {
+  color: #df6bff;
+  padding: 16px;
+  text-align: center;
+  margin-bottom: 20px;
+}
+
+.errorBox {
+  margin-top: 20px;
+  color: #ff6b6b;
+  padding: 12px;
+  background: rgba(255, 107, 107, 0.1);
+  border-radius: 10px;
+  border: 1px solid rgba(255, 107, 107, 0.3);
+}
