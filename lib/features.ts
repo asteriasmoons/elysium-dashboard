@@ -46,7 +46,7 @@ export const FEATURES: FeatureItem[] = [
     key: "mood-tracker",
     title: "Mood Tracker",
     description: "Mood logs, trends, and reflections.",
-    href: (guildId) => `/dashboard/mood?guildId=${guildId}`,
+    href: "/dashboard/mood",
     scope: "user",
     status: "ready",
   },
