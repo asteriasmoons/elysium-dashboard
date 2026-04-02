@@ -6,11 +6,12 @@ export const REMINDER_COLLECTION = "reminders";
 export interface ReminderDoc extends Document {
   _id: ObjectId;
   userId: string;
-  title: string;
-  description?: string;
-  time: Date;
-  completed: boolean;
-  createdAt: Date;
+  guildId: string | null;
+  hour: number;
+  minute: number;
+  text: string;
+  zone: string;
+  reminderSentAt: Date | null;
 }
 
 function requireUserId(userId: string | null | undefined): string {
@@ -29,28 +30,50 @@ export async function listUserReminders(
   return db
     .collection<ReminderDoc>(REMINDER_COLLECTION)
     .find({ userId: uid })
-    .sort({ time: 1 })
+    .sort({ hour: 1, minute: 1 })
     .toArray();
 }
 
 export async function createReminder(
   userId: string,
-  title: string,
-  time: Date,
-  description?: string,
+  text: string,
+  hour: number,
+  minute: number,
+  zone: string,
+  guildId: string | null,
+  reminderSentAt: Date | null,
 ): Promise<string> {
   const uid = requireUserId(userId);
+  const trimmedText = String(text ?? "").trim();
+
+  if (!trimmedText) {
+    throw new Error("Reminder text is required");
+  }
+
+  if (!Number.isInteger(hour) || hour < 0 || hour > 23) {
+    throw new Error("Hour must be between 0 and 23");
+  }
+
+  if (!Number.isInteger(minute) || minute < 0 || minute > 59) {
+    throw new Error("Minute must be between 0 and 59");
+  }
+
+  const safeZone = String(zone ?? "").trim();
+  if (!safeZone) {
+    throw new Error("Time zone is required");
+  }
 
   const client = await clientPromise;
   const db = client.db();
 
   const result = await db.collection(REMINDER_COLLECTION).insertOne({
     userId: uid,
-    title,
-    description: description ?? "",
-    time,
-    completed: false,
-    createdAt: new Date(),
+    guildId: guildId ?? null,
+    hour,
+    minute,
+    text: trimmedText,
+    zone: safeZone,
+    reminderSentAt: reminderSentAt ?? null,
   });
 
   return result.insertedId.toString();

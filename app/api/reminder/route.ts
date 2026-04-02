@@ -29,9 +29,12 @@ export async function POST(req: Request) {
 
   const id = await createReminder(
     userId,
-    body.title,
-    new Date(body.time),
-    body.description,
+    body.text,
+    body.hour,
+    body.minute,
+    body.zone,
+    body.guildId ?? null,
+    body.reminderSentAt ? new Date(body.reminderSentAt) : null
   );
 
   return NextResponse.json({ id });

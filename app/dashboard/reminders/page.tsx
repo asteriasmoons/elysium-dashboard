@@ -4,6 +4,59 @@ import { getSessionUserId } from "@/lib/journalAccess";
 import { listUserReminders } from "@/lib/reminderAccess";
 import styles from "./reminders.module.css";
 
+function renderDiscordText(text: string) {
+  const parts: React.ReactNode[] = [];
+  const regex = /<(a)?:([a-zA-Z0-9_]+):(\d+)>/g;
+  let lastIndex = 0;
+  let match: RegExpExecArray | null;
+
+  while ((match = regex.exec(text)) !== null) {
+    const [fullMatch, animatedFlag, name, id] = match;
+    const start = match.index;
+
+    if (start > lastIndex) {
+      parts.push(text.slice(lastIndex, start));
+    }
+
+    const ext = animatedFlag ? "gif" : "png";
+    const src = `https://cdn.discordapp.com/emojis/${id}.${ext}?size=64&quality=lossless`;
+
+    parts.push(
+      <img
+        key={`${id}-${start}`}
+        src={src}
+        alt={`:${name}:`}
+        title={`:${name}:`}
+        width={20}
+        height={20}
+        style={{
+          display: "inline-block",
+          verticalAlign: "-0.2em",
+          marginRight: 4,
+        }}
+      />
+    );
+
+    lastIndex = start + fullMatch.length;
+  }
+
+  if (lastIndex < text.length) {
+    parts.push(text.slice(lastIndex));
+  }
+
+  // Handle line breaks
+  return parts.flatMap((part, index) => {
+    if (typeof part !== "string") return part;
+
+    return part.split("\n").flatMap((line, i, arr) => {
+      if (i < arr.length - 1) {
+        return [line, <br key={`br-${index}-${i}`} />];
+      }
+      return line;
+    });
+  });
+}
+
 export default async function RemindersPage() {
   const session = await auth();
 
@@ -57,7 +110,7 @@ export default async function RemindersPage() {
               {reminders.map((reminder) => (
                 <div key={String(reminder._id)} className={styles.card}>
                   <div className={styles.cardTop}>
-                    <h2 className={styles.cardTitle}>{reminder.title}</h2>
+                    <h2 className={styles.cardTitle}>Reminder</h2>
                     <span
                       className={
                         reminder.completed
@@ -69,9 +122,9 @@ export default async function RemindersPage() {
                     </span>
                   </div>
 
-                  {reminder.description ? (
+                  {reminder.text ? (
                     <p className={styles.cardDescription}>
-                      {reminder.description}
+                      {renderDiscordText(reminder.text)}
                     </p>
                   ) : (
                     <p className={styles.cardDescriptionMuted}>
@@ -80,7 +133,7 @@ export default async function RemindersPage() {
                   )}
 
                   <p className={styles.cardTime}>
-                    {new Date(reminder.time).toLocaleString()}
+                    {`${((reminder.hour % 12) || 12)}:${String(reminder.minute).padStart(2, "0")} ${reminder.hour >= 12 ? "PM" : "AM"}`}
                   </p>
 
                   <div className={styles.cardActions}>
