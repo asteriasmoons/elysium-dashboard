@@ -1,13 +1,39 @@
 .page {
-  min-height: 100vh;
-  padding: 32px;
-  background: #0b0b0f;
+  min-height: 100dvh;
+  width: 100%;
+  padding: 40px 24px;
+  background-color: #05060a;
+  background-image: linear-gradient(135deg, #03e3fc, #6055f7);
+  position: relative;
+  overflow: clip;
   color: #f4f4f5;
+  -webkit-transform: translateZ(0);
+  transform: translateZ(0);
+}
+
+.page::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(135deg, #03e3fc, #6055f7);
+  filter: blur(120px);
+  opacity: 0.6;
+  z-index: -1;
+}
+
+.page::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.4);
+  z-index: -1;
 }
 
 .container {
   max-width: 900px;
   margin: 0 auto;
+  position: relative;
+  z-index: 1;
 }
 
 .topRow {
@@ -31,9 +57,12 @@
 }
 
 .panel {
-  background: rgba(255, 255, 255, 0.05);
+  background: rgba(255, 255, 255, 0.08);
+  border: 1px solid rgba(255, 255, 255, 0.12);
   padding: 24px;
   border-radius: 18px;
+  backdrop-filter: blur(14px);
+  -webkit-backdrop-filter: blur(14px);
 }
 
 .label {
@@ -50,10 +79,18 @@
   background: rgba(255, 255, 255, 0.06);
   border: 1px solid rgba(255, 255, 255, 0.12);
   color: #f4f4f5;
+  font-family: inherit;
+  outline: none;
+}
+
+.input:focus,
+.textarea:focus {
+  border-color: rgba(255, 255, 255, 0.22);
 }
 
 .textarea {
   min-height: 240px;
+  resize: vertical;
 }
 
 .primary {
@@ -63,14 +100,28 @@
   border: none;
   background: rgba(255, 255, 255, 0.12);
   font-weight: 700;
+  color: #f4f4f5;
+  cursor: pointer;
+  transition: background 160ms ease;
+}
+
+.primary:hover {
+  background: rgba(255, 255, 255, 0.18);
 }
 
 .secondary {
   padding: 10px 14px;
   border-radius: 12px;
-  border: none;
+  border: 1px solid rgba(255, 255, 255, 0.14);
   background: rgba(255, 255, 255, 0.06);
   color: #f4f4f5;
+  cursor: pointer;
+  font-weight: 600;
+  transition: background 160ms ease;
+}
+
+.secondary:hover {
+  background: rgba(255, 255, 255, 0.10);
 }
 
 .error {

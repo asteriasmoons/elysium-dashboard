@@ -1,13 +1,39 @@
 .page {
-  min-height: 100vh;
-  padding: 32px;
-  background: #0b0b0f;
+  min-height: 100dvh;
+  width: 100%;
+  padding: 40px 24px;
+  background-color: #05060a;
+  background-image: linear-gradient(135deg, #03e3fc, #6055f7);
+  position: relative;
+  overflow: clip;
   color: #f4f4f5;
+  -webkit-transform: translateZ(0);
+  transform: translateZ(0);
+}
+
+.page::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(135deg, #03e3fc, #6055f7);
+  filter: blur(120px);
+  opacity: 0.6;
+  z-index: -1;
+}
+
+.page::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.4);
+  z-index: -1;
 }
 
 .container {
   max-width: 1000px;
   margin: 0 auto;
+  position: relative;
+  z-index: 1;
 }
 
 .topRow {
@@ -33,18 +59,22 @@
 }
 
 .secondary {
-  padding: 10px 14px;
-  border-radius: 12px;
-  border: none;
-  background: rgba(255, 255, 255, 0.06);
-  color: #f4f4f5;
-  font-weight: 700;
+  display: inline-flex;
+  align-items: center;
+  height: 36px;
+  padding: 0 14px;
+  border-radius: 8px;
+  background: rgba(255, 255, 255, 0.10);
+  border: 1px solid rgba(255, 255, 255, 0.16);
+  color: rgba(255, 255, 255, 0.85);
+  font-size: 13px;
+  font-weight: 600;
   cursor: pointer;
-  transition: background 160ms ease;
+  transition: background 0.15s ease;
 }
 
 .secondary:hover {
-  background: rgba(255, 255, 255, 0.10);
+  background: rgba(255, 255, 255, 0.16);
 }
 
 .periodSelector {
@@ -121,10 +151,11 @@
 }
 
 .summaryItem {
-  background: rgba(255, 255, 255, 0.05);
+  background: #0a0c1c;
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-top: 3px solid #03e3fc;
   padding: 20px;
   border-radius: 14px;
-  border: 1px solid rgba(255, 255, 255, 0.10);
   text-align: center;
 }
 
@@ -144,9 +175,12 @@
 }
 
 .panel {
-  background: rgba(255, 255, 255, 0.05);
+  background: rgba(255, 255, 255, 0.08);
+  border: 1px solid rgba(255, 255, 255, 0.12);
   padding: 24px;
   border-radius: 18px;
+  backdrop-filter: blur(14px);
+  -webkit-backdrop-filter: blur(14px);
   margin-bottom: 20px;
 }
 

@@ -3,7 +3,7 @@ import { redirect } from "next/navigation"
 import { GuildCard } from "@/components/GuildCard"
 import { fetchUserGuilds, filterManageableGuilds, isBotInGuild, getGuildIconUrl } from "@/lib/discord"
 
-import styles from "./dashboard.module.css";
+import styles from "./dashboard.module.css"
 
 
 interface Guild {

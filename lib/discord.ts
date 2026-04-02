@@ -1,6 +1,7 @@
 import { REST } from "@discordjs/rest"
 import { Routes } from "discord-api-types/v10"
 
+export const ADMINISTRATOR = 0x00000008
 export const MANAGE_GUILD = 0x00000020
 
 export interface Guild {
@@ -21,22 +22,33 @@ export async function fetchUserGuilds(accessToken: string): Promise<Guild[]> {
     console.log("Discord API returned guilds:", guilds.length)
     console.log("First guild:", guilds[0])
     return guilds
-  } catch (error: any) {
-    console.error("fetchUserGuilds failed:", error.message)
-    console.error("Error status:", error.status)
-    console.error("Error body:", error.rawError)
+  } catch (error: unknown) {
+    if (error instanceof Error) {
+      console.error("fetchUserGuilds failed:", error.message)
+    } else {
+      console.error("fetchUserGuilds failed:", error)
+    }
+
+    // Attempt to log additional fields if they exist
+    const err = error as { status?: unknown; rawError?: unknown }
+    if (err.status) console.error("Error status:", err.status)
+    if (err.rawError) console.error("Error body:", err.rawError)
+
     return []
   }
 }
 
-export function hasManageGuild(permissions: string): boolean {
+export function hasManageAccess(permissions: string): boolean {
   const perms = BigInt(permissions)
-  return (perms & BigInt(MANAGE_GUILD)) === BigInt(MANAGE_GUILD)
+  return (
+    (perms & BigInt(ADMINISTRATOR)) === BigInt(ADMINISTRATOR) ||
+    (perms & BigInt(MANAGE_GUILD)) === BigInt(MANAGE_GUILD)
+  )
 }
 
 export function filterManageableGuilds(guilds: Guild[]): Guild[] {
-  return guilds.filter(guild => 
-    guild.owner || hasManageGuild(guild.permissions)
+  return guilds.filter(guild =>
+    guild.owner || hasManageAccess(guild.permissions)
   )
 }
 

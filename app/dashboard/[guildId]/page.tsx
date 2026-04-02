@@ -18,7 +18,7 @@ export default async function GuildHomePage({
   return (
     <div className={styles.page}>
       <div className={styles.container}>
-        <div className={styles.header}>
+        <div className={styles.topRow}>
           <div>
             <h1 className={styles.title}>Server Dashboard</h1>
             <p className={styles.subtitle}>
@@ -26,8 +26,8 @@ export default async function GuildHomePage({
             </p>
           </div>
 
-          <div className={styles.headerActions}>
-            <Link href="/dashboard" className={styles.secondaryLink}>
+          <div>
+            <Link href="/dashboard" className={styles.backLink}>
               Back to servers
             </Link>
           </div>
