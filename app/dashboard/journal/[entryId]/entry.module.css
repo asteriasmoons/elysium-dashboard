@@ -7,15 +7,7 @@
   --text: #f4f4f5;
   --muted: rgba(244, 244, 245, 0.70);
 
-  --brand-gradient: linear-gradient(
-    90deg,
-    #7e7eff 10%,
-    #7e7eff 32%,
-    #f6f65a 38%,
-    #e019d4 60%,
-    #00dbff 72%,
-    #00dbff 100%
-  );
+  --gradient: linear-gradient(135deg, #03e3fc, #6055f7);
 }
 
 .page {
