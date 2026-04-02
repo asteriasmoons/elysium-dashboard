@@ -39,7 +39,7 @@ html, body {
   background: linear-gradient(135deg, #03e3fc, #6055f7);
   filter: blur(120px);
   opacity: 0.6;
-  z-index: -1;
+  z-index: 0;
 }
 
 .page::after {
@@ -47,7 +47,7 @@ html, body {
   position: absolute;
   inset: 0;
   background: rgba(0, 0, 0, 0.4);
-  z-index: -1;
+  z-index: 1;
 }
 
 .container {
@@ -55,6 +55,8 @@ html, body {
   width: 100%;
   margin: 0 auto;
   padding: 40px 24px;
+  position: relative;
+  z-index: 2;
 }
 
 .headerRow {
