@@ -62,9 +62,9 @@ export const FEATURES: FeatureItem[] = [
     key: "reminders",
     title: "Reminders",
     description: "Create, edit, and audit scheduled reminders.",
-    href: (guildId) => `/dashboard/${guildId}/reminders`,
+    href: "/dashboard/reminders",
     scope: "guild",
-    status: "planned",
+    status: "ready",
   },
   {
     key: "logs",

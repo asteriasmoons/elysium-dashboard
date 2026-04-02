@@ -1,8 +1,11 @@
 import type { Metadata } from "next";
-import { Inter } from "next/font/google";
 import "./globals.css";
+import { Lily_Script_One } from "next/font/google";
 
-const inter = Inter({ subsets: ["latin"] });
+const lily = Lily_Script_One({
+  subsets: ["latin"],
+  weight: "400",
+});
 
 export const metadata: Metadata = {
   title: "Elysium Bot Dashboard",
@@ -16,7 +19,7 @@ export default function RootLayout({
 }) {
   return (
     <html lang="en">
-      <body className={inter.className}>{children}</body>
+      <body className={lily.className}>{children}</body>
     </html>
   );
 }

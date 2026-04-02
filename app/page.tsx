@@ -1,29 +1,28 @@
 import Link from "next/link"
-import "./globals.css"
-import { Button } from "@/components/ui/button"
+import styles from "./login/home.module.css";
 
 export default function Home() {
   return (
-    <div className="page">
-      <div className="card">
-        <h1 className="title">Elysium Bot Dashboard</h1>
-        <p className="subtitle">
+    <div className={styles.page}>
+      <div className={styles.card}>
+        <h1 className={styles.title}>Elysium Bot Dashboard</h1>
+        <p className={styles.subtitle}>
           Manage your Discord server settings with ease. Configure commands,
           moderation, and more.
         </p>
-        <div className="actions">
-          <Link href="/login">
-            <Button size="lg" className="primaryButton">
-              Get Started
-            </Button>
+        <div className={styles.actions}>
+          <Link href="/login" className={styles.primaryButton}>
+            Get Started
           </Link>
-          <Link href="/dashboard">
-            <Button variant="outline" size="lg" className="secondaryButton">
-              Dashboard
-            </Button>
+
+          <Link
+            href="/dashboard"
+            className={`${styles.secondaryButton} ${styles.outline}`}
+          >
+            Dashboard
           </Link>
         </div>
       </div>
     </div>
-  )
+  );
 }
