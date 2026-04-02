@@ -5,7 +5,6 @@ import EntryClient from "./EntryClient";
 
 export default async function JournalEntryPage({
   params,
-  searchParams,
 }: {
   params: Promise<{ entryId: string }>;
   searchParams: Promise<{ guildId?: string }>;
@@ -14,7 +13,6 @@ export default async function JournalEntryPage({
   if (!session) redirect("/login");
 
   const { entryId } = await params;
-  const { guildId } = await searchParams;
   const userId = getSessionUserId(session);
   const doc = await getUserEntryById(userId, entryId);
 
@@ -22,7 +20,6 @@ export default async function JournalEntryPage({
 
   return (
     <EntryClient
-      guildId={guildId}
       entryId={doc._id.toString()}
       initialTitle={doc.title ?? "Untitled"}
       initialEntry={doc.entry ?? ""}

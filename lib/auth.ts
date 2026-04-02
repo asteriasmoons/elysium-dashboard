@@ -26,10 +26,28 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
         token.accessToken = account.access_token
       }
 
+      // Set discordId when account info is available (first sign-in)
       if (account?.providerAccountId) {
         token.discordId = account.providerAccountId
       } else if (typeof profile?.id === "string") {
         token.discordId = profile.id
+      }
+
+      // If discordId is still missing (existing JWT without it), look it up from DB
+      if (!token.discordId && token.sub) {
+        try {
+          const client = await clientPromise
+          const db = client.db()
+          const linked = await db.collection("accounts").findOne({
+            userId: token.sub,
+            provider: "discord",
+          })
+          if (linked?.providerAccountId) {
+            token.discordId = linked.providerAccountId as string
+          }
+        } catch {
+          // non-fatal, proceed without discordId
+        }
       }
 
       return token

@@ -9,15 +9,10 @@ import {
 } from "@/lib/journalAccess";
 import { JournalGrid, JournalEntryDTO } from "@/components/JournalGrid";
 
-export default async function JournalPage({
-  searchParams,
-}: {
-  searchParams: Promise<{ guildId?: string }>;
-}) {
+export default async function JournalPage() {
   const session = await auth();
   if (!session) redirect("/login");
 
-  const { guildId } = await searchParams;
   const userId = getSessionUserId(session);
   const docs = await listUserEntries(userId);
 
@@ -42,14 +37,14 @@ export default async function JournalPage({
 
           <div className={styles.actions}>
             <Link 
-              href={guildId ? `/dashboard/${guildId}` : "/dashboard"} 
+              href="/dashboard" 
               className={styles.secondaryLink}
             >
               Back
             </Link>
 
             <Link 
-              href={`/dashboard/journal/new${guildId ? `?guildId=${guildId}` : ''}`} 
+              href="/dashboard/journal/new" 
               className={styles.primaryLink}
             >
               New Entry
@@ -58,7 +53,7 @@ export default async function JournalPage({
         </div>
 
         <div className={styles.panel}>
-          <JournalGrid entries={entries} guildId={guildId} />
+          <JournalGrid entries={entries} />
         </div>
       </div>
     </div>

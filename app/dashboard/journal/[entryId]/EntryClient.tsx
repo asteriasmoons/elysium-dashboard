@@ -15,13 +15,11 @@ function getErrorMessage(value: unknown): string {
 }
 
 export default function EntryClient({
-  guildId,
   entryId,
   initialTitle,
   initialEntry,
   createdAt,
 }: {
-  guildId?: string;
   entryId: string;
   initialTitle: string;
   initialEntry: string;
@@ -35,7 +33,7 @@ export default function EntryClient({
   const [error, setError] = useState<string | null>(null);
   const [notice, setNotice] = useState<string | null>(null);
 
-  const backUrl = `/dashboard/journal${guildId ? `?guildId=${guildId}` : ''}`;
+  const backUrl = "/dashboard/journal";
 
   async function save() {
     setSaving(true);

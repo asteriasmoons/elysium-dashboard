@@ -1,17 +1,16 @@
 import { signIn } from "@/lib/auth";
+import styles from "./login.module.css";
 
 export const runtime = "nodejs";
 
 export default function LoginPage() {
   return (
-    <div className="page">
-      <div className="card">
-        <div className="header">
-          <h1 className="title">Elysium Bot Dashboard</h1>
-          <p className="subtitle">
-            Sign in with Discord to manage your server settings
-          </p>
-        </div>
+    <div className={styles.page}>
+      <div className={styles.card}>
+        <h1 className={styles.title}>Elysium Bot Dashboard</h1>
+        <p className={styles.subtitle}>
+          Sign in with Discord to manage your server settings
+        </p>
 
         <form
           action={async () => {
@@ -19,9 +18,9 @@ export default function LoginPage() {
             await signIn("discord", { redirectTo: "/dashboard" });
           }}
         >
-          <button className="button" type="submit">
+          <button className={styles.button} type="submit">
             <svg
-              className="icon"
+              className={styles.icon}
               fill="currentColor"
               viewBox="0 0 24 24"
               aria-hidden="true"
