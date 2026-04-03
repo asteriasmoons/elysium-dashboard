@@ -47,7 +47,9 @@ export default function NewEntryClient({ guildId }: NewEntryClientProps) {
 
       if ("id" in data && typeof data.id === "string") {
         router.push(
-          `/dashboard/journal/${data.id}${guildId ? `?guildId=${guildId}` : ""}`
+          guildId
+            ? `/dashboard/server/${guildId}/journal/${data.id}`
+            : `/dashboard/journal/${data.id}`
         );
         return;
       }
@@ -76,7 +78,7 @@ export default function NewEntryClient({ guildId }: NewEntryClientProps) {
               onClick={() =>
                 router.push(
                   guildId
-                    ? `/dashboard/${guildId}/features`
+                    ? `/dashboard/server/${guildId}`
                     : "/dashboard/journal"
                 )
               }

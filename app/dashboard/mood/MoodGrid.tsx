@@ -28,7 +28,7 @@ export default function MoodGrid({ guildId }: MoodGridProps) {
       try {
         const res = await fetch("/api/mood?limit=12");
         const data = await res.json();
-		console.log("API Response:", data);
+        console.log("API Response:", data);
         setLogs(data.logs || []);
       } catch (error) {
         console.error("Error fetching mood logs:", error);
@@ -48,16 +48,10 @@ export default function MoodGrid({ guildId }: MoodGridProps) {
     });
   };
 
-  const backHref = guildId ? `/dashboard/${guildId}/features` : "/dashboard";
-  const newLogHref = `/dashboard/mood/new${
-    guildId ? `?guildId=${guildId}` : ""
-  }`;
-  const statsHref = `/dashboard/mood/stats${
-    guildId ? `?guildId=${guildId}` : ""
-  }`;
-  const settingsHref = `/dashboard/mood/settings${
-    guildId ? `?guildId=${guildId}` : ""
-  }`;
+  const backHref = guildId ? `/dashboard/${guildId}` : "/dashboard";
+  const newLogHref = `/dashboard/mood/new${guildId ? `?guildId=${guildId}` : ""}`;
+  const statsHref = `/dashboard/mood/stats${guildId ? `?guildId=${guildId}` : ""}`;
+  const settingsHref = `/dashboard/mood/settings${guildId ? `?guildId=${guildId}` : ""}`;
 
   return (
     <div className={styles.page}>
@@ -110,9 +104,7 @@ export default function MoodGrid({ guildId }: MoodGridProps) {
             {logs.map((log) => (
               <Link
                 key={log._id}
-                href={`/dashboard/mood/${log._id}${
-                  guildId ? `?guildId=${guildId}` : ""
-                }`}
+                href={`/dashboard/mood/${log._id}${guildId ? `?guildId=${guildId}` : ""}`}
                 className={styles.card}
               >
                 <div className={styles.cardTop}>

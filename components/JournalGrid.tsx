@@ -16,7 +16,7 @@ export function JournalGrid({
   entries: JournalEntryDTO[];
   guildId?: string;
 }) {
-  const newEntryUrl = `/dashboard/journal/new${guildId ? `?guildId=${guildId}` : ''}`;
+  const newEntryUrl = `/dashboard/journal/new${ guildId ? `?guildId=${guildId}` : ''}`;
   
   if (!entries || entries.length === 0) {
     return (

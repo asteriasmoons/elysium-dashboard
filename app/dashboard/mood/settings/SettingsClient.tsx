@@ -74,7 +74,7 @@ export default function SettingsClient({ guildId }: SettingsClientProps) {
     }
   }
 
-  const backHref = `/dashboard/mood${guildId ? `?guildId=${guildId}` : ""}`;
+  const backHref = guildId ? `/dashboard/${guildId}` : `/dashboard/mood`;
 
   if (loading) {
     return (

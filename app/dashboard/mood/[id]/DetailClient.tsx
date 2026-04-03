@@ -71,7 +71,7 @@ export default function DetailClient({ id, guildId }: DetailClientProps) {
         return;
       }
 
-      router.push(`/dashboard/mood${guildId ? `?guildId=${guildId}` : ""}`);
+      router.push(guildId ? `/dashboard/${guildId}` : `/dashboard/mood`);
     } catch (err) {
       setError("Failed to delete log");
       setDeleting(false);
@@ -90,7 +90,7 @@ export default function DetailClient({ id, guildId }: DetailClientProps) {
     });
   };
 
-  const backHref = `/dashboard/mood${guildId ? `?guildId=${guildId}` : ""}`;
+  const backHref = guildId ? `/dashboard/${guildId}` : `/dashboard/mood`;
 
   if (loading) {
     return (

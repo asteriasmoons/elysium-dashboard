@@ -49,7 +49,7 @@ export default function StatsClient({ guildId }: StatsClientProps) {
     fetchStats();
   }, [period]);
 
-  const backHref = `/dashboard/mood${guildId ? `?guildId=${guildId}` : ""}`;
+  const backHref = guildId ? `/dashboard/${guildId}` : `/dashboard/mood`;
 
   const periodNames: Record<string, string> = {
     today: "Today",

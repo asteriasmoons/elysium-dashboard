@@ -113,7 +113,7 @@ export default function NewMoodClient({ guildId }: NewMoodClientProps) {
       }
 
       router.push(
-        `/dashboard/mood/${data.id}${guildId ? `?guildId=${guildId}` : ""}`
+        guildId ? `/dashboard/${guildId}` : `/dashboard/mood/${data.id}`,
       );
     } catch (err) {
       setSaving(false);
@@ -121,7 +121,7 @@ export default function NewMoodClient({ guildId }: NewMoodClientProps) {
     }
   }
 
-  const backHref = `/dashboard/mood${guildId ? `?guildId=${guildId}` : ""}`;
+  const backHref = guildId ? `/dashboard/${guildId}` : `/dashboard/mood`;
 
   return (
     <div className={styles.page}>
