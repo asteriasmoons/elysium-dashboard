@@ -1,9 +1,9 @@
 "use client";
 
-import { useEffect, useMemo, useRef, useState } from "react";
-import { useRouter } from "next/navigation";
-import styles from "../reminders.module.css";
 import Image from "next/image";
+import { useEffect, useMemo, useRef, useState } from "react";
+import { useParams, useRouter } from "next/navigation";
+import styles from "../reminders.module.css";
 
 function pad(value: number): string {
   return String(value).padStart(2, "0");
@@ -130,8 +130,20 @@ type DiscordEmoji = {
   animated?: boolean;
 };
 
-export default function NewReminderPage() {
+type ReminderResponse = {
+  _id: string;
+  text: string;
+  hour: number;
+  minute: number;
+  zone?: string;
+  reminderSentAt?: string | null;
+};
+
+export default function EditReminderPage() {
   const router = useRouter();
+  const params = useParams<{ id: string }>();
+  const reminderId = params.id;
+
   const today = useMemo(() => new Date(), []);
   const todayValue = formatDateInputValue(today);
 
@@ -139,10 +151,11 @@ export default function NewReminderPage() {
   const [date, setDate] = useState(todayValue);
   const [time, setTime] = useState("09:00");
   const [loading, setLoading] = useState(false);
+  const [loadingReminder, setLoadingReminder] = useState(true);
 
   const [showDatePicker, setShowDatePicker] = useState(false);
   const [displayMonth, setDisplayMonth] = useState(
-    () => new Date(today.getFullYear(), today.getMonth(), 1)
+    () => new Date(today.getFullYear(), today.getMonth(), 1),
   );
   const dateButtonRef = useRef<HTMLButtonElement | null>(null);
 
@@ -154,6 +167,40 @@ export default function NewReminderPage() {
   const [showEmojiPicker, setShowEmojiPicker] = useState(false);
   const [emojis, setEmojis] = useState<DiscordEmoji[]>([]);
   const editorRef = useRef<HTMLDivElement | null>(null);
+
+  useEffect(() => {
+    async function loadReminder() {
+      try {
+        const response = await fetch(`/api/reminders/${reminderId}`);
+        if (!response.ok) {
+          throw new Error("Failed to load reminder");
+        }
+
+        const data = (await response.json()) as ReminderResponse;
+        setText(data.text ?? "");
+        setTime(`${pad(data.hour ?? 0)}:${pad(data.minute ?? 0)}`);
+
+        if (data.reminderSentAt) {
+          const savedDate = new Date(data.reminderSentAt);
+          if (!Number.isNaN(savedDate.getTime())) {
+            const nextDate = formatDateInputValue(savedDate);
+            setDate(nextDate);
+            setDisplayMonth(
+              new Date(savedDate.getFullYear(), savedDate.getMonth(), 1),
+            );
+          }
+        }
+      } catch (error) {
+        console.error(error);
+      } finally {
+        setLoadingReminder(false);
+      }
+    }
+
+    if (reminderId) {
+      loadReminder();
+    }
+  }, [reminderId]);
 
   useEffect(() => {
     async function loadEmojis() {
@@ -234,8 +281,9 @@ export default function NewReminderPage() {
   }, [displayMonth]);
 
   function changeMonth(offset: number) {
-    setDisplayMonth((current) =>
-      new Date(current.getFullYear(), current.getMonth() + offset, 1)
+    setDisplayMonth(
+      (current) =>
+        new Date(current.getFullYear(), current.getMonth() + offset, 1),
     );
   }
 
@@ -317,7 +365,6 @@ export default function NewReminderPage() {
 
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
-
     setLoading(true);
 
     try {
@@ -327,8 +374,8 @@ export default function NewReminderPage() {
       const zone = Intl.DateTimeFormat().resolvedOptions().timeZone;
       const reminderSentAt = new Date(`${date}T${time}`);
 
-      const response = await fetch("/api/reminders", {
-        method: "POST",
+      const response = await fetch(`/api/reminders/${reminderId}`, {
+        method: "PATCH",
         headers: {
           "Content-Type": "application/json",
         },
@@ -343,21 +390,33 @@ export default function NewReminderPage() {
       });
 
       if (!response.ok) {
-        throw new Error("Failed to create reminder");
+        throw new Error("Failed to save reminder");
       }
 
       router.push("/dashboard/reminders");
-    } catch (err) {
-      console.error(err);
+    } catch (error) {
+      console.error(error);
     } finally {
       setLoading(false);
     }
   }
 
+  if (loadingReminder) {
+    return (
+      <div className={styles.page}>
+        <div className={styles.container}>
+          <div className={styles.panel}>
+            <p className={styles.emptyText}>Loading reminder...</p>
+          </div>
+        </div>
+      </div>
+    );
+  }
+
   return (
     <div className={styles.page}>
       <div className={styles.container}>
-        <h1 className={styles.title}>New Reminder</h1>
+        <h1 className={styles.title}>Edit Reminder</h1>
 
         <form onSubmit={handleSubmit} className={styles.panel}>
           <div className={styles.formStack}>
@@ -389,7 +448,7 @@ export default function NewReminderPage() {
                   className={styles.textarea}
                   style={{ whiteSpace: "pre-wrap" }}
                 />
-                
+
                 <button
                   type="button"
                   onClick={() => setShowEmojiPicker((v) => !v)}
@@ -437,7 +496,7 @@ export default function NewReminderPage() {
                 ) : null}
               </div>
             </div>
-			
+
             <div className={styles.pickerRow}>
               <div className={styles.fieldGroup}>
                 <label className={styles.label} htmlFor="reminder-date-button">
@@ -548,7 +607,7 @@ export default function NewReminderPage() {
                 disabled={loading}
                 className={styles.primaryLink}
               >
-                {loading ? "Creating..." : "Create Reminder"}
+                {loading ? "Saving..." : "Save Reminder"}
               </button>
             </div>
           </div>

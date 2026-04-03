@@ -1,7 +1,9 @@
 import Link from "next/link";
+import Image from "next/image";
+import { revalidatePath } from "next/cache";
 import { auth } from "@/lib/auth";
 import { getSessionUserId } from "@/lib/journalAccess";
-import { listUserReminders } from "@/lib/reminderAccess";
+import { deleteReminder, listUserReminders } from "@/lib/reminderAccess";
 import styles from "./reminders.module.css";
 
 function renderDiscordText(text: string) {
@@ -22,13 +24,14 @@ function renderDiscordText(text: string) {
     const src = `https://cdn.discordapp.com/emojis/${id}.${ext}?size=64&quality=lossless`;
 
     parts.push(
-      <img
+      <Image
         key={`${id}-${start}`}
         src={src}
         alt={`:${name}:`}
         title={`:${name}:`}
         width={20}
         height={20}
+        unoptimized
         style={{
           display: "inline-block",
           verticalAlign: "-0.2em",
@@ -66,6 +69,25 @@ export default async function RemindersPage() {
 
   const userId = getSessionUserId(session);
   const reminders = await listUserReminders(userId);
+
+  async function deleteReminderAction(formData: FormData) {
+    "use server";
+
+    const session = await auth();
+    if (!session) {
+      throw new Error("Unauthorized");
+    }
+
+    const currentUserId = getSessionUserId(session);
+    const reminderId = String(formData.get("reminderId") ?? "");
+
+    if (!reminderId) {
+      throw new Error("Missing reminder id");
+    }
+
+    await deleteReminder(currentUserId, reminderId);
+    revalidatePath("/dashboard/reminders");
+  }
 
   return (
     <div className={styles.page}>
@@ -143,6 +165,17 @@ export default async function RemindersPage() {
                     >
                       Edit
                     </Link>
+
+                    <form action={deleteReminderAction}>
+                      <input
+                        type="hidden"
+                        name="reminderId"
+                        value={String(reminder._id)}
+                      />
+                      <button type="submit" className={styles.deleteButton}>
+                        Delete
+                      </button>
+                    </form>
                   </div>
                 </div>
               ))}
