@@ -35,7 +35,7 @@ export function GuildCard({ id, name, icon, owner }: GuildCardProps) {
         </div>
       </div>
 
-      <Link href={`/dashboard/server/${id}`} className={styles.manageLink}>
+      <Link href={`/dashboard/${id}`} className={styles.manageLink}>
         Manage Server
       </Link>
     </div>

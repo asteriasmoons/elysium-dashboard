@@ -75,7 +75,7 @@ function renderEditorHtml(text: string): string {
         }
 
         const src = getEmojiSrc(id, Boolean(animatedFlag));
-        html += `<span contenteditable="false" data-emoji-tag="${escapeHtml(fullMatch)}" style="display:inline-flex;align-items:center;vertical-align:-0.2em;"><img src="${src}" alt=":${escapeHtml(name)}:" title=":${escapeHtml(name)}:" width="22" height="22" style="display:block;" /></span>`;
+        html += `<span contenteditable="false" data-emoji-tag="${escapeHtml(fullMatch)}" style="display:inline-flex;align-items:center;vertical-align:-0.2em;"><img src="${src}" alt=":${escapeHtml(name)}:" title=":${escapeHtml(name)}:" width="22" height="22" style="display:block;" /></span>\u200B`;
         lastIndex = start + fullMatch.length;
       }
 
@@ -90,7 +90,7 @@ function renderEditorHtml(text: string): string {
 
 function serializeEditorNode(node: Node): string {
   if (node.nodeType === Node.TEXT_NODE) {
-    return node.textContent ?? "";
+    return (node.textContent ?? "").replace(/\u200B/g, "");
   }
 
   if (node.nodeType !== Node.ELEMENT_NODE) {
@@ -341,7 +341,7 @@ export default function EditReminderPage() {
 
     span.appendChild(img);
 
-    const trailingSpace = document.createTextNode("");
+    const trailingSpace = document.createTextNode("\u200B");
 
     range.insertNode(trailingSpace);
     range.insertNode(span);

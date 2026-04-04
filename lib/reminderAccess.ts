@@ -107,7 +107,7 @@ export async function toggleReminder(
       { $set: { completed: !reminder.completed } },
     );
 
-  return result.modifiedCount > 0;
+  return result.matchedCount > 0;
 }
 
 export async function deleteReminder(
@@ -196,5 +196,5 @@ export async function updateReminder(
     },
   );
 
-  return result.modifiedCount > 0;
+  return result.matchedCount > 0;
 }
