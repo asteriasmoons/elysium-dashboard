@@ -455,7 +455,7 @@ export default function EditReminderPage() {
                   className={styles.emojiButton}
                 >
                   <Image
-                    src="/img/icons/face.svg"
+                    src="/img/icons/xsmile.svg"
                     alt="Emoji picker"
                     width={18}
                     height={18}
