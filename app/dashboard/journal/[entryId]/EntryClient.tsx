@@ -129,6 +129,7 @@ export default function EntryClient({
   const [notice, setNotice] = useState<string | null>(null);
 
   const editorRef = useRef<HTMLDivElement | null>(null);
+  const suppressEditorSyncRef = useRef(false);
   const backUrl = "/dashboard/journal";
 
   useEffect(() => {
@@ -152,6 +153,11 @@ export default function EntryClient({
     const editor = editorRef.current;
     if (!editor) return;
 
+    if (suppressEditorSyncRef.current) {
+      suppressEditorSyncRef.current = false;
+      return;
+    }
+
     const currentSerialized = serializeEditorContent(editor);
     if (currentSerialized !== entry) {
       editor.innerHTML = renderEditorHtml(entry);
@@ -161,6 +167,7 @@ export default function EntryClient({
   function handleEditorInput() {
     const editor = editorRef.current;
     if (!editor) return;
+    suppressEditorSyncRef.current = true;
     setEntry(serializeEditorContent(editor));
   }
 
@@ -222,6 +229,7 @@ export default function EntryClient({
     selection?.removeAllRanges();
     selection?.addRange(nextRange);
 
+    suppressEditorSyncRef.current = true;
     setEntry(serializeEditorContent(editor));
     setShowEmojiPicker(false);
   }
@@ -336,6 +344,8 @@ export default function EntryClient({
                 ref={editorRef}
                 contentEditable
                 suppressContentEditableWarning
+                onFocus={() => setShowEmojiPicker(false)}
+                onClick={() => setShowEmojiPicker(false)}
                 onInput={handleEditorInput}
                 className={styles.textarea}
                 style={{ whiteSpace: "pre-wrap" }}
@@ -343,7 +353,15 @@ export default function EntryClient({
 
               <button
                 type="button"
-                onClick={() => setShowEmojiPicker((v) => !v)}
+                onMouseDown={(e) => {
+                  e.preventDefault();
+                  e.stopPropagation();
+                }}
+                onClick={(e) => {
+                  e.preventDefault();
+                  e.stopPropagation();
+                  setShowEmojiPicker((v) => !v);
+                }}
                 style={{
                   position: "absolute",
                   right: 10,
@@ -357,6 +375,7 @@ export default function EntryClient({
                   alignItems: "center",
                   justifyContent: "center",
                   cursor: "pointer",
+                  zIndex: 2,
                 }}
                 aria-label="Open emoji picker"
               >
