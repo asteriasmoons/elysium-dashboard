@@ -129,6 +129,8 @@ export default function EntryClient({
   const [notice, setNotice] = useState<string | null>(null);
 
   const editorRef = useRef<HTMLDivElement | null>(null);
+  const emojiPickerRef = useRef<HTMLDivElement | null>(null);
+  const emojiButtonRef = useRef<HTMLButtonElement | null>(null);
   const suppressEditorSyncRef = useRef(false);
   const backUrl = "/dashboard/journal";
 
@@ -163,6 +165,25 @@ export default function EntryClient({
       editor.innerHTML = renderEditorHtml(entry);
     }
   }, [entry]);
+
+  useEffect(() => {
+    function handleDocumentMouseDown(event: MouseEvent) {
+      if (!showEmojiPicker) return;
+
+      const target = event.target as Node | null;
+      if (!target) return;
+
+      if (emojiPickerRef.current?.contains(target)) return;
+      if (emojiButtonRef.current?.contains(target)) return;
+
+      setShowEmojiPicker(false);
+    }
+
+    document.addEventListener("mousedown", handleDocumentMouseDown);
+    return () => {
+      document.removeEventListener("mousedown", handleDocumentMouseDown);
+    };
+  }, [showEmojiPicker]);
 
   function handleEditorInput() {
     const editor = editorRef.current;
@@ -322,8 +343,8 @@ export default function EntryClient({
             />
           </label>
 
-          <label className={styles.label}>
-            Entry
+          <div className={styles.label}>
+            <span>Entry</span>
             <div style={{ position: "relative", overflow: "visible" }}>
               {!entry ? (
                 <div
@@ -344,14 +365,13 @@ export default function EntryClient({
                 ref={editorRef}
                 contentEditable
                 suppressContentEditableWarning
-                onFocus={() => setShowEmojiPicker(false)}
-                onClick={() => setShowEmojiPicker(false)}
                 onInput={handleEditorInput}
                 className={styles.textarea}
                 style={{ whiteSpace: "pre-wrap" }}
               />
 
               <button
+                ref={emojiButtonRef}
                 type="button"
                 onMouseDown={(e) => {
                   e.preventDefault();
@@ -389,6 +409,7 @@ export default function EntryClient({
 
               {showEmojiPicker ? (
                 <div
+                  ref={emojiPickerRef}
                   style={{
                     position: "absolute",
                     top: "calc(100% + 8px)",
@@ -448,7 +469,7 @@ export default function EntryClient({
                 </div>
               ) : null}
             </div>
-          </label>
+          </div>
 
           {error && <div className={styles.error}>{error}</div>}
           {notice && <div className={styles.notice}>{notice}</div>}
