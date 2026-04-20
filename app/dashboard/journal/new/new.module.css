@@ -139,3 +139,16 @@
   padding: 10px 12px;
   border-radius: 12px;
 }
+
+@media (max-width: 520px) {
+  .primary,
+  .secondary {
+    padding: 8px 10px;
+    border-radius: 10px;
+    font-size: 0.85rem;
+  }
+
+  .actions {
+    gap: 8px;
+  }
+}
