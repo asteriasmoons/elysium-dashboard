@@ -146,6 +146,7 @@
   color: rgba(244, 244, 245, 0.92);
   transition: background 160ms ease, border-color 160ms ease;
   font-family: var(--font-body);
+  margin-top: 10px;
 }
 
 .primary:hover,
@@ -155,12 +156,13 @@
 }
 
 .danger {
-  border-color: rgba(255, 120, 120, 0.35);
+  border-color: rgba(255, 120, 200, 0.45);
+  background: rgba(255, 120, 200, 0.12);
 }
 
 .danger:hover {
-  background: rgba(255, 120, 120, 0.10);
-  border-color: rgba(255, 120, 120, 0.45);
+  background: rgba(255, 120, 200, 0.18);
+  border-color: rgba(255, 120, 200, 0.6);
 }
 
 .primary:disabled,
