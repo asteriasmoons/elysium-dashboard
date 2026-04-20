@@ -37,7 +37,7 @@ function renderDiscordText(text: string) {
           verticalAlign: "-0.2em",
           marginRight: 4,
         }}
-      />
+      />,
     );
 
     lastIndex = start + fullMatch.length;
@@ -47,7 +47,6 @@ function renderDiscordText(text: string) {
     parts.push(text.slice(lastIndex));
   }
 
-  // Handle line breaks
   return parts.flatMap((part, index) => {
     if (typeof part !== "string") return part;
 
@@ -129,56 +128,77 @@ export default async function RemindersPage() {
             </div>
           ) : (
             <div className={styles.grid}>
-              {reminders.map((reminder) => (
-                <div key={String(reminder._id)} className={styles.card}>
-                  <div className={styles.cardTop}>
-                    <h2 className={styles.cardTitle}>Reminder</h2>
-                    <span
-                      className={
-                        reminder.completed
-                          ? styles.completedBadge
-                          : styles.activeBadge
-                      }
-                    >
-                      {reminder.completed ? "Completed" : "Active"}
-                    </span>
-                  </div>
+              {reminders.map((reminder) => {
+                const reminderId = String(reminder._id);
 
-                  {reminder.text ? (
-                    <p className={styles.cardDescription}>
-                      {renderDiscordText(reminder.text)}
+                return (
+                  <div key={reminderId} className={styles.card}>
+                    <div className={styles.cardTop}>
+                      <h2 className={styles.cardTitle}>Reminder</h2>
+                      <span
+                        className={
+                          reminder.completed
+                            ? styles.completedBadge
+                            : styles.activeBadge
+                        }
+                      >
+                        {reminder.completed ? "Completed" : "Active"}
+                      </span>
+                    </div>
+
+                    {reminder.text ? (
+                      <p className={styles.cardDescription}>
+                        {renderDiscordText(reminder.text)}
+                      </p>
+                    ) : (
+                      <p className={styles.cardDescriptionMuted}>
+                        No description
+                      </p>
+                    )}
+
+                    <p className={styles.cardTime}>
+                      {`${(reminder.hour % 12) || 12}:${String(reminder.minute).padStart(2, "0")} ${reminder.hour >= 12 ? "PM" : "AM"}`}
                     </p>
-                  ) : (
-                    <p className={styles.cardDescriptionMuted}>
-                      No description
-                    </p>
-                  )}
 
-                  <p className={styles.cardTime}>
-                    {`${((reminder.hour % 12) || 12)}:${String(reminder.minute).padStart(2, "0")} ${reminder.hour >= 12 ? "PM" : "AM"}`}
-                  </p>
-
-                  <div className={styles.cardActions}>
-                    <Link
-                      href={`/dashboard/reminders/${String(reminder._id)}`}
-                      className={styles.editLink}
+                    <div
+                      className={styles.cardActions}
+                      style={{ flexWrap: "wrap", gap: 8 }}
                     >
-                      Edit
-                    </Link>
+                      <Link
+                        href={`/dashboard/reminders/${reminderId}/schedule`}
+                        className={styles.editLink}
+                      >
+                        Schedule
+                      </Link>
 
-                    <form action={deleteReminderAction}>
-                      <input
-                        type="hidden"
-                        name="reminderId"
-                        value={String(reminder._id)}
-                      />
-                      <button type="submit" className={styles.deleteButton}>
-                        Delete
-                      </button>
-                    </form>
+                      <Link
+                        href={`/dashboard/reminders/${reminderId}/reschedule`}
+                        className={styles.editLink}
+                      >
+                        Reschedule
+                      </Link>
+
+                      <Link
+                        href={`/dashboard/reminders/${reminderId}`}
+                        className={styles.editLink}
+                      >
+                        Edit
+                      </Link>
+
+                      <form action={deleteReminderAction}>
+                        <input
+                          type="hidden"
+                          name="reminderId"
+                          value={reminderId}
+                        />
+                        <button type="submit" className={styles.deleteButton}>
+                          Delete
+                        </button>
+                      </form>
+                    </div>
                   </div>
-                </div>
-              ))}
+                );
+              })}
             </div>
           )}
         </div>

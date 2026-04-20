@@ -34,6 +34,11 @@ export async function POST(req: Request) {
     body.minute,
     body.zone,
     body.guildId ?? null,
+    {
+      frequency: body.frequency,
+      dayOfWeek: body.dayOfWeek ?? null,
+      dayOfMonth: body.dayOfMonth ?? null,
+    },
     body.reminderSentAt ? new Date(body.reminderSentAt) : null
   );
 

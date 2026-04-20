@@ -1,10 +1,10 @@
+// This is the server listings page 
 import { auth } from "@/lib/auth"
 import { redirect } from "next/navigation"
 import { GuildCard } from "@/components/GuildCard"
 import { fetchUserGuilds, filterManageableGuilds, isBotInGuild, getGuildIconUrl } from "@/lib/discord"
 
 import styles from "./dashboard.module.css"
-
 
 interface Guild {
   id: string

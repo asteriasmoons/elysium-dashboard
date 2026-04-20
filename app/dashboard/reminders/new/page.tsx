@@ -124,11 +124,28 @@ function serializeEditorContent(editor: HTMLDivElement): string {
     .replace(/\n+$/g, "");
 }
 
+
 type DiscordEmoji = {
   id: string;
   name: string;
   animated?: boolean;
 };
+
+const WEEKDAY_OPTIONS = [
+  { value: 0, label: "Sunday" },
+  { value: 1, label: "Monday" },
+  { value: 2, label: "Tuesday" },
+  { value: 3, label: "Wednesday" },
+  { value: 4, label: "Thursday" },
+  { value: 5, label: "Friday" },
+  { value: 6, label: "Saturday" },
+] as const;
+
+const FREQUENCY_OPTIONS = [
+  { value: "daily", label: "Daily" },
+  { value: "weekly", label: "Weekly" },
+  { value: "monthly", label: "Monthly" },
+] as const;
 
 export default function NewReminderPage() {
   const router = useRouter();
@@ -139,6 +156,9 @@ export default function NewReminderPage() {
   const [date, setDate] = useState(todayValue);
   const [time, setTime] = useState("09:00");
   const [loading, setLoading] = useState(false);
+  const [frequency, setFrequency] = useState<"daily" | "weekly" | "monthly">("daily");
+  const [dayOfWeek, setDayOfWeek] = useState<number>(today.getDay());
+  const [dayOfMonth, setDayOfMonth] = useState<number>(today.getDate());
 
   const [showDatePicker, setShowDatePicker] = useState(false);
   const [displayMonth, setDisplayMonth] = useState(
@@ -326,6 +346,8 @@ export default function NewReminderPage() {
       const minute = Number(minuteString);
       const zone = Intl.DateTimeFormat().resolvedOptions().timeZone;
       const reminderSentAt = new Date(`${date}T${time}`);
+      const resolvedDayOfWeek = frequency === "weekly" ? dayOfWeek : null;
+      const resolvedDayOfMonth = frequency === "monthly" ? dayOfMonth : null;
 
       const response = await fetch("/api/reminders", {
         method: "POST",
@@ -338,6 +360,9 @@ export default function NewReminderPage() {
           minute,
           zone,
           guildId: null,
+          frequency,
+          dayOfWeek: resolvedDayOfWeek,
+          dayOfMonth: resolvedDayOfMonth,
           reminderSentAt: reminderSentAt.toISOString(),
         }),
       });
@@ -541,6 +566,80 @@ export default function NewReminderPage() {
                 />
               </div>
             </div>
+
+            <div className={styles.fieldGroup}>
+              <label className={styles.label}>Frequency</label>
+              <div
+                style={{
+                  display: "flex",
+                  gap: 10,
+                  flexWrap: "wrap",
+                }}
+              >
+                {FREQUENCY_OPTIONS.map((option) => {
+                  const isActive = frequency === option.value;
+
+                  return (
+                    <button
+                      key={option.value}
+                      type="button"
+                      onClick={() => setFrequency(option.value)}
+                      className={styles.primaryLink}
+                      style={{
+                        opacity: isActive ? 1 : 0.72,
+                        outline: isActive
+                          ? "2px solid rgba(255, 255, 255, 0.32)"
+                          : "none",
+                      }}
+                    >
+                      {option.label}
+                    </button>
+                  );
+                })}
+              </div>
+            </div>
+
+            {frequency === "weekly" ? (
+              <div className={styles.fieldGroup}>
+                <label className={styles.label} htmlFor="reminder-day-of-week">
+                  Day of week
+                </label>
+                <select
+                  id="reminder-day-of-week"
+                  value={dayOfWeek}
+                  onChange={(e) => setDayOfWeek(Number(e.target.value))}
+                  className={styles.input}
+                >
+                  {WEEKDAY_OPTIONS.map((option) => (
+                    <option key={option.value} value={option.value}>
+                      {option.label}
+                    </option>
+                  ))}
+                </select>
+              </div>
+            ) : null}
+
+            {frequency === "monthly" ? (
+              <div className={styles.fieldGroup}>
+                <label className={styles.label} htmlFor="reminder-day-of-month">
+                  Day of month
+                </label>
+                <select
+                  id="reminder-day-of-month"
+                  value={dayOfMonth}
+                  onChange={(e) => setDayOfMonth(Number(e.target.value))}
+                  className={styles.input}
+                >
+                  {Array.from({ length: 31 }, (_, index) => index + 1).map(
+                    (day) => (
+                      <option key={day} value={day}>
+                        {day}
+                      </option>
+                    ),
+                  )}
+                </select>
+              </div>
+            ) : null}
 
             <div className={styles.formActions}>
               <button

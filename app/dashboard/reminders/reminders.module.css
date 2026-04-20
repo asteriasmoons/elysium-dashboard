@@ -48,10 +48,12 @@
   margin: 0;
   font-size: 1.9rem;
   font-weight: 800;
+  font-family: var(--font-title);
 }
 
 .subtitle {
   margin: 8px 0 0;
+  font-family: var(--font-body);
   color: rgba(244, 244, 245, 0.70);
 }
 
@@ -69,6 +71,7 @@
   border: 1px solid rgba(255, 255, 255, 0.14);
   transition: background 160ms ease, border-color 160ms ease;
   color: rgba(244, 244, 245, 0.88);
+  font-family: var(--font-title);
   background: rgba(255, 255, 255, 0.08);
 }
 
@@ -154,6 +157,7 @@
   margin: 0;
   font-size: 0.98rem;
   font-weight: 780;
+  font-family: var(--font-title);
   color: rgba(244, 244, 245, 0.95);
   letter-spacing: 0.2px;
 }
@@ -162,6 +166,7 @@
 .completedBadge {
   font-size: 0.72rem;
   font-weight: 700;
+  font-family: var(--font-extra);
   padding: 5px 9px;
   border-radius: 999px;
   white-space: nowrap;
@@ -182,6 +187,7 @@
 .cardDescription {
   margin: 0;
   font-size: 0.86rem;
+  font-family: var(--font-body);
   line-height: 1.4;
   color: rgba(244, 244, 245, 0.65);
 }
@@ -196,6 +202,7 @@
   margin-top: 10px;
   font-size: 0.8rem;
   font-weight: 600;
+  font-family: var(--font-title);
   color: rgba(3, 227, 252, 0.9);
 }
 
@@ -203,13 +210,6 @@
   margin-top: 12px;
   padding-top: 10px;
   border-top: 1px solid rgba(255, 255, 255, 0.10);
-}
-
-.editLink {
-  font-weight: 700;
-  font-size: 0.85rem;
-  text-decoration: none;
-  color: rgba(244, 244, 245, 0.85);
 }
 
 .emptyState {
@@ -470,6 +470,7 @@
   color: white;
   font-weight: 600;
   font-size: 0.95rem;
+  font-family: var(--font-extra);
   text-decoration: none;
   display: inline-flex;
   align-items: center;
@@ -490,6 +491,7 @@
   color: white;
   font-weight: 600;
   font-size: 0.95rem;
+  font-family: var(--font-extra);
   cursor: pointer;
   transition: transform 0.15s ease, opacity 0.15s ease;
 }
@@ -536,4 +538,524 @@
 .emojiItem:hover {
   background: rgba(255,255,255,0.1);
   border-radius: 8px;
+}
+
+.glassSelect {
+  width: 100%;
+  min-height: 54px;
+  padding: 0 18px;
+  border-radius: 999px;
+  border: 1px solid rgba(255, 255, 255, 0.22);
+  background:
+    linear-gradient(
+      180deg,
+      rgba(255, 255, 255, 0.22) 0%,
+      rgba(255, 255, 255, 0.10) 48%,
+      rgba(255, 255, 255, 0.06) 100%
+    );
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.30),
+    inset 0 -1px 0 rgba(255, 255, 255, 0.08),
+    0 10px 30px rgba(0, 0, 0, 0.18);
+  color: rgba(255, 255, 255, 0.96);
+  font-size: 0.95rem;
+  font-weight: 500;
+  font-family: var(--font-title);
+  line-height: 1;
+  appearance: none;
+  -webkit-appearance: none;
+  -moz-appearance: none;
+  outline: none;
+  cursor: pointer;
+  background-image:
+    linear-gradient(
+      180deg,
+      rgba(255, 255, 255, 0.22) 0%,
+      rgba(255, 255, 255, 0.10) 48%,
+      rgba(255, 255, 255, 0.06) 100%
+    ),
+    url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='20' height='20' viewBox='0 0 20 20' fill='none'%3E%3Cpath d='M5.25 7.5L10 12.25L14.75 7.5' stroke='rgba(255,255,255,0.92)' stroke-width='1.8' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E");
+  background-repeat: no-repeat, no-repeat;
+  background-position: 0 0, right 16px center;
+  background-size: auto, 18px;
+  padding-right: 48px;
+}
+
+.glassSelect:hover {
+  border-color: rgba(255, 255, 255, 0.30);
+  background-image:
+    linear-gradient(
+      180deg,
+      rgba(255, 255, 255, 0.28) 0%,
+      rgba(255, 255, 255, 0.12) 48%,
+      rgba(255, 255, 255, 0.07) 100%
+    ),
+    url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='20' height='20' viewBox='0 0 20 20' fill='none'%3E%3Cpath d='M5.25 7.5L10 12.25L14.75 7.5' stroke='rgba(255,255,255,0.92)' stroke-width='1.8' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E");
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.34),
+    inset 0 -1px 0 rgba(255, 255, 255, 0.10),
+    0 12px 34px rgba(0, 0, 0, 0.22);
+}
+
+.glassSelect:focus {
+  border-color: rgba(255, 255, 255, 0.38);
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.36),
+    inset 0 -1px 0 rgba(255, 255, 255, 0.10),
+    0 0 0 3px rgba(255, 255, 255, 0.10),
+    0 12px 34px rgba(0, 0, 0, 0.22);
+}
+
+.glassSelect option {
+  background: #1f2230;
+  color: white;
+}
+
+.pillGroup {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  margin-top: 10px;
+}
+
+.pillInput {
+  position: absolute;
+  opacity: 0;
+  pointer-events: none;
+}
+
+.pill {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 46px;
+  padding: 0 18px;
+  border-radius: 999px;
+
+  border: 1px solid rgba(255, 255, 255, 0.18);
+
+  background:
+    linear-gradient(180deg, rgba(255,255,255,0.16) 0%, rgba(255,255,255,0.08) 100%);
+
+  box-shadow:
+    inset 0 1px 0 rgba(255,255,255,0.24),
+    0 8px 24px rgba(0,0,0,0.18);
+
+  color: rgba(255,255,255,0.96);
+  cursor: pointer;
+  user-select: none;
+
+  transition: all 0.2s ease;
+}
+
+.pill:hover {
+  background:
+    linear-gradient(180deg, rgba(255,255,255,0.22) 0%, rgba(255,255,255,0.10) 100%);
+}
+
+.pillActive {
+  border: 1px solid rgba(255, 255, 255, 0.32);
+
+  background:
+    linear-gradient(180deg, rgba(255,255,255,0.28) 0%, rgba(255,255,255,0.12) 100%);
+
+  box-shadow:
+    inset 0 1px 0 rgba(255,255,255,0.32),
+    0 10px 28px rgba(0,0,0,0.22),
+    0 0 0 2px rgba(255,255,255,0.10);
+}
+
+.pillSmall {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 42px;
+  padding: 0 16px;
+  border-radius: 999px;
+  border: 1px solid rgba(255, 255, 255, 0.18);
+  background: linear-gradient(180deg, rgba(255,255,255,0.16) 0%, rgba(255,255,255,0.08) 100%);
+  box-shadow: inset 0 1px 0 rgba(255,255,255,0.24), 0 8px 24px rgba(0,0,0,0.18);
+  color: rgba(255,255,255,0.96);
+  cursor: pointer;
+  user-select: none;
+  transition: all 0.2s ease;
+  font-size: 14px;
+}
+
+.pillSmallActive {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 42px;
+  padding: 0 16px;
+  border-radius: 999px;
+  border: 1px solid rgba(255, 255, 255, 0.32);
+  background: linear-gradient(180deg, rgba(255,255,255,0.28) 0%, rgba(255,255,255,0.12) 100%);
+  box-shadow: inset 0 1px 0 rgba(255,255,255,0.32), 0 10px 28px rgba(0,0,0,0.22), 0 0 0 2px rgba(255,255,255,0.10);
+  color: rgba(255,255,255,0.96);
+  cursor: pointer;
+  user-select: none;
+  transition: all 0.2s ease;
+  font-size: 14px;
+}
+
+.cardWide {
+  max-width: 980px;
+  overflow: visible;
+  position: relative;
+  z-index: 5;
+}
+
+.spacingMd {
+  margin-top: 14px;
+}
+
+.spacingLg {
+  margin-top: 20px;
+}
+
+.customSelect {
+  position: relative;
+  width: 100%;
+}
+
+.customSelect summary {
+  list-style: none;
+}
+
+.customSelect summary::-webkit-details-marker {
+  display: none;
+}
+
+.customSelectTrigger {
+  width: 100%;
+  min-height: 54px;
+  padding: 0 18px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+
+  border-radius: 999px;
+  border: 1px solid rgba(255, 255, 255, 0.22);
+
+  background:
+    linear-gradient(
+      180deg,
+      rgba(255, 255, 255, 0.22) 0%,
+      rgba(255, 255, 255, 0.10) 48%,
+      rgba(255, 255, 255, 0.06) 100%
+    );
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
+
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.30),
+    inset 0 -1px 0 rgba(255, 255, 255, 0.08),
+    0 10px 30px rgba(0, 0, 0, 0.18);
+
+  color: rgba(255, 255, 255, 0.96);
+  cursor: pointer;
+  user-select: none;
+}
+
+.customSelect[open] .customSelectTrigger {
+  border-color: rgba(255, 255, 255, 0.32);
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.34),
+    inset 0 -1px 0 rgba(255, 255, 255, 0.10),
+    0 12px 34px rgba(0, 0, 0, 0.22),
+    0 0 0 2px rgba(255, 255, 255, 0.10);
+}
+
+.customSelectChevron {
+  font-size: 0.95rem;
+  line-height: 1;
+  opacity: 0.9;
+}
+
+.customSelectMenu {
+  position: absolute;
+  top: calc(100% + 10px);
+  left: 0;
+  right: 0;
+  z-index: 50;
+
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  padding: 12px;
+
+  max-height: 260px;
+  overflow-y: auto;
+
+  border-radius: 24px;
+  border: 1px solid rgba(255, 255, 255, 0.18);
+
+  background:
+    linear-gradient(
+      180deg,
+      rgba(255, 255, 255, 0.16) 0%,
+      rgba(255, 255, 255, 0.08) 100%
+    ),
+    rgba(19, 25, 52, 0.92);
+
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
+
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.22),
+    0 18px 40px rgba(0, 0, 0, 0.28);
+}
+
+.customSelectMenuGrid {
+  position: absolute;
+  top: calc(100% + 10px);
+  left: 0;
+  right: 0;
+  z-index: 50;
+
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(64px, 1fr));
+  gap: 8px;
+  padding: 12px;
+
+  max-height: 260px;
+  overflow-y: auto;
+
+  border-radius: 24px;
+  border: 1px solid rgba(255, 255, 255, 0.18);
+
+  background:
+    linear-gradient(
+      180deg,
+      rgba(255, 255, 255, 0.16) 0%,
+      rgba(255, 255, 255, 0.08) 100%
+    ),
+    rgba(19, 25, 52, 0.92);
+
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
+
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.22),
+    0 18px 40px rgba(0, 0, 0, 0.28);
+}
+
+.customSelectInput {
+  position: absolute;
+  opacity: 0;
+  pointer-events: none;
+}
+
+.customSelectOption {
+  position: relative;
+  min-height: 46px;
+  padding: 0 16px;
+  display: flex;
+  align-items: center;
+  justify-content: flex-start;
+
+  border-radius: 999px;
+  border: 1px solid rgba(255, 255, 255, 0.14);
+
+  background:
+    linear-gradient(
+      180deg,
+      rgba(255, 255, 255, 0.14) 0%,
+      rgba(255, 255, 255, 0.06) 100%
+    );
+
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.18),
+    0 8px 20px rgba(0, 0, 0, 0.18);
+
+  color: rgba(255, 255, 255, 0.96);
+  cursor: pointer;
+  user-select: none;
+  transition: all 0.18s ease;
+}
+
+.customSelectOption:hover {
+  border-color: rgba(255, 255, 255, 0.24);
+  background:
+    linear-gradient(
+      180deg,
+      rgba(255, 255, 255, 0.22) 0%,
+      rgba(255, 255, 255, 0.09) 100%
+    );
+}
+
+.customSelectOptionSelected {
+  border-color: rgba(255, 255, 255, 0.28);
+  background:
+    linear-gradient(
+      180deg,
+      rgba(255, 255, 255, 0.26) 0%,
+      rgba(255, 255, 255, 0.12) 100%
+    );
+
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.26),
+    0 10px 24px rgba(0, 0, 0, 0.22),
+    0 0 0 2px rgba(255, 255, 255, 0.08);
+}
+
+.customSelectMenu,
+.customSelectMenuGrid {
+  scrollbar-width: thin;
+  scrollbar-color: #7d19f7 rgba(255, 255, 255, 0.08);
+}
+
+.customSelectMenu,
+.customSelectMenuGrid {
+  scrollbar-width: none;
+}
+
+.customSelectMenu::-webkit-scrollbar,
+.customSelectMenuGrid::-webkit-scrollbar {
+  display: none;
+}
+
+.scrollWrapper {
+  position: relative;
+}
+
+.fakeScrollbar {
+  position: absolute;
+  top: 10px;
+  right: 6px;
+  bottom: 10px;
+  width: 8px;
+
+  z-index: 999; /* THIS is the fix */
+
+  pointer-events: none;
+
+  border-radius: 999px;
+  background: rgba(255, 255, 255, 0.08);
+}
+
+.fakeThumb {
+  position: absolute;
+  width: 100%;
+  height: 40px;
+
+  border-radius: 999px;
+
+  background: linear-gradient(
+    180deg,
+    #03dbfc 0%,
+    #7d19f7 100%
+  );
+
+  z-index: 1000; /* ensures thumb stays on top */
+}
+
+.rowFields {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 16px;
+  margin-bottom: 22px;
+}
+
+.dateInput {
+  width: 100%;
+  height: 48px;
+
+  border-radius: 999px;
+  border: 1px solid rgba(255, 255, 255, 0.2);
+
+  background:
+    linear-gradient(
+      180deg,
+      rgba(255, 255, 255, 0.18) 0%,
+      rgba(255, 255, 255, 0.08) 100%
+    );
+
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+
+  padding: 0 14px;
+
+  color: rgba(255, 255, 255, 0.95);
+  font-size: 0.95rem;
+
+  outline: none;
+}
+
+.dateInput::-webkit-calendar-picker-indicator {
+  filter: invert(1) brightness(1.2);
+  cursor: pointer;
+}
+
+.scheduleDateButton {
+  width: 100%;
+  min-height: 54px;
+  padding: 0 18px;
+
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+
+  border-radius: 999px;
+  border: 1px solid rgba(255, 255, 255, 0.22);
+
+  background:
+    linear-gradient(
+      180deg,
+      rgba(255, 255, 255, 0.22) 0%,
+      rgba(255, 255, 255, 0.10) 48%,
+      rgba(255, 255, 255, 0.06) 100%
+    );
+
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
+
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.30),
+    inset 0 -1px 0 rgba(255, 255, 255, 0.08),
+    0 10px 30px rgba(0, 0, 0, 0.18);
+
+  color: rgba(255, 255, 255, 0.96);
+  font-size: 0.95rem;
+  font-family: var(--font-title);
+
+  cursor: pointer;
+  outline: none;
+  transition: all 0.18s ease;
+}
+
+.scheduleDateButton:hover {
+  border-color: rgba(255, 255, 255, 0.30);
+
+  background:
+    linear-gradient(
+      180deg,
+      rgba(255, 255, 255, 0.28) 0%,
+      rgba(255, 255, 255, 0.12) 48%,
+      rgba(255, 255, 255, 0.07) 100%
+    );
+
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.34),
+    inset 0 -1px 0 rgba(255, 255, 255, 0.10),
+    0 12px 34px rgba(0, 0, 0, 0.22);
+}
+
+.scheduleDateButton:focus {
+  border-color: rgba(255, 255, 255, 0.38);
+
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.36),
+    inset 0 -1px 0 rgba(255, 255, 255, 0.10),
+    0 0 0 3px rgba(255, 255, 255, 0.10),
+    0 12px 34px rgba(0, 0, 0, 0.22);
+}
+
+.dateField {
+  position: relative;
+  margin-bottom: 22px;
 }

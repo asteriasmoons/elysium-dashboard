@@ -1,6 +1,6 @@
 import type { Metadata } from "next";
 import "./globals.css";
-import { Lily_Script_One, Hachi_Maru_Pop } from "next/font/google";
+import { Lily_Script_One, Hachi_Maru_Pop, Gorditas } from "next/font/google";
 
 const lily = Lily_Script_One({
   subsets: ["latin"],
@@ -12,6 +12,12 @@ const hachi = Hachi_Maru_Pop({
   subsets: ["latin"],
   weight: "400",
   variable: "--font-body",
+});
+
+const gorditas = Gorditas({
+  subsets: ["latin"],
+  weight: "400",
+  variable: "--font-extra",
 });
 
 export const metadata: Metadata = {
@@ -26,7 +32,7 @@ export default function RootLayout({
 }) {
   return (
     <html lang="en">
-      <body className={`${lily.variable} ${hachi.variable}`}>{children}</body>
+      <body className={`${lily.variable} ${hachi.variable} ${gorditas.variable}`}>{children}</body>
     </html>
   );
 }

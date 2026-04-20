@@ -88,6 +88,7 @@
 
 .name {
   margin: 0;
+  font-family: var(--font-title);
   font-size: 1.1rem;
   font-weight: 700;
   color: #f4f4f5;
@@ -96,6 +97,7 @@
 .role {
   margin: 0;
   font-size: 0.9rem;
+  font-family: var(--font-body);
   color: rgba(244, 244, 245, 0.70);
 }
 
@@ -109,6 +111,7 @@
   color: #f4f4f5;
   text-decoration: none;
   font-weight: 700;
+  font-family: var(--font-title);
   border: 1px solid rgba(255, 255, 255, 0.10);
   transition: transform 140ms ease, border-color 140ms ease, background 140ms ease;
 }

@@ -70,6 +70,7 @@
   margin: 0;
   font-size: 0.98rem;
   font-weight: 700;
+  font-family: var(--font-title);
   color: rgba(244, 244, 245, 0.95);
   letter-spacing: 0.2px;
 }
@@ -79,6 +80,7 @@
   font-weight: 700;
   padding: 4px 9px;
   border-radius: 999px;
+  font-family: var(--font-title);
   color: rgba(244, 244, 245, 0.75);
   border: 1px solid rgba(255, 255, 255, 0.12);
   background: rgba(255, 255, 255, 0.06);
@@ -89,5 +91,6 @@
   margin: 0;
   font-size: 0.86rem;
   line-height: 1.4;
+  font-family: var(--font-body);
   color: rgba(244, 244, 245, 0.55);
 }

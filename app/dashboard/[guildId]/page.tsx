@@ -8,12 +8,12 @@ import { FeatureGrid } from "@/components/FeatureGrid";
 export default async function GuildHomePage({
   params,
 }: {
-  params: { guildId: string };
+  params: Promise<{ guildId: string }>;
 }) {
   const session = await auth();
   if (!session) redirect("/login");
 
-  const guildId = params.guildId;
+  const { guildId } = await params;
 
   return (
     <div className={styles.page}>

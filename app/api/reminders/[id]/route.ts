@@ -33,6 +33,9 @@ export async function GET(_: Request, { params }: RouteContext) {
     minute: reminder.minute,
     text: reminder.text,
     zone: reminder.zone,
+    frequency: reminder.frequency,
+    dayOfWeek: reminder.dayOfWeek ?? null,
+    dayOfMonth: reminder.dayOfMonth ?? null,
     reminderSentAt: reminder.reminderSentAt
       ? reminder.reminderSentAt.toISOString()
       : null,
@@ -55,6 +58,9 @@ export async function PATCH(req: Request, { params }: RouteContext) {
     minute?: number;
     zone?: string;
     guildId?: string | null;
+    frequency?: "daily" | "weekly" | "monthly";
+    dayOfWeek?: number | null;
+    dayOfMonth?: number | null;
     reminderSentAt?: string | null;
   };
 
@@ -66,6 +72,11 @@ export async function PATCH(req: Request, { params }: RouteContext) {
     Number(body.minute),
     body.zone ?? "",
     body.guildId ?? null,
+    {
+      frequency: body.frequency,
+      dayOfWeek: body.dayOfWeek ?? null,
+      dayOfMonth: body.dayOfMonth ?? null,
+    },
     body.reminderSentAt ? new Date(body.reminderSentAt) : null,
   );
 

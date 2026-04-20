@@ -3,6 +3,14 @@ import { ObjectId, type Document } from "mongodb";
 
 export const REMINDER_COLLECTION = "reminders";
 
+export type ReminderFrequency = "daily" | "weekly" | "monthly";
+
+export interface ReminderScheduleInput {
+  frequency?: ReminderFrequency;
+  dayOfWeek?: number | null;
+  dayOfMonth?: number | null;
+}
+
 export interface ReminderDoc extends Document {
   _id: ObjectId;
   userId: string;
@@ -11,6 +19,9 @@ export interface ReminderDoc extends Document {
   minute: number;
   text: string;
   zone: string;
+  frequency: ReminderFrequency;
+  dayOfWeek: number | null;
+  dayOfMonth: number | null;
   reminderSentAt: Date | null;
   completed?: boolean;
 }
@@ -19,6 +30,48 @@ function requireUserId(userId: string | null | undefined): string {
   const trimmed = (userId ?? "").trim();
   if (!trimmed) throw new Error("Missing userId");
   return trimmed;
+}
+
+function normalizeReminderSchedule(input?: ReminderScheduleInput) {
+  const frequency = input?.frequency ?? "daily";
+
+  if (!["daily", "weekly", "monthly"].includes(frequency)) {
+    throw new Error("Frequency must be daily, weekly, or monthly");
+  }
+
+  let dayOfWeek: number | null = input?.dayOfWeek ?? null;
+  let dayOfMonth: number | null = input?.dayOfMonth ?? null;
+
+  if (frequency === "weekly") {
+    if (
+      dayOfWeek == null ||
+      !Number.isInteger(dayOfWeek) ||
+      dayOfWeek < 0 ||
+      dayOfWeek > 6
+    ) {
+      throw new Error("Weekly reminders require dayOfWeek between 0 and 6");
+    }
+    dayOfMonth = null;
+  } else if (frequency === "monthly") {
+    if (
+      dayOfMonth == null ||
+      !Number.isInteger(dayOfMonth) ||
+      dayOfMonth < 1 ||
+      dayOfMonth > 31
+    ) {
+      throw new Error("Monthly reminders require dayOfMonth between 1 and 31");
+    }
+    dayOfWeek = null;
+  } else {
+    dayOfWeek = null;
+    dayOfMonth = null;
+  }
+
+  return {
+    frequency,
+    dayOfWeek,
+    dayOfMonth,
+  };
 }
 
 export async function listUserReminders(
@@ -42,6 +95,7 @@ export async function createReminder(
   minute: number,
   zone: string,
   guildId: string | null,
+  schedule: ReminderScheduleInput | undefined,
   reminderSentAt: Date | null,
 ): Promise<string> {
   const uid = requireUserId(userId);
@@ -64,6 +118,8 @@ export async function createReminder(
     throw new Error("Time zone is required");
   }
 
+  const normalizedSchedule = normalizeReminderSchedule(schedule);
+
   const client = await clientPromise;
   const db = client.db();
 
@@ -74,6 +130,9 @@ export async function createReminder(
     minute,
     text: trimmedText,
     zone: safeZone,
+    frequency: normalizedSchedule.frequency,
+    dayOfWeek: normalizedSchedule.dayOfWeek,
+    dayOfMonth: normalizedSchedule.dayOfMonth,
     reminderSentAt: reminderSentAt ?? null,
     completed: false,
   });
@@ -155,6 +214,7 @@ export async function updateReminder(
   minute: number,
   zone: string,
   guildId: string | null,
+  schedule: ReminderScheduleInput | undefined,
   reminderSentAt: Date | null,
 ): Promise<boolean> {
   const uid = requireUserId(userId);
@@ -178,6 +238,8 @@ export async function updateReminder(
     throw new Error("Time zone is required");
   }
 
+  const normalizedSchedule = normalizeReminderSchedule(schedule);
+
   const client = await clientPromise;
   const db = client.db();
   const _id = new ObjectId(reminderId);
@@ -190,6 +252,9 @@ export async function updateReminder(
         hour,
         minute,
         zone: safeZone,
+        frequency: normalizedSchedule.frequency,
+        dayOfWeek: normalizedSchedule.dayOfWeek,
+        dayOfMonth: normalizedSchedule.dayOfMonth,
         guildId: guildId ?? null,
         reminderSentAt: reminderSentAt ?? null,
       },
