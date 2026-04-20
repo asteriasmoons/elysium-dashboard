@@ -45,10 +45,12 @@
 .title {
   font-size: 2rem;
   font-weight: 800;
+  font-family: var(--font-title);
 }
 
 .subtitle {
   color: rgba(244, 244, 245, 0.7);
+  font-family: var(--font-body);
 }
 
 .actions {
@@ -68,6 +70,8 @@
 .label {
   display: block;
   margin-bottom: 16px;
+  font-family: var(--font-body);
+  color: rgba(244, 244, 245, 0.9);
 }
 
 .input,
@@ -79,7 +83,7 @@
   background: rgba(255, 255, 255, 0.06);
   border: 1px solid rgba(255, 255, 255, 0.12);
   color: #f4f4f5;
-  font-family: inherit;
+  font-family: var(--font-body);
   outline: none;
 }
 
@@ -100,6 +104,7 @@
   border: none;
   background: rgba(255, 255, 255, 0.12);
   font-weight: 700;
+  font-family: var(--font-body);
   color: #f4f4f5;
   cursor: pointer;
   transition: background 160ms ease;
@@ -117,6 +122,7 @@
   color: #f4f4f5;
   cursor: pointer;
   font-weight: 600;
+  font-family: var(--font-body);
   transition: background 160ms ease;
 }
 
@@ -125,6 +131,11 @@
 }
 
 .error {
-  color: #ff6b6b;
+  color: #e422f69a;
   margin-top: 10px;
+  font-family: var(--font-body);
+  border: 1px solid rgba(255, 107, 107, 0.22);
+  background: rgba(255, 107, 107, 0.08);
+  padding: 10px 12px;
+  border-radius: 12px;
 }

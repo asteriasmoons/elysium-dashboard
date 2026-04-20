@@ -123,6 +123,8 @@
   padding: 10px 12px;
   border-radius: 12px;
   color: rgba(244, 244, 245, 0.92);
+  font-family: var(--font-body);
+  margin-top: 10px;
 }
 
 .notice {
@@ -132,6 +134,7 @@
   border-radius: 12px;
   color: rgba(244, 244, 245, 0.92);
   font-family: var(--font-body);
+  margin-top: 10px;
 }
 
 .primary,
