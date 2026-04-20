@@ -48,11 +48,13 @@
   margin: 0;
   font-size: 1.9rem;
   font-weight: 800;
+  font-family: var(--font-title);
 }
 
 .subtitle {
   margin: 8px 0 0;
   color: rgba(244, 244, 245, 0.70);
+  font-family: var(--font-body);
 }
 
 .actions {
@@ -85,6 +87,7 @@
   gap: 8px;
   font-weight: 700;
   color: rgba(244, 244, 245, 0.90);
+  font-family: var(--font-body);
 }
 
 .input,
@@ -95,7 +98,7 @@
   color: #f4f4f5;
   padding: 12px;
   outline: none;
-  font-family: inherit;
+  font-family: var(--font-body);
   transition: border-color 160ms ease, background 160ms ease;
 }
 
@@ -103,6 +106,9 @@
   min-height: 260px;
   resize: vertical;
   line-height: 1.3rem;
+  white-space: pre-wrap;
+  overflow-y: auto;
+  padding-bottom: 52px;
 }
 
 .input:focus,
@@ -119,6 +125,15 @@
   color: rgba(244, 244, 245, 0.92);
 }
 
+.notice {
+  border: 1px solid rgba(3, 227, 252, 0.28);
+  background: rgba(3, 227, 252, 0.10);
+  padding: 10px 12px;
+  border-radius: 12px;
+  color: rgba(244, 244, 245, 0.92);
+  font-family: var(--font-body);
+}
+
 .primary,
 .secondary,
 .danger {
@@ -130,6 +145,7 @@
   background: rgba(255, 255, 255, 0.08);
   color: rgba(244, 244, 245, 0.92);
   transition: background 160ms ease, border-color 160ms ease;
+  font-family: var(--font-body);
 }
 
 .primary:hover,
