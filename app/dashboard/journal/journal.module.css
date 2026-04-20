@@ -47,11 +47,13 @@
 .title {
   margin: 0;
   font-size: 1.9rem;
+  font-family: var(--font-title);
   font-weight: 800;
 }
 
 .subtitle {
   margin: 8px 0 0;
+  font-family: var(--font-body);
   color: rgba(244, 244, 245, 0.70);
 }
 
@@ -69,6 +71,7 @@
   border: 1px solid rgba(255, 255, 255, 0.14);
   transition: background 160ms ease, border-color 160ms ease;
   color: rgba(244, 244, 245, 0.88);
+  font-family: var(--font-title);
   background: rgba(255, 255, 255, 0.08);
 }
 
@@ -123,19 +126,35 @@
   display: block;
   text-decoration: none;
   color: inherit;
-  background: #0a0c1c;
-  border: 1px solid rgba(255, 255, 255, 0.1);
-  border-top: 3px solid #03e3fc;
   border-radius: 14px;
-  padding: 14px;
+  padding: 28px 18px 18px;
+  background: #0a0c1c;
+  background-clip: padding-box;
+  -webkit-backface-visibility: hidden;
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  position: relative;
   transition: transform 160ms ease, box-shadow 160ms ease, border-color 160ms ease;
+  overflow: hidden;
+  box-sizing: border-box;
+  min-height: 110px;
+}
+
+.card::before {
+  content: "";
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 8px;
+  background: linear-gradient(135deg, #03e3fc, #6055f7);
+  border-top-left-radius: 14px;
+  border-top-right-radius: 14px;
 }
 
 .card:hover {
   transform: translateY(-2px);
   box-shadow: 0 10px 30px rgba(0, 0, 0, 0.4);
   border-color: rgba(255, 255, 255, 0.2);
-  border-top-color: #6055f7;
 }
 
 .cardTop {
@@ -208,4 +227,17 @@
   border: 1px solid rgba(255, 255, 255, 0.12);
   background: rgba(255, 255, 255, 0.06);
   color: rgba(244, 244, 245, 0.92);
+}
+
+@media (max-width: 520px) {
+  .primaryLink,
+  .secondaryLink {
+    padding: 8px 10px;
+    border-radius: 10px;
+    font-size: 0.85rem;
+  }
+
+  .actions {
+    gap: 8px;
+  }
 }
