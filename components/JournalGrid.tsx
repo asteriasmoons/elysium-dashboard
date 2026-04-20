@@ -36,7 +36,7 @@ export function JournalGrid({
     <div className={styles.grid}>
       {entries.map((e) => {
         const preview = e.entry?.slice(0, 120) ?? "";
-        const entryUrl = `/dashboard/journal/${e.id}${guildId ? `?guildId=${guildId}` : ''}`;
+        const entryUrl = `/dashboard/journal/${e.id}/view${guildId ? `?guildId=${guildId}` : ''}`;
 
         return (
           <Link
