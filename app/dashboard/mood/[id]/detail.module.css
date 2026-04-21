@@ -91,9 +91,9 @@
   height: 36px;
   padding: 0 14px;
   border-radius: 8px;
-  background: rgba(255, 107, 107, 0.15);
-  border: 1px solid rgba(255, 107, 107, 0.3);
-  color: #ff9898;
+  background: rgba(255, 120, 200, 0.15);
+  border: 1px solid rgba(255, 120, 200, 0.3);
+  color: #ff9ed6;
   font-size: 13px;
   font-weight: 600;
   cursor: pointer;
@@ -101,7 +101,7 @@
 }
 
 .delete:hover:not(:disabled) {
-  background: rgba(255, 107, 107, 0.25);
+    background: rgba(255, 120, 200, 0.25);
 }
 
 .delete:disabled {

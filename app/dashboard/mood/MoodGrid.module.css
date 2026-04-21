@@ -163,6 +163,7 @@
   margin: 0;
   font-size: 0.98rem;
   font-weight: 780;
+  font-family: var(--font-title);
   color: rgba(244, 244, 245, 0.95);
   letter-spacing: 0.2px;
 }
