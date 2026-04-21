@@ -2,6 +2,7 @@
 
 import { useEffect, useMemo, useRef, useState } from "react";
 import Link from "next/link";
+import { ICONS } from "@/lib/icons";
 import Image from "next/image";
 import { useParams, useRouter } from "next/navigation";
 import styles from "../habits.module.css";
@@ -453,7 +454,7 @@ export default function EditHabitPage() {
                   onClick={() => setShowEmojiPicker((prev) => !prev)}
                 >
                   <Image
-                    src="/img/icons/face.svg"
+                    src={ICONS.face}
                     alt="emoji picker"
                     width={20}
                     height={20}
