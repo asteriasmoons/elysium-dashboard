@@ -72,6 +72,7 @@
   color: rgba(255, 255, 255, 0.85);
   font-size: 13px;
   font-weight: 600;
+  font-family: var(--font-title);
   cursor: pointer;
   transition: background 0.15s ease;
   text-decoration: none;
@@ -95,6 +96,7 @@
   border: 1px solid rgba(255, 255, 255, 0.12);
   color: rgba(244, 244, 245, 0.92);
   font-weight: 700;
+  font-family: var(--font-title);
   text-decoration: none;
   transition: all 160ms ease;
 }
@@ -235,6 +237,7 @@
   display: inline-block;
   text-decoration: none;
   font-weight: 800;
+  font-family: var(--font-title);
   padding: 10px 14px;
   border-radius: 12px;
   border: 1px solid rgba(255, 255, 255, 0.12);
@@ -244,4 +247,24 @@
 
 .emptyCta:hover {
   background: rgba(255, 255, 255, 0.10);
+}
+
+/* MOBILE BUTTONS */
+@media (max-width: 520px) {
+  .secondary,
+  .actionButton,
+  .emptyCta {
+    padding: 8px 10px;
+    border-radius: 10px;
+    font-size: 0.85rem;
+  }
+
+  .secondary {
+    height: 32px;
+  }
+
+  .actions,
+  .buttonRow {
+    gap: 8px;
+  }
 }
