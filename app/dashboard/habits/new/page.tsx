@@ -348,44 +348,49 @@ export default function NewHabitPage() {
                 />
 
                 <button
-                  type="button"
-                  className={styles.emojiButton}
-                  onClick={() => setShowEmojiPicker((prev) => !prev)}
-                >
-                  <Image
-                    src="/icons/smile.svg"
-                    alt="emoji picker"
-                    width={20}
-                    height={20}
-                    unoptimized
-                  />
-                </button>
+  type="button"
+  className={styles.emojiButton}
+  onMouseDown={(e) => e.preventDefault()}
+  onClick={() => setShowEmojiPicker((prev) => !prev)}
+>
+  <Image
+    src="/icons/face.svg"
+    alt="emoji picker"
+    width={20}
+    height={20}
+    unoptimized
+  />
+</button>
 
-                {showEmojiPicker && (
-                  <div className={styles.emojiPopover}>
-                    {emojis.map((emoji) => {
-                      const emojiTag = `<${emoji.animated ? "a" : ""}:${emoji.name}:${emoji.id}>`;
+{showEmojiPicker && (
+  <div
+    className={styles.emojiPopover}
+    onMouseDown={(e) => e.preventDefault()}
+  >
+    {emojis.map((emoji) => {
+      const emojiTag = `<${emoji.animated ? "a" : ""}:${emoji.name}:${emoji.id}>`;
 
-                      return (
-                        <button
-                          key={emoji.id}
-                          type="button"
-                          className={styles.emojiItem}
-                          onClick={() => insertEmojiTag(emojiTag)}
-                          title={emoji.name}
-                        >
-                          <Image
-                            src={getEmojiSrc(emoji.id, emoji.animated)}
-                            alt={emoji.name}
-                            width={28}
-                            height={28}
-                            unoptimized
-                          />
-                        </button>
-                      );
-                    })}
-                  </div>
-                )}
+      return (
+        <button
+          key={emoji.id}
+          type="button"
+          className={styles.emojiItem}
+          onMouseDown={(e) => e.preventDefault()}
+          onClick={() => insertEmojiTag(emojiTag)}
+          title={emoji.name}
+        >
+          <Image
+            src={getEmojiSrc(emoji.id, emoji.animated)}
+            alt={emoji.name}
+            width={28}
+            height={28}
+            unoptimized
+          />
+        </button>
+      );
+    })}
+  </div>
+)}
               </div>
             </div>
 
