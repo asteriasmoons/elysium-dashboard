@@ -27,17 +27,16 @@ export default async function ScheduleHabitPage({ params }: PageProps) {
 
   const safeHabit = {
     _id: String(habit._id),
-    title: habit.title,
+    name: habit.name,
     description: habit.description,
     hour: habit.hour,
     minute: habit.minute,
-    zone: habit.zone,
+    timezone: habit.timezone,
     frequency: habit.frequency ?? "daily",
     dayOfWeek:
       typeof habit.dayOfWeek === "number" ? habit.dayOfWeek : null,
-    streak: typeof habit.streak === "number" ? habit.streak : 0,
-    lastCompletedAt: habit.lastCompletedAt
-      ? new Date(habit.lastCompletedAt).toISOString()
+    createdAt: habit.createdAt
+      ? new Date(habit.createdAt).toISOString()
       : null,
   };
 
@@ -70,11 +69,11 @@ export default async function ScheduleHabitPage({ params }: PageProps) {
     await updateHabit(
       currentUserId,
       id,
-      safeHabit.title,
+      safeHabit.name,
       safeHabit.description,
       hour,
       minute,
-      safeHabit.zone,
+      safeHabit.timezone,
       {
         frequency,
         dayOfWeek,

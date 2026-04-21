@@ -7,15 +7,14 @@ import styles from "../../habits.module.css";
 
 type HabitData = {
   _id: string;
-  title: string;
+  name: string;
   description: string;
   hour: number;
   minute: number;
-  zone: string;
+  timezone: string;
   frequency: "daily" | "weekly";
   dayOfWeek: number | null;
-  streak: number;
-  lastCompletedAt: string | null;
+  createdAt: string | null;
 };
 
 type Props = {
@@ -138,8 +137,8 @@ export default function ScheduleHabitClient({
   const [selectedHour, setSelectedHour] = useState(habit.hour);
   const [selectedMinute, setSelectedMinute] = useState(habit.minute);
   const [selectedDate, setSelectedDate] = useState(() => {
-    if (habit.lastCompletedAt) {
-      const parsed = new Date(habit.lastCompletedAt);
+    if (habit.createdAt) {
+      const parsed = new Date(habit.createdAt);
       if (!Number.isNaN(parsed.getTime())) {
         return parsed.toISOString().slice(0, 10);
       }
@@ -289,13 +288,11 @@ export default function ScheduleHabitClient({
           <div className={`${styles.card} ${styles.cardWide}`}>
             <div className={styles.cardTop}>
               <h2 className={styles.cardTitle}>Habit</h2>
-              <span className={styles.activeBadge}>
-                {habit.streak} streak
-              </span>
+              <span className={styles.activeBadge}>Active</span>
             </div>
 
             <p className={styles.cardDescription}>
-              {habit.title ? renderDiscordPreview(habit.title) : "No title"}
+              {habit.name ? renderDiscordPreview(habit.name) : "No name"}
             </p>
 
             {habit.description ? (

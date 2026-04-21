@@ -10,15 +10,14 @@ type HabitFrequency = "daily" | "weekly";
 
 type HabitData = {
   _id: string;
-  title: string;
+  name: string;
   description: string;
   hour: number;
   minute: number;
-  zone: string;
+  timezone: string;
   frequency: HabitFrequency;
   dayOfWeek: number | null;
-  streak: number;
-  lastCompletedAt: string | null;
+  createdAt: string | null;
 };
 
 const WEEKDAY_OPTIONS = [
@@ -30,7 +29,6 @@ const WEEKDAY_OPTIONS = [
   { value: 5, label: "Friday" },
   { value: 6, label: "Saturday" },
 ] as const;
-
 
 function getEmojiSrc(emojiId: string, animated?: boolean): string {
   const ext = animated ? "gif" : "png";
@@ -186,14 +184,14 @@ export default function EditHabitPage() {
   const [deleting, setDeleting] = useState(false);
   const [error, setError] = useState("");
 
-  const [title, setTitle] = useState("");
+  const [name, setName] = useState("");
   const [description, setDescription] = useState("");
   const [showEmojiPicker, setShowEmojiPicker] = useState(false);
   const [emojis, setEmojis] = useState<DiscordEmoji[]>([]);
   const editorRef = useRef<HTMLDivElement | null>(null);
   const [hour, setHour] = useState(9);
   const [minute, setMinute] = useState(0);
-  const [zone, setZone] = useState("America/Chicago");
+  const [timezone, setTimezone] = useState("America/Chicago");
   const [frequency, setFrequency] = useState<HabitFrequency>("daily");
   const [dayOfWeek, setDayOfWeek] = useState<number>(1);
   const [streak, setStreak] = useState(0);
@@ -274,14 +272,14 @@ export default function EditHabitPage() {
 
         const habit = data as HabitData;
 
-        setTitle(habit.title ?? "");
+        setName(habit.name ?? "");
         setDescription(habit.description ?? "");
         setHour(Number(habit.hour ?? 9));
         setMinute(Number(habit.minute ?? 0));
-        setZone(habit.zone ?? "America/Chicago");
+        setTimezone(habit.timezone ?? "America/Chicago");
         setFrequency(habit.frequency ?? "daily");
         setDayOfWeek(typeof habit.dayOfWeek === "number" ? habit.dayOfWeek : 1);
-        setStreak(Number(habit.streak ?? 0));
+        setStreak(0);
       } catch (err) {
         if (!cancelled) {
           setError(err instanceof Error ? err.message : "Failed to load habit");
@@ -324,11 +322,11 @@ export default function EditHabitPage() {
           "Content-Type": "application/json",
         },
         body: JSON.stringify({
-          title,
+          name,
           description,
           hour,
           minute,
-          zone,
+          timezone,
           frequency,
           dayOfWeek: frequency === "weekly" ? dayOfWeek : null,
         }),
@@ -412,18 +410,19 @@ export default function EditHabitPage() {
         <div className={`${styles.panel} ${styles.cardWide}`}>
           <form onSubmit={handleSubmit} className={styles.formStack}>
             <div className={styles.fieldGroup}>
-              <label className={styles.label} htmlFor="title">
-                Habit Title
+              <label className={styles.label} htmlFor="name">
+                Habit Name
               </label>
               <input
-                id="title"
+                id="name"
                 className={styles.input}
-                value={title}
-                onChange={(e) => setTitle(e.target.value)}
+                value={name}
+                onChange={(e) => setName(e.target.value)}
                 placeholder="Drink water <:water:123456789012345678>"
                 autoComplete="off"
               />
             </div>
+
             <div className={styles.fieldGroup}>
               <label className={styles.label}>Description</label>
 
@@ -578,14 +577,14 @@ export default function EditHabitPage() {
             </div>
 
             <div className={styles.fieldGroup}>
-              <label className={styles.label} htmlFor="zone">
+              <label className={styles.label} htmlFor="timezone">
                 Time Zone
               </label>
               <input
-                id="zone"
+                id="timezone"
                 className={styles.input}
-                value={zone}
-                onChange={(e) => setZone(e.target.value)}
+                value={timezone}
+                onChange={(e) => setTimezone(e.target.value)}
                 placeholder="America/Chicago"
                 autoComplete="off"
               />
@@ -597,12 +596,12 @@ export default function EditHabitPage() {
                 <span className={styles.activeBadge}>{streak} streak</span>
               </div>
 
-              {title.trim() ? (
+              {name.trim() ? (
                 <p className={styles.cardDescription}>
-                  {renderDiscordPreview(title)}
+                  {renderDiscordPreview(name)}
                 </p>
               ) : (
-                <p className={styles.cardDescriptionMuted}>No title yet</p>
+                <p className={styles.cardDescriptionMuted}>No name yet</p>
               )}
 
               {description.trim() ? (
