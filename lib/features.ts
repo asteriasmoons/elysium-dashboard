@@ -3,6 +3,7 @@ export type FeatureKey =
   | "habit-tracker"
   | "mood-tracker"
   | "reading"
+  | "embeds"
   | "reminders"
   | "prompts"
   | "sprints"
@@ -51,6 +52,14 @@ export const FEATURES: FeatureItem[] = [
     title: "Reading",
     description: "Buddy reads, sprints, and reading stats.",
     href: (guildId) => `/dashboard/${guildId}/reading`,
+    scope: "guild",
+    status: "planned",
+  },
+  {
+    key: "embeds",
+    title: "Embed Creator",
+    description: "Create, edit and send embeds to discord",
+    href: (guildId) => `/dashboard/${guildId}/embeds`,
     scope: "guild",
     status: "planned",
   },
