@@ -416,10 +416,18 @@
   padding: 0 18px;
   border-radius: 999px;
   border: 1px solid rgba(255, 255, 255, 0.22);
-  background: linear-gradient(180deg, rgba(255, 255, 255, 0.22) 0%, rgba(255, 255, 255, 0.10) 48%, rgba(255, 255, 255, 0.06) 100%);
+  background: linear-gradient(
+    180deg,
+    rgba(255, 255, 255, 0.22) 0%,
+    rgba(255, 255, 255, 0.10) 48%,
+    rgba(255, 255, 255, 0.06) 100%
+  );
   backdrop-filter: blur(16px);
   -webkit-backdrop-filter: blur(16px);
-  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.30), inset 0 -1px 0 rgba(255, 255, 255, 0.08), 0 10px 30px rgba(0, 0, 0, 0.18);
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.30),
+    inset 0 -1px 0 rgba(255, 255, 255, 0.08),
+    0 10px 30px rgba(0, 0, 0, 0.18);
   color: rgba(255, 255, 255, 0.96);
   font-size: 0.95rem;
   font-weight: 500;
@@ -430,17 +438,20 @@
   -moz-appearance: none;
   outline: none;
   cursor: pointer;
-  background-image: linear-gradient(180deg, rgba(255, 255, 255, 0.22) 0%, rgba(255, 255, 255, 0.10) 48%, rgba(255, 255, 255, 0.06) 100%), url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='20' height='20' viewBox='0 0 20 20' fill='none'%3E%3Cpath d='M5.25 7.5L10 12.25L14.75 7.5' stroke='rgba(255,255,255,0.92)' stroke-width='1.8' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E");
-  background-repeat: no-repeat, no-repeat;
-  background-position: 0 0, right 16px center;
-  background-size: auto, 18px;
-  padding-right: 48px;
 }
 
 .glassSelect:hover {
   border-color: rgba(255, 255, 255, 0.30);
-  background-image: linear-gradient(180deg, rgba(255, 255, 255, 0.28) 0%, rgba(255, 255, 255, 0.12) 48%, rgba(255, 255, 255, 0.07) 100%), url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='20' height='20' viewBox='0 0 20 20' fill='none'%3E%3Cpath d='M5.25 7.5L10 12.25L14.75 7.5' stroke='rgba(255,255,255,0.92)' stroke-width='1.8' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E");
-  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.34), inset 0 -1px 0 rgba(255, 255, 255, 0.10), 0 12px 34px rgba(0, 0, 0, 0.22);
+  background: linear-gradient(
+    180deg,
+    rgba(255, 255, 255, 0.28) 0%,
+    rgba(255, 255, 255, 0.12) 48%,
+    rgba(255, 255, 255, 0.07) 100%
+  );
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.34),
+    inset 0 -1px 0 rgba(255, 255, 255, 0.10),
+    0 12px 34px rgba(0, 0, 0, 0.22);
 }
 
 .glassSelect:focus {
@@ -463,14 +474,45 @@
   position: absolute;
   right: 10px;
   bottom: 10px;
+  z-index: 20;
+  width: 34px;
+  height: 34px;
+  padding: 0;
   background: rgba(255, 255, 255, 0.08);
   border: 1px solid rgba(255, 255, 255, 0.12);
   border-radius: 10px;
-  padding: 6px;
   cursor: pointer;
   display: inline-flex;
   align-items: center;
   justify-content: center;
+  line-height: 0;
+}
+
+.emojiButton:hover {
+  background: rgba(255, 255, 255, 0.14);
+}
+
+.emojiButton img {
+  width: 18px;
+  height: 18px;
+  display: block;
+  pointer-events: none;
+}
+
+/* MOBILE EMOJI BUTTON */
+@media (max-width: 720px) {
+  .emojiButton {
+    right: 8px;
+    bottom: 8px;
+    width: 30px;
+    height: 30px;
+    border-radius: 8px;
+  }
+
+  .emojiButton img {
+    width: 16px;
+    height: 16px;
+  }
 }
 
 .emojiPopover {
@@ -946,17 +988,5 @@
   .dayButton {
     min-height: 34px;
     font-size: 0.82rem;
-  }
-
-  .emojiButton {
-    right: 8px;
-    bottom: 8px;
-    padding: 5px;
-    border-radius: 8px;
-  }
-
-  .emojiButton img {
-    width: 16px;
-    height: 16px;
   }
 }
