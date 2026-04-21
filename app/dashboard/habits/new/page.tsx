@@ -353,7 +353,7 @@ export default function NewHabitPage() {
                   onClick={() => setShowEmojiPicker((prev) => !prev)}
                 >
                   <Image
-                    src="/icons/xsmile.svg"
+                    src="/icons/smile.svg"
                     alt="emoji picker"
                     width={20}
                     height={20}
