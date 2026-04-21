@@ -88,6 +88,7 @@
   position: relative;
   border: 1px solid rgba(255, 255, 255, 0.1);
   box-shadow: 0 10px 30px rgba(0, 0, 0, 0.35);
+  overflow: visible;
 }
 
 .discordPreviewShell {
@@ -212,22 +213,17 @@
   display: flex;
   flex-direction: column;
   gap: 18px;
+  min-width: 0;
 }
 
 .fieldGroup {
   display: flex;
   flex-direction: column;
   gap: 8px;
-}
-
-.label {
-  font-size: 0.95rem;
-  font-weight: 700;
-  color: rgba(244, 244, 245, 0.92);
+  min-width: 0;
 }
 
 .input,
-.textarea,
 .glassSelect {
   width: 100%;
   box-sizing: border-box;
@@ -242,25 +238,41 @@
   transition: border-color 160ms ease, box-shadow 160ms ease, background 160ms ease;
 }
 
-.input::placeholder,
-.textarea::placeholder {
+.textarea {
+  display: block;
+  width: 100%;
+  box-sizing: border-box;
+  border-radius: 14px;
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  background: #060817;
+  color: #f4f4f5;
+  padding: 12px 14px;
+  outline: none;
+  font: inherit;
+  font-family: var(--font-body);
+  line-height: 1.5;
+  min-height: 180px;
+  height: auto;
+  max-width: 100%;
+  overflow-x: hidden;
+  overflow-y: auto;
+  white-space: pre-wrap;
+  overflow-wrap: break-word;
+  word-break: break-word;
+  transition: border-color 160ms ease, box-shadow 160ms ease, background 160ms ease;
+}
+
+.input::placeholder {
   color: rgba(244, 244, 245, 0.38);
 }
 
 .input:focus,
+.glassSelect:focus,
 .textarea:focus,
-.glassSelect:focus {
+.textarea:focus-visible {
   border-color: rgba(3, 227, 252, 0.55);
   box-shadow: 0 0 0 3px rgba(3, 227, 252, 0.12);
   background: #090c1d;
-}
-
-.textarea {
-  min-height: 180px;
-  resize: vertical;
-  line-height: 1.5;
-  white-space: pre-wrap;
-  overflow-wrap: break-word;
 }
 
 .rowFields {
