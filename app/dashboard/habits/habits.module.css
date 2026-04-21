@@ -189,11 +189,13 @@
 .cardDescription {
   font-size: 0.86rem;
   color: rgba(244, 244, 245, 0.65);
+  font-family: var(--font-body);
 }
 
 .cardDescriptionMuted {
   font-size: 0.86rem;
   color: rgba(244, 244, 245, 0.4);
+  font-family: var(--font-body);
 }
 
 .cardTime {
@@ -304,6 +306,7 @@
   color: #f4f4f5;
   padding: 12px 14px;
   font: inherit;
+  font-family: var(--font-body);
   box-sizing: border-box;
   outline: none;
   transition: border-color 160ms ease, box-shadow 160ms ease, background 160ms ease;
@@ -313,6 +316,7 @@
   min-height: 160px;
   resize: vertical;
   line-height: 1.5;
+  font-family: var(--font-body);
 }
 
 .input::placeholder,
