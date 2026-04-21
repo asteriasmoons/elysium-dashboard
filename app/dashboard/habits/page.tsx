@@ -74,6 +74,7 @@ type Habit = {
 export default function HabitsPage() {
   const [habits, setHabits] = useState<Habit[]>([]);
   const [loading, setLoading] = useState(true);
+  const [confirmDeleteId, setConfirmDeleteId] = useState<string | null>(null);
 
   useEffect(() => {
     fetchHabits();
@@ -98,6 +99,7 @@ export default function HabitsPage() {
     });
 
     fetchHabits();
+    setConfirmDeleteId(null);
   }
 
   const totalHabits = habits.length;
@@ -187,13 +189,38 @@ export default function HabitsPage() {
                     Edit
                   </Link>
 
-                  <form action={deleteHabitAction}>
-                    <input type="hidden" name="habitId" value={habit._id} />
-                    <button type="submit" className={styles.deleteButton}>
-                      Delete
-                    </button>
-                  </form>
+                  <button
+                    type="button"
+                    className={styles.deleteButton}
+                    onClick={() => setConfirmDeleteId(habit._id)}
+                  >
+                    Delete
+                  </button>
                 </div>
+                {confirmDeleteId === habit._id && (
+                  <div className={styles.confirmBox}>
+                    <p className={styles.cardDescription}>
+                      Are you sure you want to delete this habit?
+                    </p>
+
+                    <div className={styles.confirmActions}>
+                      <form action={deleteHabitAction}>
+                        <input type="hidden" name="habitId" value={habit._id} />
+                        <button type="submit" className={styles.deleteButton}>
+                          Confirm Delete
+                        </button>
+                      </form>
+
+                      <button
+                        type="button"
+                        className={styles.primaryLink}
+                        onClick={() => setConfirmDeleteId(null)}
+                      >
+                        Cancel
+                      </button>
+                    </div>
+                  </div>
+                )}
               </div>
             ))}
           </div>
