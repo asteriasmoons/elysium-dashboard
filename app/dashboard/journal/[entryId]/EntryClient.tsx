@@ -406,7 +406,7 @@ export default function EntryClient({
                   height={18}
                 />
               </button>
-
+ 
               {showEmojiPicker ? (
                 <div
                   ref={emojiPickerRef}
