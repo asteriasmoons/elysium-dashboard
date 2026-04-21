@@ -5,12 +5,8 @@ export type FeatureKey =
   | "reading"
   | "reminders"
   | "prompts"
-  | "tags"
-  | "logs"
-  | "automation"
-  | "guild-settings"
-  | "permissions"
-  | "integrations";
+  | "sprints"
+  | "buddy-reads";
 
 export type FeatureStatus = "planned" | "in-progress" | "ready";
 
@@ -38,9 +34,9 @@ export const FEATURES: FeatureItem[] = [
     key: "habit-tracker",
     title: "Habit Tracker",
     description: "Habits, streaks, and accountability tools.",
-    href: (guildId) => `/dashboard/${guildId}/habits`,
-    scope: "guild",
-    status: "planned",
+    href: "/dashboard/habits",
+    scope: "user",
+    status: "ready",
   },
   {
     key: "mood-tracker",
@@ -59,51 +55,27 @@ export const FEATURES: FeatureItem[] = [
     status: "planned",
   },
   {
+    key: "sprints",
+    title: "Sprints",
+    description: "Run timed reading sessions with others.",
+    href: (guildId) => `/dashboard/${guildId}/sprints`,
+    scope: "guild",
+    status: "planned",
+  },
+  {
+    key: "buddy-reads",
+    title: "Buddy Reads",
+    description: "Track shared reading progress with others.",
+    href: (guildId) => `/dashboard/${guildId}/buddy-reads`,
+    scope: "guild",
+    status: "planned",
+  },
+  {
     key: "reminders",
     title: "Reminders",
     description: "Create, edit, and audit scheduled reminders.",
     href: "/dashboard/reminders",
-    scope: "guild",
+    scope: "user",
     status: "ready",
-  },
-  {
-    key: "logs",
-    title: "Activity Log",
-    description: "See what the bot has been doing recently.",
-    href: (guildId) => `/dashboard/${guildId}/logs`,
-    scope: "guild",
-    status: "planned",
-  },
-  {
-    key: "automation",
-    title: "Automation",
-    description: "Rules, triggers, and optional automations.",
-    href: (guildId) => `/dashboard/${guildId}/automation`,
-    scope: "guild",
-    status: "planned",
-  },
-  {
-    key: "integrations",
-    title: "Integrations",
-    description: "GitHub feeds and other external links.",
-    href: (guildId) => `/dashboard/${guildId}/integrations`,
-    scope: "guild",
-    status: "planned",
-  },
-  {
-    key: "guild-settings",
-    title: "Guild Settings",
-    description: "Core configuration for channels and features.",
-    href: (guildId) => `/dashboard/${guildId}/settings`,
-    scope: "guild",
-    status: "planned",
-  },
-  {
-    key: "permissions",
-    title: "Permissions",
-    description: "Who can use what, role rules, and access control.",
-    href: (guildId) => `/dashboard/${guildId}/permissions`,
-    scope: "guild",
-    status: "planned",
   },
 ];
