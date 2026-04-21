@@ -74,7 +74,6 @@ type Habit = {
 export default function HabitsPage() {
   const [habits, setHabits] = useState<Habit[]>([]);
   const [loading, setLoading] = useState(true);
-  const [deleteTarget, setDeleteTarget] = useState<Habit | null>(null);
 
   useEffect(() => {
     fetchHabits();
@@ -90,14 +89,14 @@ export default function HabitsPage() {
     }
   }
 
-  async function handleDelete() {
-    if (!deleteTarget) return;
+  async function deleteHabitAction(formData: FormData) {
+    const habitId = String(formData.get("habitId") ?? "").trim();
+    if (!habitId) return;
 
-    await fetch(`/api/habits/${deleteTarget._id}`, {
+    await fetch(`/api/habits/${habitId}`, {
       method: "DELETE",
     });
 
-    setDeleteTarget(null);
     fetchHabits();
   }
 
@@ -188,46 +187,18 @@ export default function HabitsPage() {
                     Edit
                   </Link>
 
-                  <button
-                    className={styles.deleteButton}
-                    onClick={() => setDeleteTarget(habit)}
-                  >
-                    Delete
-                  </button>
+                  <form action={deleteHabitAction}>
+                    <input type="hidden" name="habitId" value={habit._id} />
+                    <button type="submit" className={styles.deleteButton}>
+                      Delete
+                    </button>
+                  </form>
                 </div>
               </div>
             ))}
           </div>
         )}
       </div>
-
-      {/* CUSTOM DELETE MODAL */}
-      {deleteTarget && (
-        <div className={styles.page}>
-          <div className={styles.container}>
-            <div className={styles.panel}>
-              <h2 className={styles.title}>Delete Habit</h2>
-
-              <p className={styles.cardDescription}>
-                Are you sure you want to delete &quot;{renderDiscordPreview(deleteTarget.name)}&quot;?
-              </p>
-
-              <div className={styles.formActions}>
-                <button className={styles.deleteButton} onClick={handleDelete}>
-                  Confirm Delete
-                </button>
-
-                <button
-                  className={styles.primaryLink}
-                  onClick={() => setDeleteTarget(null)}
-                >
-                  Cancel
-                </button>
-              </div>
-            </div>
-          </div>
-        </div>
-      )}
     </div>
   );
 }

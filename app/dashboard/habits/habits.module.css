@@ -468,10 +468,25 @@
   color: white;
 }
 
+/* Button container */
 .formActions {
   display: flex;
   justify-content: flex-start;
-  gap: 10px;
+}
+
+/* Mobile stacking */
+@media (max-width: 720px) {
+  .pickerRow {
+    grid-template-columns: 1fr;
+  }
+
+  .formActions {
+    width: 100%;
+  }
+
+  .formActions .primaryLink {
+    width: 100%;
+  }
 }
 
 .emojiButton {
