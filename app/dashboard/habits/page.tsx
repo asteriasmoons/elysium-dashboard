@@ -62,13 +62,13 @@ function renderDiscordPreview(text: string) {
 
 type Habit = {
   _id: string;
-  title: string;
+  name: string;
   description: string;
   hour: number;
   minute: number;
   frequency: "daily" | "weekly";
   dayOfWeek?: number | null;
-  streak: number;
+  streak?: number;
 };
 
 export default function HabitsPage() {
@@ -154,11 +154,11 @@ export default function HabitsPage() {
             {habits.map((habit) => (
               <div key={habit._id} className={styles.card}>
                 <div className={styles.cardTop}>
-                  <h3 className={styles.cardTitle}>{renderDiscordPreview(habit.title)}</h3>
+                  <h3 className={styles.cardTitle}>{renderDiscordPreview(habit.name)}</h3>
 
-                  {habit.streak > 0 && (
+                  {(habit.streak ?? 0) > 0 && (
                     <span className={styles.activeBadge}>
-                      {habit.streak} streak
+                      {habit.streak ?? 0} streak
                     </span>
                   )}
                 </div>
@@ -209,7 +209,7 @@ export default function HabitsPage() {
               <h2 className={styles.title}>Delete Habit</h2>
 
               <p className={styles.cardDescription}>
-                Are you sure you want to delete &quot;{renderDiscordPreview(deleteTarget.title)}&quot;?
+                Are you sure you want to delete &quot;{renderDiscordPreview(deleteTarget.name)}&quot;?
               </p>
 
               <div className={styles.formActions}>

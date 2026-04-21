@@ -165,14 +165,14 @@ function formatTimePreview(hour: number, minute: number) {
 export default function NewHabitPage() {
   const router = useRouter();
 
-  const [title, setTitle] = useState("");
+  const [name, setName] = useState("");
   const [description, setDescription] = useState("");
   const [showEmojiPicker, setShowEmojiPicker] = useState(false);
   const [emojis, setEmojis] = useState<DiscordEmoji[]>([]);
   const editorRef = useRef<HTMLDivElement | null>(null);
   const [hour, setHour] = useState(9);
   const [minute, setMinute] = useState(0);
-  const [zone, setZone] = useState(
+  const [timezone, setTimezone] = useState(
     Intl.DateTimeFormat().resolvedOptions().timeZone || "America/Chicago",
   );
   const [frequency, setFrequency] = useState<HabitFrequency>("daily");
@@ -264,11 +264,11 @@ export default function NewHabitPage() {
           "Content-Type": "application/json",
         },
         body: JSON.stringify({
-          title,
+          name,
           description,
           hour,
           minute,
-          zone,
+          timezone,
           frequency,
           dayOfWeek: frequency === "weekly" ? dayOfWeek : null,
         }),
@@ -310,14 +310,14 @@ export default function NewHabitPage() {
         <div className={`${styles.panel} ${styles.cardWide}`}>
           <form onSubmit={handleSubmit} className={styles.formStack}>
             <div className={styles.fieldGroup}>
-              <label className={styles.label} htmlFor="title">
-                Habit Title
+              <label className={styles.label} htmlFor="name">
+                Habit Name
               </label>
               <input
-                id="title"
+                id="name"
                 className={styles.input}
-                value={title}
-                onChange={(e) => setTitle(e.target.value)}
+                value={name}
+                onChange={(e) => setName(e.target.value)}
                 placeholder="Drink water <:water:123456789012345678>"
                 autoComplete="off"
               />
@@ -477,14 +477,14 @@ export default function NewHabitPage() {
             </div>
 
             <div className={styles.fieldGroup}>
-              <label className={styles.label} htmlFor="zone">
+              <label className={styles.label} htmlFor="timezone">
                 Time Zone
               </label>
               <input
-                id="zone"
+                id="timezone"
                 className={styles.input}
-                value={zone}
-                onChange={(e) => setZone(e.target.value)}
+                value={timezone}
+                onChange={(e) => setTimezone(e.target.value)}
                 placeholder="America/Chicago"
                 autoComplete="off"
               />
@@ -496,12 +496,12 @@ export default function NewHabitPage() {
                 <span className={styles.activeBadge}>{scheduleLabel}</span>
               </div>
 
-              {title.trim() ? (
+              {name.trim() ? (
                 <p className={styles.cardDescription}>
-                  {renderDiscordPreview(title)}
+                  {renderDiscordPreview(name)}
                 </p>
               ) : (
-                <p className={styles.cardDescriptionMuted}>No title yet</p>
+                <p className={styles.cardDescriptionMuted}>No name yet</p>
               )}
 
               {description.trim() ? (
