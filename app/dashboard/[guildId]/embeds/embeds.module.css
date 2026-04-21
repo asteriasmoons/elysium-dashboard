@@ -1,0 +1,172 @@
+.page {
+  min-height: 100dvh;
+  padding: 40px 24px;
+  background-color: #05060a;
+  background-image: linear-gradient(135deg, #03e3fc, #6055f7);
+  position: relative;
+  overflow: clip;
+  color: #f4f4f5;
+}
+
+.container {
+  max-width: 1120px;
+  margin: 0 auto;
+}
+
+/* HEADER */
+.headerRow {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-end;
+  margin-bottom: 20px;
+}
+
+.title {
+  font-size: 1.9rem;
+  font-weight: 800;
+}
+
+.subtitle {
+  margin-top: 6px;
+  color: rgba(255, 255, 255, 0.6);
+}
+
+.actions {
+  display: flex;
+  gap: 10px;
+}
+
+/* BUTTONS */
+.primaryLink {
+  padding: 10px 14px;
+  border-radius: 12px;
+  background: rgba(255, 255, 255, 0.08);
+  text-decoration: none;
+  color: white;
+}
+
+.editLink {
+  padding: 10px 14px;
+  border-radius: 12px;
+  background: linear-gradient(135deg, #03dbfc, #7d19f7);
+  text-decoration: none;
+  color: white;
+}
+
+.deleteButton {
+  padding: 10px 14px;
+  border-radius: 12px;
+  border: none;
+  background: #ff4d6d;
+  color: white;
+  cursor: pointer;
+}
+
+/* GRID */
+.grid {
+  display: grid;
+  gap: 14px;
+}
+
+@media (min-width: 720px) {
+  .grid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}
+
+@media (min-width: 1024px) {
+  .grid {
+    grid-template-columns: repeat(3, 1fr);
+  }
+}
+
+/* CARD */
+.card {
+  background: #0a0c1c;
+  border-radius: 14px;
+  padding: 16px;
+  position: relative;
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.35);
+}
+
+.discordPreviewShell {
+  margin-top: 10px;
+}
+
+.discordEmbed {
+  border-left: 4px solid #5865F2;
+  background: #2b2d31;
+  border-radius: 4px;
+  padding: 0;
+  overflow: hidden;
+}
+
+.discordEmbedInner {
+  padding: 12px 14px;
+  min-height: 72px;
+}
+
+/* TOP */
+.cardTop {
+  margin-bottom: 6px;
+}
+
+.cardTitle {
+  font-weight: 700;
+}
+
+/* PREVIEW */
+.preview {
+  margin-top: 8px;
+}
+
+.previewTitle {
+  margin: 0 0 6px;
+  color: #ffffff;
+  font-size: 1rem;
+  font-weight: 600;
+  line-height: 1.25;
+}
+
+.previewDescription {
+  margin: 0;
+  font-size: 0.92rem;
+  line-height: 1.35;
+  color: #dbdee1;
+  white-space: pre-wrap;
+  word-break: break-word;
+  font-family: var(--font-body);
+}
+
+.previewMuted {
+  margin: 0;
+  font-size: 0.92rem;
+  line-height: 1.35;
+  color: #949ba4;
+  font-family: var(--font-body);
+}
+
+/* ACTIONS */
+.cardActions {
+  margin-top: 12px;
+  display: flex;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+
+/* EMPTY */
+.emptyState {
+  padding: 20px;
+  border: 1px dashed rgba(255, 255, 255, 0.2);
+  border-radius: 14px;
+}
+
+.emptyTitle {
+  font-weight: 700;
+}
+
+.emptyText {
+  margin-top: 6px;
+  opacity: 0.6;
+}
