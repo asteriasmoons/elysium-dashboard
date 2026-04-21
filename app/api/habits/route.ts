@@ -28,11 +28,11 @@ export async function POST(req: Request) {
 
   const id = await createHabit(
     userId,
-    body.title,
+    body.name,
     body.description,
     Number(body.hour),
     Number(body.minute),
-    body.zone,
+    body.timezone,
     {
       frequency: body.frequency,
       dayOfWeek: body.dayOfWeek ?? null,

@@ -9,6 +9,7 @@ type RouteContext = {
 
 export async function GET(_: Request, { params }: RouteContext) {
   const session = await auth();
+
   if (!session) {
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
   }
@@ -23,41 +24,41 @@ export async function GET(_: Request, { params }: RouteContext) {
   }
 
   return NextResponse.json({
-    _id: String(habit._id),
+    _id: habit._id,
     userId: habit.userId,
-    title: habit.title,
+    name: habit.name,
     description: habit.description,
     hour: habit.hour,
     minute: habit.minute,
-    zone: habit.zone,
+    timezone: habit.timezone,
     frequency: habit.frequency,
-    dayOfWeek: habit.dayOfWeek ?? null,
-    streak: habit.streak,
-    lastCompletedAt: habit.lastCompletedAt
-      ? habit.lastCompletedAt.toISOString()
+    dayOfWeek:
+      typeof habit.dayOfWeek === "number" ? habit.dayOfWeek : null,
+    createdAt: habit.createdAt
+      ? new Date(habit.createdAt).toISOString()
       : null,
   });
 }
 
 export async function PATCH(req: Request, { params }: RouteContext) {
   const session = await auth();
+
   if (!session) {
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
   }
 
   const userId = getSessionUserId(session);
   const { id } = await params;
-
   const body = await req.json();
 
   const success = await updateHabit(
     userId,
     id,
-    body.title ?? "",
+    body.name ?? "",
     body.description ?? "",
     Number(body.hour),
     Number(body.minute),
-    body.zone ?? "",
+    body.timezone ?? "",
     {
       frequency: body.frequency,
       dayOfWeek: body.dayOfWeek ?? null,
@@ -76,6 +77,7 @@ export async function PATCH(req: Request, { params }: RouteContext) {
 
 export async function DELETE(_: Request, { params }: RouteContext) {
   const session = await auth();
+
   if (!session) {
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
   }

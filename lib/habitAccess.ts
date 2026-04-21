@@ -1,5 +1,5 @@
 import clientPromise from "@/lib/mongodb";
-import { ObjectId, type Document } from "mongodb";
+import type { Document } from "mongodb";
 
 export const HABIT_COLLECTION = "habits";
 
@@ -11,23 +11,28 @@ export interface HabitScheduleInput {
 }
 
 export interface HabitDoc extends Document {
-  _id: ObjectId;
+  _id: string;
   userId: string;
-  title: string;
+  name: string;
   description: string;
   hour: number;
   minute: number;
-  zone: string;
+  timezone: string;
   frequency: HabitFrequency;
-  dayOfWeek: number | null;
-  streak: number;
-  lastCompletedAt: Date | null;
+  dayOfWeek?: number | null;
   createdAt: Date;
+  __v?: number;
 }
 
 function requireUserId(userId: string | null | undefined): string {
   const trimmed = (userId ?? "").trim();
   if (!trimmed) throw new Error("Missing userId");
+  return trimmed;
+}
+
+function requireHabitId(habitId: string | null | undefined): string {
+  const trimmed = String(habitId ?? "").trim();
+  if (!trimmed) throw new Error("Missing habitId");
   return trimmed;
 }
 
@@ -73,17 +78,19 @@ export async function listUserHabits(userId: string): Promise<HabitDoc[]> {
 
 export async function createHabit(
   userId: string,
-  title: string,
+  name: string,
   description: string,
   hour: number,
   minute: number,
-  zone: string,
+  timezone: string,
   schedule: HabitScheduleInput | undefined,
 ): Promise<string> {
   const uid = requireUserId(userId);
-  const trimmedTitle = String(title ?? "").trim();
+  const trimmedName = String(name ?? "").trim();
 
-  if (!trimmedTitle) throw new Error("Habit title is required");
+  if (!trimmedName) {
+    throw new Error("Habit name is required");
+  }
 
   if (!Number.isInteger(hour) || hour < 0 || hour > 23) {
     throw new Error("Hour must be between 0 and 23");
@@ -93,29 +100,33 @@ export async function createHabit(
     throw new Error("Minute must be between 0 and 59");
   }
 
-  const safeZone = String(zone ?? "").trim();
-  if (!safeZone) throw new Error("Time zone is required");
+  const safeTimezone = String(timezone ?? "").trim();
+  if (!safeTimezone) {
+    throw new Error("Time zone is required");
+  }
 
   const normalizedSchedule = normalizeHabitSchedule(schedule);
-
   const client = await clientPromise;
   const db = client.db();
 
-  const result = await db.collection(HABIT_COLLECTION).insertOne({
+  const habitId = `${uid}-${Date.now()}`;
+
+  await db.collection<HabitDoc>(HABIT_COLLECTION).insertOne({
+    _id: habitId,
     userId: uid,
-    title: trimmedTitle,
+    name: trimmedName,
     description: String(description ?? "").trim(),
     hour,
     minute,
-    zone: safeZone,
+    timezone: safeTimezone,
     frequency: normalizedSchedule.frequency,
-    dayOfWeek: normalizedSchedule.dayOfWeek,
-    streak: 0,
-    lastCompletedAt: null,
+    ...(normalizedSchedule.dayOfWeek != null
+      ? { dayOfWeek: normalizedSchedule.dayOfWeek }
+      : {}),
     createdAt: new Date(),
   });
 
-  return result.insertedId.toString();
+  return habitId;
 }
 
 export async function deleteHabit(
@@ -123,15 +134,14 @@ export async function deleteHabit(
   habitId: string,
 ): Promise<boolean> {
   const uid = requireUserId(userId);
-
-  if (!ObjectId.isValid(habitId)) return false;
+  const hid = requireHabitId(habitId);
 
   const client = await clientPromise;
   const db = client.db();
 
   const result = await db
-    .collection(HABIT_COLLECTION)
-    .deleteOne({ _id: new ObjectId(habitId), userId: uid });
+    .collection<HabitDoc>(HABIT_COLLECTION)
+    .deleteOne({ _id: hid, userId: uid });
 
   return result.deletedCount > 0;
 }
@@ -141,33 +151,34 @@ export async function getHabitById(
   habitId: string,
 ): Promise<HabitDoc | null> {
   const uid = requireUserId(userId);
-
-  if (!ObjectId.isValid(habitId)) return null;
+  const hid = requireHabitId(habitId);
 
   const client = await clientPromise;
   const db = client.db();
 
-  return db
-    .collection<HabitDoc>(HABIT_COLLECTION)
-    .findOne({ _id: new ObjectId(habitId), userId: uid });
+  return db.collection<HabitDoc>(HABIT_COLLECTION).findOne({
+    _id: hid,
+    userId: uid,
+  });
 }
 
 export async function updateHabit(
   userId: string,
   habitId: string,
-  title: string,
+  name: string,
   description: string,
   hour: number,
   minute: number,
-  zone: string,
+  timezone: string,
   schedule: HabitScheduleInput | undefined,
 ): Promise<boolean> {
   const uid = requireUserId(userId);
+  const hid = requireHabitId(habitId);
+  const trimmedName = String(name ?? "").trim();
 
-  if (!ObjectId.isValid(habitId)) return false;
-
-  const trimmedTitle = String(title ?? "").trim();
-  if (!trimmedTitle) throw new Error("Habit title is required");
+  if (!trimmedName) {
+    throw new Error("Habit name is required");
+  }
 
   if (!Number.isInteger(hour) || hour < 0 || hour > 23) {
     throw new Error("Hour must be between 0 and 23");
@@ -177,25 +188,26 @@ export async function updateHabit(
     throw new Error("Minute must be between 0 and 59");
   }
 
-  const safeZone = String(zone ?? "").trim();
-  if (!safeZone) throw new Error("Time zone is required");
+  const safeTimezone = String(timezone ?? "").trim();
+  if (!safeTimezone) {
+    throw new Error("Time zone is required");
+  }
 
   const normalizedSchedule = normalizeHabitSchedule(schedule);
-
   const client = await clientPromise;
   const db = client.db();
 
-  const result = await db.collection(HABIT_COLLECTION).updateOne(
-    { _id: new ObjectId(habitId), userId: uid },
+  const result = await db.collection<HabitDoc>(HABIT_COLLECTION).updateOne(
+    { _id: hid, userId: uid },
     {
       $set: {
-        title: trimmedTitle,
+        name: trimmedName,
         description: String(description ?? "").trim(),
         hour,
         minute,
-        zone: safeZone,
+        timezone: safeTimezone,
         frequency: normalizedSchedule.frequency,
-        dayOfWeek: normalizedSchedule.dayOfWeek,
+        dayOfWeek: normalizedSchedule.dayOfWeek ?? null,
       },
     },
   );
