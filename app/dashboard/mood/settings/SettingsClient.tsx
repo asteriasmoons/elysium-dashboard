@@ -110,7 +110,7 @@ export default function SettingsClient({ guildId }: SettingsClientProps) {
 
         <div className={styles.panel}>
           <div className={styles.notice}>
-            <strong>📱 Discord DM Reminders</strong>
+            <strong>Discord DM Reminders</strong>
             <p>
               These settings control when the bot sends you reminder DMs on
               Discord. Changes sync automatically with the bot.
