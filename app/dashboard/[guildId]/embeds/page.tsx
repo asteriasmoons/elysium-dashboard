@@ -58,14 +58,27 @@ export default function EmbedsPage() {
             </p>
           </div>
 
-          <div className={styles.actions}>
-            <Link
-              href={`/dashboard/${guildId}/embeds/new`}
-              className={styles.primaryLink}
-            >
-              + New Embed
-            </Link>
-          </div>
+          <div className={styles.headerRow}>
+  <div>
+    <h1 className={styles.title}>Embeds</h1>
+    <p className={styles.subtitle}>
+      Create, manage, and send embeds to your server.
+    </p>
+  </div>
+
+  <div className={styles.actions}>
+    <Link href={`/dashboard/${guildId}`} className={styles.primaryLink}>
+      Back to Dashboard
+    </Link>
+
+    <Link
+      href={`/dashboard/${guildId}/embeds/new`}
+      className={styles.primaryLink}
+    >
+      + New Embed
+    </Link>
+  </div>
+</div>
         </div>
 
         {/* GRID */}
