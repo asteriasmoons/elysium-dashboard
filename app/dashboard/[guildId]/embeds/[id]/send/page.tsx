@@ -35,6 +35,61 @@ type GuildChannel = {
   type?: number;
 };
 
+function getEmojiSrc(emojiId: string, animated?: boolean): string {
+  const ext = animated ? "gif" : "png";
+  return `https://cdn.discordapp.com/emojis/${emojiId}.${ext}?size=64&quality=lossless`;
+}
+
+function renderDiscordPreview(text: string) {
+  const parts: React.ReactNode[] = [];
+  const regex = /<(a)?:([a-zA-Z0-9_]+):(\d+)>/g;
+  let lastIndex = 0;
+  let match: RegExpExecArray | null;
+
+  while ((match = regex.exec(text)) !== null) {
+    const [fullMatch, animatedFlag, name, id] = match;
+    const start = match.index;
+
+    if (start > lastIndex) {
+      parts.push(text.slice(lastIndex, start));
+    }
+
+    parts.push(
+      <Image
+        key={`${id}-${start}-${fullMatch}`}
+        src={getEmojiSrc(id, Boolean(animatedFlag))}
+        alt={`:${name}:`}
+        title={`:${name}:`}
+        width={20}
+        height={20}
+        unoptimized
+        style={{
+          display: "inline-block",
+          verticalAlign: "-0.2em",
+          marginRight: 4,
+        }}
+      />,
+    );
+
+    lastIndex = start + fullMatch.length;
+  }
+
+  if (lastIndex < text.length) {
+    parts.push(text.slice(lastIndex));
+  }
+
+  return parts.flatMap((part, index) => {
+    if (typeof part !== "string") return part;
+
+    return part.split("\n").flatMap((line, i, arr) => {
+      if (i < arr.length - 1) {
+        return [line, <br key={`br-${index}-${i}`} />];
+      }
+      return line;
+    });
+  });
+}
+
 export default function SendEmbedPage() {
   const params = useParams<{ guildId: string; id: string }>();
   const guildId = String(params.guildId);
@@ -274,7 +329,9 @@ if (!embed) {
 
               {content.trim() ? (
                 <div className={styles.spacingLg}>
-                  <p className={styles.previewDescription}>{content}</p>
+                  <p className={styles.previewDescription}>
+                    {renderDiscordPreview(content)}
+                  </p>
                 </div>
               ) : null}
               <div className={styles.discordPreviewShell}>
@@ -296,7 +353,7 @@ if (!embed) {
                           />
                         ) : null}
                         <span className={styles.embedAuthorName}>
-                          {embed.author?.name || "Author"}
+                          {renderDiscordPreview(embed.author?.name || "Author")}
                         </span>
                       </div>
                     )}
@@ -304,12 +361,14 @@ if (!embed) {
                     <div className={styles.embedBodyRow}>
                       <div className={styles.embedMain}>
                         {embed.title ? (
-                          <p className={styles.previewTitle}>{embed.title}</p>
+                          <p className={styles.previewTitle}>
+                            {renderDiscordPreview(embed.title)}
+                          </p>
                         ) : null}
 
                         {embed.description ? (
                           <p className={styles.previewDescription}>
-                            {embed.description}
+                            {renderDiscordPreview(embed.description)}
                           </p>
                         ) : (
                           <p className={styles.previewMuted}>No description</p>
@@ -354,7 +413,7 @@ if (!embed) {
                           />
                         ) : null}
                         <span className={styles.embedFooterText}>
-                          {embed.footer?.text || "Footer"}
+                          {renderDiscordPreview(embed.footer?.text || "Footer")}
                           {embed.footer?.timestamp
                             ? ` • ${new Date().toLocaleString()}`
                             : ""}
@@ -367,7 +426,7 @@ if (!embed) {
 
               <div className={styles.spacingLg}>
                 <p className={styles.previewMuted}>
-                  Sending: <strong>{embed.name}</strong>
+                  Sending: <strong>{renderDiscordPreview(embed.name)}</strong>
                 </p>
               </div>
             </div>
