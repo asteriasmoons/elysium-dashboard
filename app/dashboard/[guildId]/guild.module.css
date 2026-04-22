@@ -143,18 +143,16 @@
 }
 
 @media (max-width: 719px) {
-  .page {
-    padding: 24px 8px;
-  }
-
   .container {
     padding: 0;
   }
 
+  .page {
+    padding: 24px 0;
+  }
+
   .panel {
-    padding: 10px;
-    border-radius: 12px;
-    margin: 0 -8px;
+    border-radius: 0;
   }
 
   .topRow {
