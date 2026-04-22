@@ -50,14 +50,6 @@ export default function EmbedsPage() {
     <div className={styles.page}>
       <div className={styles.container}>
         {/* HEADER */}
-        <div className={styles.headerRow}>
-          <div>
-            <h1 className={styles.title}>Embeds</h1>
-            <p className={styles.subtitle}>
-              Create, manage, and send embeds to your server.
-            </p>
-          </div>
-
           <div className={styles.headerRow}>
   <div>
     <h1 className={styles.title}>Embeds</h1>
