@@ -154,6 +154,7 @@
   .panel {
     padding: 10px;
     border-radius: 12px;
+    margin: 0 -8px;
   }
 
   .topRow {
