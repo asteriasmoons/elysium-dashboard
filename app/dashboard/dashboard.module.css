@@ -80,6 +80,12 @@
     padding: 16px;
     border-radius: 14px;
   }
+  
+  .headerRow {
+    padding: 0 0 0 0;
+    margin-left: -8px;
+  }
+
 }
 
 
