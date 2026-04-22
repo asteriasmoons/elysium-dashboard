@@ -78,13 +78,36 @@
   color: white;
 }
 
-.deleteButton {
-  padding: 10px 14px;
+/* --- SEND BUTTON --- */
+.sendButton {
+  padding: 10px 16px;
   border-radius: 12px;
   border: none;
-  background: #ff4d6d;
-  color: white;
   cursor: pointer;
+  background: linear-gradient(135deg, #6055f7, #9a4dff);
+  color: white;
+  font-weight: 600;
+  letter-spacing: 0.02em;
+  box-shadow:
+    0 6px 18px rgba(96, 85, 247, 0.35),
+    inset 0 1px 0 rgba(255, 255, 255, 0.15);
+  transition: transform 0.15s ease, box-shadow 0.15s ease, filter 0.15s ease;
+}
+
+.sendButton:hover {
+  transform: translateY(-1px);
+  filter: brightness(1.05);
+
+  box-shadow:
+    0 10px 24px rgba(96, 85, 247, 0.45),
+    inset 0 1px 0 rgba(255, 255, 255, 0.2);
+}
+
+.sendButton:active {
+  transform: translateY(0);
+  box-shadow:
+    0 4px 10px rgba(96, 85, 247, 0.3),
+    inset 0 1px 0 rgba(255, 255, 255, 0.1);
 }
 
 /* GRID */
