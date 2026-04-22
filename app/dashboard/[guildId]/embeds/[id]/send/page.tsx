@@ -148,18 +148,31 @@ export default function SendEmbedPage() {
     );
   }
 
-  if (!embed) {
-    return (
-      <div className={styles.page}>
-        <div className={styles.container}>
-          <div className={styles.emptyState}>
-            <h3 className={styles.emptyTitle}>Embed not found</h3>
-            <p className={styles.emptyText}>This embed could not be loaded.</p>
-          </div>
+  if (error) {
+  return (
+    <div className={styles.page}>
+      <div className={styles.container}>
+        <div className={styles.emptyState}>
+          <h3 className={styles.emptyTitle}>Failed to load send page</h3>
+          <p className={styles.emptyText}>{error}</p>
         </div>
       </div>
-    );
-  }
+    </div>
+  );
+}
+
+if (!embed) {
+  return (
+    <div className={styles.page}>
+      <div className={styles.container}>
+        <div className={styles.emptyState}>
+          <h3 className={styles.emptyTitle}>Embed not found</h3>
+          <p className={styles.emptyText}>This embed could not be loaded.</p>
+        </div>
+      </div>
+    </div>
+  );
+}
 
   return (
     <div className={styles.page}>
