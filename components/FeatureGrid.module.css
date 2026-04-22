@@ -100,12 +100,15 @@
   word-break: break-word;
 }
 
-@media (max-width: 560px) {
+@media (max-width: 719px) {
   .container {
-    padding: 0 2px;
+    padding: 0;
+    max-width: 100%;
   }
 
   .grid {
+    width: 100%;
+    padding: 0;
     gap: 8px;
   }
 
@@ -132,17 +135,5 @@
   .desc {
     font-size: 0.72rem;
     line-height: 1.22;
-  }
-}
-
-@media (max-width: 560px) {
-  .container {
-    max-width: 100%;
-    padding: 0;
-  }
-
-  .grid {
-    width: 100%;
-    padding: 0 6px;
   }
 }
