@@ -44,6 +44,7 @@ export default function SendEmbedPage() {
   const [embed, setEmbed] = useState<EmbedData | null>(null);
   const [channels, setChannels] = useState<GuildChannel[]>([]);
   const [channelId, setChannelId] = useState("");
+  const [content, setContent] = useState("");
   const [loading, setLoading] = useState(true);
   const [sending, setSending] = useState(false);
   const [error, setError] = useState("");
@@ -118,6 +119,7 @@ export default function SendEmbedPage() {
         body: JSON.stringify({
           guildId,
           channelId,
+          content,
         }),
       });
 
@@ -228,6 +230,18 @@ if (!embed) {
                     ))}
                   </select>
                 </div>
+                <div className={styles.fieldGroup}>
+                  <label className={styles.label} htmlFor="content">
+                    Message (Optional)
+                  </label>
+                  <textarea
+                    id="content"
+                    className={styles.textarea}
+                    value={content}
+                    onChange={(e) => setContent(e.target.value)}
+                    placeholder="Write an optional message to send with this embed"
+                  />
+                </div>
 
                 {error ? (
                   <div className={styles.emptyState}>
@@ -258,6 +272,11 @@ if (!embed) {
             <div className={styles.previewCard}>
               <div className={styles.previewLabel}>Preview</div>
 
+              {content.trim() ? (
+                <div className={styles.spacingLg}>
+                  <p className={styles.previewDescription}>{content}</p>
+                </div>
+              ) : null}
               <div className={styles.discordPreviewShell}>
                 <div
                   className={styles.discordEmbed}
