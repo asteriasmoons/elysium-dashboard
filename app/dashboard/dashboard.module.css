@@ -69,7 +69,7 @@
 
 @media (max-width: 719px) {
   .container {
-    padding: 0;
+    padding: 0 16px;
   }
 
   .page {
@@ -77,10 +77,11 @@
   }
 
   .panel {
+    padding: 16px;
     border-radius: 0;
+    margin: 0 -16px;
   }
 }
-
 
 .headerRow {
   display: flex;
