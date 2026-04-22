@@ -1,11 +1,33 @@
 .page {
   min-height: 100dvh;
   padding: 40px 24px;
-  background-color: #05060a;
-  background-image: linear-gradient(135deg, #03e3fc, #6055f7);
   position: relative;
   overflow: clip;
   color: #f4f4f5;
+  background-color: #03040a;
+  background-image: linear-gradient(
+    135deg,
+    #019fb3 0%,
+    #3f36c9 100%
+  );
+}
+
+/* GLASS + OVERLAY LAYER */
+.page::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.45);
+  backdrop-filter: blur(40px);
+  -webkit-backdrop-filter: blur(40px);
+  pointer-events: none;
+  z-index: 0;
+}
+
+/* make sure content sits above overlay */
+.page > * {
+  position: relative;
+  z-index: 1;
 }
 
 .container {
