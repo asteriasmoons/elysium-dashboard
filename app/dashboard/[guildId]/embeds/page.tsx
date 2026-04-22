@@ -71,7 +71,6 @@ export default function EmbedsPage() {
     </Link>
   </div>
 </div>
-        </div>
 
         {/* GRID */}
         {loading ? (
