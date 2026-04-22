@@ -118,10 +118,14 @@ export default function HabitsPage() {
           </div>
 
           <div className={styles.actions}>
-            <Link href="/dashboard/habits/new" className={styles.primaryLink}>
-              + New Habit
-            </Link>
-          </div>
+  <Link href="/dashboard" className={styles.primaryLink}>
+    Back to Dashboard
+  </Link>
+
+  <Link href="/dashboard/habits/new" className={styles.primaryLink}>
+    + New Habit
+  </Link>
+</div>
         </div>
 
         {/* STREAK CARD */}

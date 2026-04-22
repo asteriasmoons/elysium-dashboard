@@ -45,7 +45,7 @@ function escapeHtml(value: string): string {
     .replace(/&/g, "&amp;")
     .replace(/</g, "&lt;")
     .replace(/>/g, "&gt;")
-    .replace(/\"/g, "&quot;")
+    .replace(/"/g, "&quot;")
     .replace(/'/g, "&#39;");
 }
 
@@ -68,7 +68,13 @@ function renderEditorHtml(text: string): string {
         }
 
         const src = getEmojiSrc(id, Boolean(animatedFlag));
-        html += `<span contenteditable="false" data-emoji-tag="${escapeHtml(fullMatch)}" style="display:inline-flex;align-items:center;vertical-align:-0.2em;"><img src="${src}" alt=":${escapeHtml(name)}:" title=":${escapeHtml(name)}:" width="22" height="22" style="display:block;" /></span>\u200B`;
+        html += `<span contenteditable="false" data-emoji-tag="${escapeHtml(
+          fullMatch,
+        )}" style="display:inline-flex;align-items:center;vertical-align:-0.2em;"><img src="${src}" alt=":${escapeHtml(
+          name,
+        )}:" title=":${escapeHtml(
+          name,
+        )}:" width="22" height="22" style="display:block;" /></span>\u200B`;
         lastIndex = start + fullMatch.length;
       }
 
@@ -431,303 +437,316 @@ export default function EditEmbedPage() {
           </div>
         </div>
 
-        <form onSubmit={handleSubmit} style={{ display: "grid", gap: 16 }}>
-          <div className={styles.card}>
-            <div style={{ display: "grid", gap: 14 }}>
-              <div>
-                <label>Name</label>
-                <input
-                  value={name}
-                  onChange={(e) => setName(e.target.value)}
-                  style={{ width: "100%", marginTop: 6 }}
-                />
-              </div>
-
-              <div style={{ position: "relative" }}>
-                <label>Embed Title</label>
-                <div
-                  ref={titleEditorRef}
-                  contentEditable
-                  suppressContentEditableWarning
-                  onFocus={() => setActiveEditor("title")}
-                  onInput={(e) =>
-                    setTitle(serializeEditorContent(e.currentTarget))
-                  }
-                  onBlur={(e) =>
-                    setTitle(serializeEditorContent(e.currentTarget))
-                  }
-                  style={{
-                    minHeight: 54,
-                    marginTop: 6,
-                    padding: "12px 42px 12px 12px",
-                    border: "1px solid rgba(255,255,255,0.12)",
-                    borderRadius: 12,
-                    background: "#0a0c1c",
-                    whiteSpace: "pre-wrap",
-                    overflowWrap: "break-word",
-                  }}
-                />
-
-                <button
-                  type="button"
-                  onMouseDown={(e) => e.preventDefault()}
-                  onClick={() => {
-                    setActiveEditor("title");
-                    setShowEmojiPicker((prev) => !prev);
-                  }}
-                  style={{
-                    position: "absolute",
-                    right: 10,
-                    bottom: 10,
-                    background: "rgba(255,255,255,0.08)",
-                    border: "1px solid rgba(255,255,255,0.12)",
-                    borderRadius: 10,
-                    padding: 6,
-                  }}
-                >
-                  <Image
-                    src="/img/icons/face.svg"
-                    alt="emoji picker"
-                    width={20}
-                    height={20}
-                    unoptimized
-                  />
-                </button>
-              </div>
-
-              <div style={{ position: "relative" }}>
-                <label>Description</label>
-                <div
-                  ref={descriptionEditorRef}
-                  contentEditable
-                  suppressContentEditableWarning
-                  onFocus={() => setActiveEditor("description")}
-                  onInput={(e) =>
-                    setDescription(serializeEditorContent(e.currentTarget))
-                  }
-                  onBlur={(e) =>
-                    setDescription(serializeEditorContent(e.currentTarget))
-                  }
-                  style={{
-                    minHeight: 180,
-                    marginTop: 6,
-                    padding: "12px 42px 12px 12px",
-                    border: "1px solid rgba(255,255,255,0.12)",
-                    borderRadius: 12,
-                    background: "#0a0c1c",
-                    whiteSpace: "pre-wrap",
-                    overflowWrap: "break-word",
-                  }}
-                />
-
-                <button
-                  type="button"
-                  onMouseDown={(e) => e.preventDefault()}
-                  onClick={() => {
-                    setActiveEditor("description");
-                    setShowEmojiPicker((prev) => !prev);
-                  }}
-                  style={{
-                    position: "absolute",
-                    right: 10,
-                    bottom: 10,
-                    background: "rgba(255,255,255,0.08)",
-                    border: "1px solid rgba(255,255,255,0.12)",
-                    borderRadius: 10,
-                    padding: 6,
-                  }}
-                >
-                  <Image
-                    src="/img/icons/face.svg"
-                    alt="emoji picker"
-                    width={20}
-                    height={20}
-                    unoptimized
-                  />
-                </button>
-
-                {showEmojiPicker && (
-                  <div
-                    onMouseDown={(e) => e.preventDefault()}
-                    style={{
-                      position: "absolute",
-                      top: "calc(100% + 8px)",
-                      right: 0,
-                      zIndex: 50,
-                      background: "#0b0f1f",
-                      borderRadius: 12,
-                      padding: 10,
-                      display: "grid",
-                      gridTemplateColumns: "repeat(6, 1fr)",
-                      gap: 8,
-                      width: 320,
-                      maxHeight: 300,
-                      overflowY: "auto",
-                    }}
-                  >
-                    {emojis.map((emoji) => {
-                      const emojiTag = `<${emoji.animated ? "a" : ""}:${emoji.name}:${emoji.id}>`;
-
-                      return (
-                        <button
-                          key={emoji.id}
-                          type="button"
-                          onMouseDown={(e) => e.preventDefault()}
-                          onClick={() => insertEmojiTag(emojiTag)}
-                          title={emoji.name}
-                          style={{
-                            background: "transparent",
-                            border: "none",
-                            padding: 4,
-                          }}
-                        >
-                          <Image
-                            src={getEmojiSrc(emoji.id, emoji.animated)}
-                            alt={emoji.name}
-                            width={28}
-                            height={28}
-                            unoptimized
-                          />
-                        </button>
-                      );
-                    })}
+        <form onSubmit={handleSubmit} className={styles.formStack}>
+          <div className={styles.builderLayout}>
+            <div className={styles.builderPanel}>
+              <div className={styles.card}>
+                <div className={styles.formStack}>
+                  <div className={styles.fieldGroup}>
+                    <label className={styles.label}>Name</label>
+                    <input
+                      className={styles.input}
+                      value={name}
+                      onChange={(e) => setName(e.target.value)}
+                    />
                   </div>
-                )}
-              </div>
 
-              <div>
-                <label>Color</label>
-                <input
-                  value={color}
-                  onChange={(e) => setColor(e.target.value)}
-                  style={{ width: "100%", marginTop: 6 }}
-                />
-              </div>
-
-              <div style={{ display: "grid", gap: 12 }}>
-                <div>
-                  <label>Author Name</label>
-                  <input
-                    value={authorName}
-                    onChange={(e) => setAuthorName(e.target.value)}
-                    style={{ width: "100%", marginTop: 6 }}
-                  />
-                </div>
-
-                <div>
-                  <label>Author Icon URL</label>
-                  <input
-                    value={authorIconUrl}
-                    onChange={(e) => setAuthorIconUrl(e.target.value)}
-                    style={{ width: "100%", marginTop: 6 }}
-                  />
-                </div>
-
-                <div>
-                  <label>Footer Text</label>
-                  <input
-                    value={footerText}
-                    onChange={(e) => setFooterText(e.target.value)}
-                    style={{ width: "100%", marginTop: 6 }}
-                  />
-                </div>
-
-                <div>
-                  <label>Footer Icon URL</label>
-                  <input
-                    value={footerIconUrl}
-                    onChange={(e) => setFooterIconUrl(e.target.value)}
-                    style={{ width: "100%", marginTop: 6 }}
-                  />
-                </div>
-
-                <label
-                  style={{ display: "flex", gap: 8, alignItems: "center" }}
-                >
-                  <input
-                    type="checkbox"
-                    checked={footerTimestamp}
-                    onChange={(e) => setFooterTimestamp(e.target.checked)}
-                  />
-                  Footer Timestamp
-                </label>
-
-                <div>
-                  <label>Thumbnail URL</label>
-                  <input
-                    value={thumbnail}
-                    onChange={(e) => setThumbnail(e.target.value)}
-                    style={{ width: "100%", marginTop: 6 }}
-                  />
-                </div>
-
-                <div>
-                  <label>Image URL</label>
-                  <input
-                    value={image}
-                    onChange={(e) => setImage(e.target.value)}
-                    style={{ width: "100%", marginTop: 6 }}
-                  />
-                </div>
-              </div>
-            </div>
-          </div>
-
-          <div className={styles.card}>
-            <div className={styles.cardTop}>
-              <h2 className={styles.cardTitle}>Preview</h2>
-            </div>
-
-            <div className={styles.discordPreviewShell}>
-              <div
-                className={styles.discordEmbed}
-                style={{ borderLeftColor: color || "#5865F2" }}
-              >
-                <div className={styles.discordEmbedInner}>
-                  {authorName ? (
-                    <p
+                  <div
+                    className={styles.fieldGroup}
+                    style={{ position: "relative" }}
+                  >
+                    <label className={styles.label}>Embed Title</label>
+                    <div
+                      ref={titleEditorRef}
+                      contentEditable
+                      suppressContentEditableWarning
+                      className={styles.input}
+                      onFocus={() => setActiveEditor("title")}
+                      onInput={(e) =>
+                        setTitle(serializeEditorContent(e.currentTarget))
+                      }
+                      onBlur={(e) =>
+                        setTitle(serializeEditorContent(e.currentTarget))
+                      }
                       style={{
-                        margin: "0 0 8px",
-                        fontSize: 12,
-                        color: "#ffffff",
+                        minHeight: 54,
+                        paddingRight: 42,
+                        whiteSpace: "pre-wrap",
+                        overflowWrap: "break-word",
+                      }}
+                    />
+
+                    <button
+                      type="button"
+                      className={styles.emojiButton}
+                      onMouseDown={(e) => e.preventDefault()}
+                      onClick={() => {
+                        setActiveEditor("title");
+                        setShowEmojiPicker((prev) => !prev);
                       }}
                     >
-                      {authorName}
-                    </p>
-                  ) : null}
+                      <Image
+                        src="/img/icons/face.svg"
+                        alt="emoji picker"
+                        width={20}
+                        height={20}
+                        unoptimized
+                      />
+                    </button>
+                  </div>
 
-                  {title ? (
-                    <p className={styles.previewTitle}>
-                      {renderDiscordPreview(title)}
-                    </p>
-                  ) : null}
+                  <div
+                    className={styles.fieldGroup}
+                    style={{ position: "relative" }}
+                  >
+                    <label className={styles.label}>Description</label>
+                    <div
+                      ref={descriptionEditorRef}
+                      contentEditable
+                      suppressContentEditableWarning
+                      className={styles.textarea}
+                      onFocus={() => setActiveEditor("description")}
+                      onInput={(e) =>
+                        setDescription(serializeEditorContent(e.currentTarget))
+                      }
+                      onBlur={(e) =>
+                        setDescription(serializeEditorContent(e.currentTarget))
+                      }
+                      style={{ paddingRight: 42 }}
+                    />
 
-                  {description ? (
-                    <p className={styles.previewDescription}>
-                      {renderDiscordPreview(description)}
-                    </p>
-                  ) : (
-                    <p className={styles.previewMuted}>No description</p>
-                  )}
-
-                  {footerText ? (
-                    <p
-                      style={{ marginTop: 10, fontSize: 12, color: "#949ba4" }}
+                    <button
+                      type="button"
+                      className={styles.emojiButton}
+                      onMouseDown={(e) => e.preventDefault()}
+                      onClick={() => {
+                        setActiveEditor("description");
+                        setShowEmojiPicker((prev) => !prev);
+                      }}
                     >
-                      {footerText}
-                      {footerTimestamp
-                        ? ` • ${new Date().toLocaleString()}`
-                        : ""}
-                    </p>
-                  ) : null}
+                      <Image
+                        src="/img/icons/face.svg"
+                        alt="emoji picker"
+                        width={20}
+                        height={20}
+                        unoptimized
+                      />
+                    </button>
+
+                    {showEmojiPicker && (
+                      <div
+                        className={styles.emojiPopover}
+                        onMouseDown={(e) => e.preventDefault()}
+                      >
+                        {emojis.map((emoji) => {
+                          const emojiTag = `<${
+                            emoji.animated ? "a" : ""
+                          }:${emoji.name}:${emoji.id}>`;
+
+                          return (
+                            <button
+                              key={emoji.id}
+                              type="button"
+                              className={styles.emojiItem}
+                              onMouseDown={(e) => e.preventDefault()}
+                              onClick={() => insertEmojiTag(emojiTag)}
+                              title={emoji.name}
+                            >
+                              <Image
+                                src={getEmojiSrc(emoji.id, emoji.animated)}
+                                alt={emoji.name}
+                                width={28}
+                                height={28}
+                                unoptimized
+                              />
+                            </button>
+                          );
+                        })}
+                      </div>
+                    )}
+                  </div>
+
+                  <div className={styles.fieldGroup}>
+                    <label className={styles.label}>Color</label>
+                    <input
+                      className={styles.input}
+                      value={color}
+                      onChange={(e) => setColor(e.target.value)}
+                    />
+                  </div>
+
+                  <div className={styles.rowFields}>
+                    <div className={styles.fieldGroup}>
+                      <label className={styles.label}>Author Name</label>
+                      <input
+                        className={styles.input}
+                        value={authorName}
+                        onChange={(e) => setAuthorName(e.target.value)}
+                      />
+                    </div>
+
+                    <div className={styles.fieldGroup}>
+                      <label className={styles.label}>Author Icon URL</label>
+                      <input
+                        className={styles.input}
+                        value={authorIconUrl}
+                        onChange={(e) => setAuthorIconUrl(e.target.value)}
+                      />
+                    </div>
+                  </div>
+
+                  <div className={styles.rowFields}>
+                    <div className={styles.fieldGroup}>
+                      <label className={styles.label}>Footer Text</label>
+                      <input
+                        className={styles.input}
+                        value={footerText}
+                        onChange={(e) => setFooterText(e.target.value)}
+                      />
+                    </div>
+
+                    <div className={styles.fieldGroup}>
+                      <label className={styles.label}>Footer Icon URL</label>
+                      <input
+                        className={styles.input}
+                        value={footerIconUrl}
+                        onChange={(e) => setFooterIconUrl(e.target.value)}
+                      />
+                    </div>
+                  </div>
+
+                  <label className={styles.checkboxRow}>
+                    <input
+                      type="checkbox"
+                      checked={footerTimestamp}
+                      onChange={(e) => setFooterTimestamp(e.target.checked)}
+                    />
+                    Footer Timestamp
+                  </label>
+
+                  <div className={styles.rowFields}>
+                    <div className={styles.fieldGroup}>
+                      <label className={styles.label}>Thumbnail URL</label>
+                      <input
+                        className={styles.input}
+                        value={thumbnail}
+                        onChange={(e) => setThumbnail(e.target.value)}
+                      />
+                    </div>
+
+                    <div className={styles.fieldGroup}>
+                      <label className={styles.label}>Image URL</label>
+                      <input
+                        className={styles.input}
+                        value={image}
+                        onChange={(e) => setImage(e.target.value)}
+                      />
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <div className={styles.previewPanel}>
+              <div className={styles.previewCard}>
+                <p className={styles.previewLabel}>Preview</p>
+
+                <div className={styles.discordPreviewShell}>
+                  <div
+                    className={styles.discordEmbed}
+                    style={{ borderLeftColor: color || "#5865F2" }}
+                  >
+                    <div className={styles.discordEmbedInner}>
+                      {authorName && (
+                        <div className={styles.embedAuthorRow}>
+                          {authorIconUrl && (
+                            <Image
+                              className={styles.embedAuthorIcon}
+                              src={authorIconUrl}
+                              alt=""
+                              width={20}
+                              height={20}
+                              unoptimized
+                            />
+                          )}
+                          <span className={styles.embedAuthorName}>
+                            {authorName}
+                          </span>
+                        </div>
+                      )}
+
+                      <div className={styles.embedBodyRow}>
+                        <div className={styles.embedMain}>
+                          {title && (
+                            <p className={styles.previewTitle}>
+                              {renderDiscordPreview(title)}
+                            </p>
+                          )}
+
+                          {description ? (
+                            <p className={styles.previewDescription}>
+                              {renderDiscordPreview(description)}
+                            </p>
+                          ) : (
+                            <p className={styles.previewMuted}>
+                              No description
+                            </p>
+                          )}
+                        </div>
+
+                        {thumbnail && (
+                          <Image
+                            className={styles.embedThumbnail}
+                            src={thumbnail}
+                            alt=""
+                            width={80}
+                            height={80}
+                            unoptimized
+                          />
+                        )}
+                      </div>
+
+                      {image && (
+                        <Image
+                          className={styles.embedImage}
+                          src={image}
+                          alt=""
+                          width={400}
+                          height={240}
+                          unoptimized
+                        />
+                      )}
+
+                      {(footerText || footerTimestamp) && (
+                        <div className={styles.embedFooterRow}>
+                          {footerIconUrl && (
+                            <Image
+                              className={styles.embedFooterIcon}
+                              src={footerIconUrl}
+                              alt=""
+                              width={20}
+                              height={20}
+                              unoptimized
+                            />
+                          )}
+                          <span className={styles.embedFooterText}>
+                            {footerText}
+                            {footerTimestamp
+                              ? `${footerText ? " • " : ""}${new Date().toLocaleString()}`
+                              : ""}
+                          </span>
+                        </div>
+                      )}
+                    </div>
+                  </div>
                 </div>
               </div>
             </div>
           </div>
 
-          {error ? <p className={styles.emptyText}>{error}</p> : null}
+          {error && <p className={styles.emptyText}>{error}</p>}
 
-          <div style={{ display: "flex", gap: 10 }}>
+          <div className={`${styles.formActions} ${styles.spacingLg}`}>
             <button type="submit" className={styles.editLink} disabled={saving}>
               {saving ? "Saving..." : "Save Changes"}
             </button>

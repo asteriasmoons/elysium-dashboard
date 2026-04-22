@@ -61,7 +61,7 @@ export const FEATURES: FeatureItem[] = [
     description: "Create, edit and send embeds to discord",
     href: (guildId) => `/dashboard/${guildId}/embeds`,
     scope: "guild",
-    status: "planned",
+    status: "ready",
   },
   {
     key: "sprints",

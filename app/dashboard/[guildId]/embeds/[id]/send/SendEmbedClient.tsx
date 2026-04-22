@@ -154,7 +154,7 @@ export default function SendEmbedClient({
                 <div className={styles.formActions}>
                   <button
                     type="submit"
-                    className={styles.deleteButton}
+                    className={styles.sendButton}
                     disabled={sending || !channelId}
                   >
                     {sending ? "Sending..." : "Send Embed"}
