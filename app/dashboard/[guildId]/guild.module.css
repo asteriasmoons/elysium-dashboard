@@ -141,3 +141,23 @@
   color: rgba(244, 244, 245, 0.68);
   max-width: 70ch;
 }
+
+@media (max-width: 719px) {
+  .page {
+    padding: 24px 8px;
+  }
+
+  .container {
+    padding: 0;
+  }
+
+  .panel {
+    padding: 10px;
+    border-radius: 12px;
+  }
+
+  .topRow {
+    margin-bottom: 16px;
+  }
+}
+
