@@ -4,6 +4,7 @@ import { useEffect, useState } from "react";
 import { useParams } from "next/navigation";
 import Link from "next/link";
 import styles from "./embeds.module.css";
+import RenderDiscordText from "@/components/discord/RenderDiscordText";
 
 type Embed = {
   _id: string;
@@ -106,12 +107,14 @@ export default function EmbedsPage() {
                   >
                     <div className={styles.discordEmbedInner}>
                       {embed.title ? (
-                        <p className={styles.previewTitle}>{embed.title}</p>
+                        <p className={styles.previewTitle}>
+                          <RenderDiscordText text={embed.title} />
+                        </p>
                       ) : null}
 
                       {embed.description ? (
                         <p className={styles.previewDescription}>
-                          {embed.description}
+                          <RenderDiscordText text={embed.description} />
                         </p>
                       ) : (
                         <p className={styles.previewMuted}>No description</p>
