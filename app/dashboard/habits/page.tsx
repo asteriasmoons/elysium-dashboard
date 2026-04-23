@@ -182,10 +182,10 @@ export default function HabitsPage() {
         </div>
 
         {habitActionMessage ? (
-          <div className={styles.emptyState}>
-            <p className={styles.emptyText}>{habitActionMessage}</p>
-          </div>
-        ) : null}
+  <div className={styles.habitActionMessage}>
+    <p>{habitActionMessage}</p>
+  </div>
+) : null}
 
         {/* GRID */}
         <div className={styles.spacingLg} />

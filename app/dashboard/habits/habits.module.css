@@ -178,17 +178,26 @@
 }
 
 .habitActionMessage {
-  margin: 18px 0 22px;
-  padding: 16px;
-  border-radius: 14px;
-  background: rgba(0, 0, 0, 0.45);
-  border: 1px solid rgba(255, 255, 255, 0.2);
-  backdrop-filter: blur(18px);
-  -webkit-backdrop-filter: blur(18px);
-  font-family: var(--font-body);
-  font-size: 0.95rem;
-  color: #ffffff;
-  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.25);
+  margin:22px 0 28px;
+  padding:18px 20px;
+  border-radius:16px;
+  background:rgba(10,12,28,0.88);
+  border:1px solid rgba(255,255,255,0.18);
+  backdrop-filter:blur(18px);
+  -webkit-backdrop-filter:blur(18px);
+  box-shadow:0 14px 34px rgba(0,0,0,0.35);
+  color:#ffffff;
+  font-family:var(--font-body);
+}
+.habitActionMessage p {
+  margin:0;
+  font-size:0.95rem;
+  line-height:1.45;
+  color:rgba(255,255,255,0.9);
+}
+
+.spacingLg {
+  margin-top:24px;
 }
 
 /* STREAK PANEL */
