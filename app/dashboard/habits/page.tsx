@@ -75,6 +75,8 @@ export default function HabitsPage() {
   const [habits, setHabits] = useState<Habit[]>([]);
   const [loading, setLoading] = useState(true);
   const [confirmDeleteId, setConfirmDeleteId] = useState<string | null>(null);
+  const [habitActionLoadingId, setHabitActionLoadingId] = useState<string | null>(null);
+  const [habitActionMessage, setHabitActionMessage] = useState<string>("");
 
   useEffect(() => {
     fetchHabits();
@@ -100,6 +102,46 @@ export default function HabitsPage() {
 
     fetchHabits();
     setConfirmDeleteId(null);
+  }
+
+  async function handleHabitAction(
+    habitId: string,
+    action: "yes" | "nottoday" | "skip",
+  ) {
+    setHabitActionLoadingId(habitId);
+    setHabitActionMessage("");
+
+    try {
+      const res = await fetch(`/api/habits/${habitId}/action`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({ action }),
+      });
+
+      const data = await res.json();
+
+      if (!res.ok) {
+        throw new Error(data?.error || "Failed to update habit");
+      }
+
+      if (action === "yes") {
+        setHabitActionMessage("Habit completed. 10 XP awarded.");
+      } else if (action === "nottoday") {
+        setHabitActionMessage("Marked as not today. 2 XP awarded.");
+      } else {
+        setHabitActionMessage("Habit skipped. XP unchanged.");
+      }
+
+      fetchHabits();
+    } catch (err) {
+      setHabitActionMessage(
+        err instanceof Error ? err.message : "Failed to update habit",
+      );
+    } finally {
+      setHabitActionLoadingId(null);
+    }
   }
 
   const totalHabits = habits.length;
@@ -138,6 +180,12 @@ export default function HabitsPage() {
             Combined Streak: {totalStreak}
           </p>
         </div>
+
+        {habitActionMessage ? (
+          <div className={styles.emptyState}>
+            <p className={styles.emptyText}>{habitActionMessage}</p>
+          </div>
+        ) : null}
 
         {/* GRID */}
         <div className={styles.spacingLg} />
@@ -186,6 +234,33 @@ export default function HabitsPage() {
 
                 {/* ACTIONS */}
                 <div className={styles.cardActions}>
+                  <button
+                    type="button"
+                    className={styles.editLink}
+                    disabled={habitActionLoadingId === habit._id}
+                    onClick={() => handleHabitAction(habit._id, "yes")}
+                  >
+                    Yes
+                  </button>
+
+                  <button
+                    type="button"
+                    className={styles.editLink}
+                    disabled={habitActionLoadingId === habit._id}
+                    onClick={() => handleHabitAction(habit._id, "nottoday")}
+                  >
+                    Not Today
+                  </button>
+
+                  <button
+                    type="button"
+                    className={styles.editLink}
+                    disabled={habitActionLoadingId === habit._id}
+                    onClick={() => handleHabitAction(habit._id, "skip")}
+                  >
+                    Skip
+                  </button>
+
                   <Link
                     href={`/dashboard/habits/${habit._id}`}
                     className={styles.editLink}
