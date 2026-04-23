@@ -225,8 +225,7 @@ export default function HabitsPage() {
                 )}
 
                 <div className={styles.cardTime}>
-                  {habit.hour.toString().padStart(2, "0")}:
-                  {habit.minute.toString().padStart(2, "0")} •{" "}
+                  {formatTime(habit.hour, habit.minute)} •{" "}
                   {habit.frequency === "daily"
                     ? "Daily"
                     : `Weekly (${dayName(habit.dayOfWeek)})`}
@@ -307,6 +306,13 @@ export default function HabitsPage() {
       </div>
     </div>
   );
+}
+
+function formatTime(hour: number, minute: number) {
+  const h = hour % 12 || 12;
+  const m = minute.toString().padStart(2, "0");
+  const period = hour >= 12 ? "PM" : "AM";
+  return `${h}:${m} ${period}`;
 }
 
 function dayName(day?: number | null) {
