@@ -117,7 +117,7 @@
   color: white;
   font-weight: 600;
   font-size: 0.95rem;
-  font-family: var(--font-extra);
+  font-family: var(--font-title);
   cursor: pointer;
   transition: transform 0.15s ease, opacity 0.15s ease;
 }
@@ -134,7 +134,7 @@
   color: white;
   font-weight: 600;
   font-size: 0.95rem;
-  font-family: var(--font-extra);
+  font-family: var(--font-title);
   text-decoration: none;
   display: inline-flex;
   align-items: center;
