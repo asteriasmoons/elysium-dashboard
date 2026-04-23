@@ -236,7 +236,7 @@ export default function HabitsPage() {
                 <div className={styles.cardActions}>
                   <button
                     type="button"
-                    className={styles.editLink}
+                    className={styles.habitActionButton}
                     disabled={habitActionLoadingId === habit._id}
                     onClick={() => handleHabitAction(habit._id, "yes")}
                   >
@@ -245,7 +245,7 @@ export default function HabitsPage() {
 
                   <button
                     type="button"
-                    className={styles.editLink}
+                    className={styles.habitActionButton}
                     disabled={habitActionLoadingId === habit._id}
                     onClick={() => handleHabitAction(habit._id, "nottoday")}
                   >
@@ -254,7 +254,7 @@ export default function HabitsPage() {
 
                   <button
                     type="button"
-                    className={styles.editLink}
+                    className={styles.habitActionButton}
                     disabled={habitActionLoadingId === habit._id}
                     onClick={() => handleHabitAction(habit._id, "skip")}
                   >
