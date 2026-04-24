@@ -63,7 +63,6 @@ export default async function DashboardPage() {
   return (
     <div className={styles.page}>
       <div className={styles.container}>
-        <div>TOP BAR TEST</div>
         <div className={styles.topBarNav}>
           <div className={styles.topBarBrand}>
             <span className={styles.topBarKicker}>Elysium</span>
