@@ -9,9 +9,10 @@ import {
 
 export async function GET(
   req: Request,
-  { params }: { params: { id: string } },
+  { params }: { params: Promise<{ id: string }> },
 ) {
   const session = await auth();
+  const { id } = await params;
 
   if (!session) {
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
@@ -24,7 +25,7 @@ export async function GET(
     return NextResponse.json({ error: "Missing guildId" }, { status: 400 });
   }
 
-  const panel = await getTicketPanelById(guildId, params.id);
+  const panel = await getTicketPanelById(guildId, id);
 
   if (!panel) {
     return NextResponse.json({ error: "Not found" }, { status: 404 });
@@ -51,9 +52,10 @@ export async function GET(
 
 export async function PATCH(
   req: Request,
-  { params }: { params: { id: string } },
+  { params }: { params: Promise<{ id: string }> },
 ) {
   const session = await auth();
+  const { id } = await params;
 
   if (!session) {
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
@@ -68,7 +70,7 @@ export async function PATCH(
 
   const body = await req.json();
 
-  const success = await updateTicketPanel(guildId, params.id, {
+  const success = await updateTicketPanel(guildId, id, {
     panelName: body.panelName,
     emoji: body.emoji ?? null,
     greeting: body.greeting ?? "",
@@ -90,9 +92,10 @@ export async function PATCH(
 
 export async function DELETE(
   req: Request,
-  { params }: { params: { id: string } },
+  { params }: { params: Promise<{ id: string }> },
 ) {
   const session = await auth();
+  const { id } = await params;
 
   if (!session) {
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
@@ -105,7 +108,7 @@ export async function DELETE(
     return NextResponse.json({ error: "Missing guildId" }, { status: 400 });
   }
 
-  const success = await deleteTicketPanel(guildId, params.id);
+  const success = await deleteTicketPanel(guildId, id);
 
   if (!success) {
     return NextResponse.json({ error: "Not found" }, { status: 404 });

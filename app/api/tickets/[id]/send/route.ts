@@ -6,9 +6,11 @@ const BOT_API_BASE = process.env.BOT_API_URL; // your Railway bot URL
 
 export async function POST(
   req: Request,
-  { params }: { params: { id: string } },
+  { params }: { params: Promise<{ id: string }> },
 ) {
   const session = await auth();
+
+  const { id } = await params;
 
   if (!session) {
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
@@ -35,7 +37,7 @@ export async function POST(
       );
     }
 
-    const panel = await getTicketPanelById(guildId, params.id);
+    const panel = await getTicketPanelById(guildId, id);
 
     if (!panel) {
       return NextResponse.json(
