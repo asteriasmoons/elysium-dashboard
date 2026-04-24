@@ -110,12 +110,59 @@ function createEmojiNode(tag: string): HTMLSpanElement | null {
   return span;
 }
 
+
 function cleanEditorValue(value: string) {
   return value
     .replace(/\r\n/g, "\n")
     .replace(/\r/g, "\n")
     .replace(/[\u200B\u200C\u200D\uFEFF]/g, "")
     .replace(/\n{3,}/g, "\n\n");
+}
+
+function serializeTicketEditorContent(editor: HTMLDivElement) {
+  const blockTags = new Set([
+    "DIV",
+    "P",
+    "LI",
+    "UL",
+    "OL",
+    "H1",
+    "H2",
+    "H3",
+    "H4",
+    "H5",
+    "H6",
+  ]);
+
+  function walk(node: Node): string {
+    if (node.nodeType === Node.TEXT_NODE) {
+      return node.textContent ?? "";
+    }
+
+    if (node.nodeType !== Node.ELEMENT_NODE) {
+      return "";
+    }
+
+    const element = node as HTMLElement;
+
+    if (element.dataset?.emojiTag) {
+      return element.dataset.emojiTag;
+    }
+
+    if (element.tagName === "BR") {
+      return "\n";
+    }
+
+    const content = Array.from(element.childNodes).map(walk).join("");
+
+    if (blockTags.has(element.tagName)) {
+      return content.endsWith("\n") ? content : `${content}\n`;
+    }
+
+    return content;
+  }
+
+  return cleanEditorValue(Array.from(editor.childNodes).map(walk).join(""));
 }
 
 function insertEmojiNodeAtCursor(
@@ -165,7 +212,7 @@ function insertEmojiNodeAtCursor(
     editor.appendChild(spacer);
   }
 
-  setValue(cleanEditorValue(serializeDiscordEditorContent(editor)));
+  setValue(serializeTicketEditorContent(editor));
 }
 
 export default function TicketPanelForm({
@@ -599,17 +646,13 @@ export default function TicketPanelForm({
                     onKeyUp={(e) => saveCurrentEditorRange(e.currentTarget)}
                     onInput={(e) => {
                       setGreeting(
-                        cleanEditorValue(
-                          serializeDiscordEditorContent(e.currentTarget),
-                        ),
+                        serializeTicketEditorContent(e.currentTarget)
                       );
                       saveCurrentEditorRange(e.currentTarget);
                     }}
                     onBlur={(e) =>
                       setGreeting(
-                        cleanEditorValue(
-                          serializeDiscordEditorContent(e.currentTarget),
-                        ),
+                        serializeTicketEditorContent(e.currentTarget)
                       )
                     }
                   />
@@ -784,14 +827,14 @@ function EmbedEditor({
               onInput={(e) => {
                 updateEmbed(
                   "title",
-                  cleanEditorValue(serializeDiscordEditorContent(e.currentTarget)),
+                  serializeTicketEditorContent(e.currentTarget),
                 );
                 saveCurrentEditorRange(e.currentTarget);
               }}
               onBlur={(e) =>
                 updateEmbed(
                   "title",
-                  cleanEditorValue(serializeDiscordEditorContent(e.currentTarget)),
+                  serializeTicketEditorContent(e.currentTarget),
                 )
               }
             />
@@ -832,14 +875,14 @@ function EmbedEditor({
               onInput={(e) => {
                 updateEmbed(
                   "description",
-                  cleanEditorValue(serializeDiscordEditorContent(e.currentTarget)),
+                  serializeTicketEditorContent(e.currentTarget),
                 );
                 saveCurrentEditorRange(e.currentTarget);
               }}
               onBlur={(e) =>
                 updateEmbed(
                   "description",
-                  cleanEditorValue(serializeDiscordEditorContent(e.currentTarget)),
+                  serializeTicketEditorContent(e.currentTarget),
                 )
               }
             />
