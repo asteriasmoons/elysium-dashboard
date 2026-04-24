@@ -84,6 +84,7 @@ const emptyEmbed: TicketEmbedData = {
   image: "",
 };
 
+
 function createEmojiNode(tag: string): HTMLSpanElement | null {
   const match = tag.match(/^<(a)?:([a-zA-Z0-9_]+):(\d+)>$/);
   if (!match) return null;
@@ -107,6 +108,14 @@ function createEmojiNode(tag: string): HTMLSpanElement | null {
 
   span.appendChild(img);
   return span;
+}
+
+function cleanEditorValue(value: string) {
+  return value
+    .replace(/\r\n/g, "\n")
+    .replace(/\r/g, "\n")
+    .replace(/[\u200B\u200C\u200D\uFEFF]/g, "")
+    .replace(/\n{3,}/g, "\n\n");
 }
 
 function insertEmojiNodeAtCursor(
@@ -156,7 +165,7 @@ function insertEmojiNodeAtCursor(
     editor.appendChild(spacer);
   }
 
-  setValue(serializeDiscordEditorContent(editor));
+  setValue(cleanEditorValue(serializeDiscordEditorContent(editor)));
 }
 
 export default function TicketPanelForm({
@@ -589,12 +598,18 @@ export default function TicketPanelForm({
                     onMouseUp={(e) => saveCurrentEditorRange(e.currentTarget)}
                     onKeyUp={(e) => saveCurrentEditorRange(e.currentTarget)}
                     onInput={(e) => {
-                      setGreeting(serializeDiscordEditorContent(e.currentTarget));
+                      setGreeting(
+                        cleanEditorValue(
+                          serializeDiscordEditorContent(e.currentTarget),
+                        ),
+                      );
                       saveCurrentEditorRange(e.currentTarget);
                     }}
                     onBlur={(e) =>
                       setGreeting(
-                        serializeDiscordEditorContent(e.currentTarget),
+                        cleanEditorValue(
+                          serializeDiscordEditorContent(e.currentTarget),
+                        ),
                       )
                     }
                   />
@@ -769,14 +784,14 @@ function EmbedEditor({
               onInput={(e) => {
                 updateEmbed(
                   "title",
-                  serializeDiscordEditorContent(e.currentTarget),
+                  cleanEditorValue(serializeDiscordEditorContent(e.currentTarget)),
                 );
                 saveCurrentEditorRange(e.currentTarget);
               }}
               onBlur={(e) =>
                 updateEmbed(
                   "title",
-                  serializeDiscordEditorContent(e.currentTarget),
+                  cleanEditorValue(serializeDiscordEditorContent(e.currentTarget)),
                 )
               }
             />
@@ -817,14 +832,14 @@ function EmbedEditor({
               onInput={(e) => {
                 updateEmbed(
                   "description",
-                  serializeDiscordEditorContent(e.currentTarget),
+                  cleanEditorValue(serializeDiscordEditorContent(e.currentTarget)),
                 );
                 saveCurrentEditorRange(e.currentTarget);
               }}
               onBlur={(e) =>
                 updateEmbed(
                   "description",
-                  serializeDiscordEditorContent(e.currentTarget),
+                  cleanEditorValue(serializeDiscordEditorContent(e.currentTarget)),
                 )
               }
             />
