@@ -113,35 +113,47 @@ function insertEmojiNodeAtCursor(
   editor: HTMLDivElement | null,
   tag: string,
   setValue: (value: string) => void,
+  savedRangeRef?: React.RefObject<Range | null>,
 ) {
   if (!editor) return;
 
   editor.focus();
 
   const selection = window.getSelection();
+  const range: Range | null = savedRangeRef?.current ?? null;
   const emojiNode = createEmojiNode(tag);
   if (!emojiNode) return;
 
   const spacer = document.createTextNode("\u200B");
 
-  if (!selection || selection.rangeCount === 0) {
-    editor.appendChild(emojiNode);
-    editor.appendChild(spacer);
-  } else {
-    const range = selection.getRangeAt(0);
+  if (range && editor.contains(range.commonAncestorContainer)) {
+    range.deleteContents();
+    range.insertNode(spacer);
+    range.insertNode(emojiNode);
+    range.setStartAfter(spacer);
+    range.collapse(true);
+    selection?.removeAllRanges();
+    selection?.addRange(range);
+    if (savedRangeRef) savedRangeRef.current = range.cloneRange();
+  } else if (selection && selection.rangeCount > 0) {
+    const liveRange = selection.getRangeAt(0);
 
-    if (!editor.contains(range.commonAncestorContainer)) {
+    if (editor.contains(liveRange.commonAncestorContainer)) {
+      liveRange.deleteContents();
+      liveRange.insertNode(spacer);
+      liveRange.insertNode(emojiNode);
+      liveRange.setStartAfter(spacer);
+      liveRange.collapse(true);
+      selection.removeAllRanges();
+      selection.addRange(liveRange);
+      if (savedRangeRef) savedRangeRef.current = liveRange.cloneRange();
+    } else {
       editor.appendChild(emojiNode);
       editor.appendChild(spacer);
-    } else {
-      range.deleteContents();
-      range.insertNode(spacer);
-      range.insertNode(emojiNode);
-      range.setStartAfter(spacer);
-      range.collapse(true);
-      selection.removeAllRanges();
-      selection.addRange(range);
     }
+  } else {
+    editor.appendChild(emojiNode);
+    editor.appendChild(spacer);
   }
 
   setValue(serializeDiscordEditorContent(editor));
@@ -201,6 +213,16 @@ export default function TicketPanelForm({
   const embedDescriptionRef = useRef<HTMLDivElement | null>(null);
   const greetingTitleRef = useRef<HTMLDivElement | null>(null);
   const greetingDescriptionRef = useRef<HTMLDivElement | null>(null);
+  const savedRangeRef = useRef<Range | null>(null);
+
+  function saveCurrentEditorRange(editor: HTMLDivElement | null) {
+    if (!editor) return;
+    const selection = window.getSelection();
+    if (!selection || selection.rangeCount === 0) return;
+    const range = selection.getRangeAt(0);
+    if (!editor.contains(range.commonAncestorContainer)) return;
+    savedRangeRef.current = range.cloneRange();
+  }
 
   const postChannels = channels.filter((channel) =>
     [0, 5, 15].includes(Number(channel.type)),
@@ -314,38 +336,50 @@ export default function TicketPanelForm({
     }
 
     if (activeEditor === "greeting") {
-      insertEmojiNodeAtCursor(greetingRef.current, tag, setGreeting);
+      insertEmojiNodeAtCursor(greetingRef.current, tag, setGreeting, savedRangeRef);
       setShowEmojiPicker(false);
       return;
     }
 
     if (activeEditor === "embedTitle") {
-      insertEmojiNodeAtCursor(embedTitleRef.current, tag, (value) =>
-        updateEmbedField("title", value),
+      insertEmojiNodeAtCursor(
+        embedTitleRef.current,
+        tag,
+        (value) => updateEmbedField("title", value),
+        savedRangeRef,
       );
       setShowEmojiPicker(false);
       return;
     }
 
     if (activeEditor === "embedDescription") {
-      insertEmojiNodeAtCursor(embedDescriptionRef.current, tag, (value) =>
-        updateEmbedField("description", value),
+      insertEmojiNodeAtCursor(
+        embedDescriptionRef.current,
+        tag,
+        (value) => updateEmbedField("description", value),
+        savedRangeRef,
       );
       setShowEmojiPicker(false);
       return;
     }
 
     if (activeEditor === "greetingTitle") {
-      insertEmojiNodeAtCursor(greetingTitleRef.current, tag, (value) =>
-        updateGreetingEmbedField("title", value),
+      insertEmojiNodeAtCursor(
+        greetingTitleRef.current,
+        tag,
+        (value) => updateGreetingEmbedField("title", value),
+        savedRangeRef,
       );
       setShowEmojiPicker(false);
       return;
     }
 
     if (activeEditor === "greetingDescription") {
-      insertEmojiNodeAtCursor(greetingDescriptionRef.current, tag, (value) =>
-        updateGreetingEmbedField("description", value),
+      insertEmojiNodeAtCursor(
+        greetingDescriptionRef.current,
+        tag,
+        (value) => updateGreetingEmbedField("description", value),
+        savedRangeRef,
       );
       setShowEmojiPicker(false);
     }
@@ -548,12 +582,16 @@ export default function TicketPanelForm({
                     className={styles.textarea}
                     contentEditable
                     suppressContentEditableWarning
-                    onFocus={() => setActiveEditor("greeting")}
-                    onInput={(e) =>
-                      setGreeting(
-                        serializeDiscordEditorContent(e.currentTarget),
-                      )
-                    }
+                    onFocus={(e) => {
+                      setActiveEditor("greeting");
+                      saveCurrentEditorRange(e.currentTarget);
+                    }}
+                    onMouseUp={(e) => saveCurrentEditorRange(e.currentTarget)}
+                    onKeyUp={(e) => saveCurrentEditorRange(e.currentTarget)}
+                    onInput={(e) => {
+                      setGreeting(serializeDiscordEditorContent(e.currentTarget));
+                      saveCurrentEditorRange(e.currentTarget);
+                    }}
                     onBlur={(e) =>
                       setGreeting(
                         serializeDiscordEditorContent(e.currentTarget),
@@ -589,6 +627,7 @@ export default function TicketPanelForm({
             descriptionRef={embedDescriptionRef}
             setActiveEditor={setActiveEditor}
             setShowEmojiPicker={setShowEmojiPicker}
+            saveCurrentEditorRange={saveCurrentEditorRange}
             titleEditorKey="embedTitle"
             descriptionEditorKey="embedDescription"
           />
@@ -601,6 +640,7 @@ export default function TicketPanelForm({
             descriptionRef={greetingDescriptionRef}
             setActiveEditor={setActiveEditor}
             setShowEmojiPicker={setShowEmojiPicker}
+            saveCurrentEditorRange={saveCurrentEditorRange}
             titleEditorKey="greetingTitle"
             descriptionEditorKey="greetingDescription"
           />
@@ -680,6 +720,7 @@ type EmbedEditorProps = {
     >
   >;
   setShowEmojiPicker: React.Dispatch<React.SetStateAction<boolean>>;
+  saveCurrentEditorRange: (editor: HTMLDivElement | null) => void;
   titleEditorKey: "embedTitle" | "greetingTitle";
   descriptionEditorKey: "embedDescription" | "greetingDescription";
 };
@@ -692,6 +733,7 @@ function EmbedEditor({
   descriptionRef,
   setActiveEditor,
   setShowEmojiPicker,
+  saveCurrentEditorRange,
   titleEditorKey,
   descriptionEditorKey,
 }: EmbedEditorProps) {
@@ -718,13 +760,19 @@ function EmbedEditor({
               className={styles.textareaSmall}
               contentEditable
               suppressContentEditableWarning
-              onFocus={() => setActiveEditor(titleEditorKey)}
-              onInput={(e) =>
+              onFocus={(e) => {
+                setActiveEditor(titleEditorKey);
+                saveCurrentEditorRange(e.currentTarget);
+              }}
+              onMouseUp={(e) => saveCurrentEditorRange(e.currentTarget)}
+              onKeyUp={(e) => saveCurrentEditorRange(e.currentTarget)}
+              onInput={(e) => {
                 updateEmbed(
                   "title",
                   serializeDiscordEditorContent(e.currentTarget),
-                )
-              }
+                );
+                saveCurrentEditorRange(e.currentTarget);
+              }}
               onBlur={(e) =>
                 updateEmbed(
                   "title",
@@ -760,13 +808,19 @@ function EmbedEditor({
               className={styles.textarea}
               contentEditable
               suppressContentEditableWarning
-              onFocus={() => setActiveEditor(descriptionEditorKey)}
-              onInput={(e) =>
+              onFocus={(e) => {
+                setActiveEditor(descriptionEditorKey);
+                saveCurrentEditorRange(e.currentTarget);
+              }}
+              onMouseUp={(e) => saveCurrentEditorRange(e.currentTarget)}
+              onKeyUp={(e) => saveCurrentEditorRange(e.currentTarget)}
+              onInput={(e) => {
                 updateEmbed(
                   "description",
                   serializeDiscordEditorContent(e.currentTarget),
-                )
-              }
+                );
+                saveCurrentEditorRange(e.currentTarget);
+              }}
               onBlur={(e) =>
                 updateEmbed(
                   "description",
