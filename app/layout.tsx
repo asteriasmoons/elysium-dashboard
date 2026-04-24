@@ -1,9 +1,6 @@
-"use client";
 import type { Metadata } from "next";
 import "./globals.css";
 import { Lily_Script_One, Hachi_Maru_Pop, Gorditas } from "next/font/google";
-
-import { useEffect } from "react";
 
 const lily = Lily_Script_One({
   subsets: ["latin"],
@@ -33,14 +30,22 @@ export default function RootLayout({
 }: {
   children: React.ReactNode;
 }) {
-  useEffect(() => {
-    if ("serviceWorker" in navigator) {
-      navigator.serviceWorker.register("/sw.js");
-    }
-  }, []);
   return (
     <html lang="en">
-      <body className={`${lily.variable} ${hachi.variable} ${gorditas.variable}`}>{children}</body>
+      <body className={`${lily.variable} ${hachi.variable} ${gorditas.variable}`}>
+        {children}
+        <script
+          dangerouslySetInnerHTML={{
+            __html: `
+              if ("serviceWorker" in navigator) {
+                window.addEventListener("load", function () {
+                  navigator.serviceWorker.register("/sw.js");
+                });
+              }
+            `,
+          }}
+        />
+      </body>
     </html>
   );
 }
