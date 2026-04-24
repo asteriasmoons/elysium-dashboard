@@ -42,11 +42,26 @@ type TicketPanel = {
   updatedAt: string | null;
 };
 
+type GuildChannel = {
+  id: string;
+  name: string;
+  type?: number;
+};
+
+type GuildRole = {
+  id: string;
+  name: string;
+  color?: string;
+  position?: number;
+};
+
 export default function TicketsPage() {
   const params = useParams<{ guildId: string }>();
   const guildId = String(params.guildId);
 
   const [panels, setPanels] = useState<TicketPanel[]>([]);
+  const [channels, setChannels] = useState<GuildChannel[]>([]);
+  const [roles, setRoles] = useState<GuildRole[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
   const [confirmDeleteId, setConfirmDeleteId] = useState<string | null>(null);
@@ -74,6 +89,48 @@ export default function TicketsPage() {
   useEffect(() => {
     fetchPanels();
   }, [guildId]);
+
+  useEffect(() => {
+    async function fetchGuildMeta() {
+      try {
+        const [channelsRes, rolesRes] = await Promise.all([
+          fetch(`/api/guilds/${guildId}/channels`),
+          fetch(`/api/guilds/${guildId}/roles`),
+        ]);
+
+        const channelsData = await channelsRes.json();
+        const rolesData = await rolesRes.json();
+
+        setChannels(
+          Array.isArray(channelsData.channels) ? channelsData.channels : [],
+        );
+        setRoles(Array.isArray(rolesData.roles) ? rolesData.roles : []);
+      } catch {
+        setChannels([]);
+        setRoles([]);
+      }
+    }
+
+    fetchGuildMeta();
+  }, [guildId]);
+
+  function getChannelName(channelId: string | null) {
+    if (!channelId) return "None";
+    const channel = channels.find((item) => item.id === channelId);
+    return channel ? `#${channel.name}` : channelId;
+  }
+
+  function getCategoryName(channelId: string | null) {
+    if (!channelId) return "None";
+    const channel = channels.find((item) => item.id === channelId);
+    return channel ? channel.name : channelId;
+  }
+
+  function getRoleName(roleId: string | null) {
+    if (!roleId) return "None";
+    const role = roles.find((item) => item.id === roleId);
+    return role ? `@${role.name}` : roleId;
+  }
 
   async function deletePanel(panelId: string) {
     try {
@@ -166,7 +223,7 @@ export default function TicketsPage() {
                     </h2>
 
                     <p className={styles.cardDescriptionMuted}>
-                      Post Channel: {panel.postChannelId}
+                      Post Channel: {getChannelName(panel.postChannelId)}
                     </p>
                   </div>
 
@@ -181,21 +238,21 @@ export default function TicketsPage() {
                   <div className={styles.metaItem}>
                     <span className={styles.metaLabel}>Ticket Category</span>
                     <span className={styles.metaValue}>
-                      {panel.ticketCategoryId}
+                      {getCategoryName(panel.ticketCategoryId)}
                     </span>
                   </div>
 
                   <div className={styles.metaItem}>
                     <span className={styles.metaLabel}>Role To Ping</span>
                     <span className={styles.metaValue}>
-                      {panel.roleToPing || "None"}
+                      {getRoleName(panel.roleToPing)}
                     </span>
                   </div>
 
                   <div className={styles.metaItem}>
                     <span className={styles.metaLabel}>Transcript Channel</span>
                     <span className={styles.metaValue}>
-                      {panel.transcriptChannelId || "None"}
+                      {getChannelName(panel.transcriptChannelId)}
                     </span>
                   </div>
 
@@ -361,23 +418,32 @@ export default function TicketsPage() {
                     className={styles.primaryLink}
                     onClick={async () => {
                       try {
-                        const res = await fetch(`/api/tickets/${panel._id}/send`, {
-                          method: "POST",
-                          headers: {
-                            "Content-Type": "application/json",
+                        const res = await fetch(
+                          `/api/tickets/${panel._id}/send`,
+                          {
+                            method: "POST",
+                            headers: {
+                              "Content-Type": "application/json",
+                            },
+                            body: JSON.stringify({ guildId }),
                           },
-                          body: JSON.stringify({ guildId }),
-                        });
+                        );
 
                         const data = await res.json();
 
                         if (!res.ok) {
-                          throw new Error(data?.error || "Failed to send panel");
+                          throw new Error(
+                            data?.error || "Failed to send panel",
+                          );
                         }
 
                         alert("Ticket panel sent successfully.");
                       } catch (err) {
-                        alert(err instanceof Error ? err.message : "Failed to send panel");
+                        alert(
+                          err instanceof Error
+                            ? err.message
+                            : "Failed to send panel",
+                        );
                       }
                     }}
                   >
