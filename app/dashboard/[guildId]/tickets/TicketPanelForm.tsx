@@ -53,6 +53,13 @@ type GuildChannel = {
   type?: number;
 };
 
+type GuildRole = {
+  id: string;
+  name: string;
+  color?: string;
+  position?: number;
+};
+
 type Props = {
   guildId: string;
   mode: Mode;
@@ -86,6 +93,7 @@ export default function TicketPanelForm({
   const router = useRouter();
 
   const [channels, setChannels] = useState<GuildChannel[]>([]);
+  const [roles, setRoles] = useState<GuildRole[]>([]);
   const [emojis, setEmojis] = useState<DiscordEmoji[]>([]);
   const [activeEditor, setActiveEditor] = useState<
     | "emoji"
@@ -131,34 +139,60 @@ export default function TicketPanelForm({
   const greetingTitleRef = useRef<HTMLDivElement | null>(null);
   const greetingDescriptionRef = useRef<HTMLDivElement | null>(null);
 
+  const postChannels = channels.filter((channel) =>
+    [0, 5, 15].includes(Number(channel.type)),
+  );
+  const categoryChannels = channels.filter(
+    (channel) => Number(channel.type) === 4,
+  );
+  const transcriptChannels = channels.filter((channel) =>
+    [0, 5].includes(Number(channel.type)),
+  );
+
   useEffect(() => {
     async function loadData() {
-      const [channelsRes, emojiRes] = await Promise.all([
+      const [channelsRes, rolesRes, emojiRes] = await Promise.all([
         fetch(`/api/guilds/${guildId}/channels`),
+        fetch(`/api/guilds/${guildId}/roles`),
         fetch("/api/emojis"),
       ]);
 
       const channelsData = await channelsRes.json();
+      const rolesData = await rolesRes.json();
       const emojiData = await emojiRes.json();
 
-      const nextChannels = Array.isArray(channelsData.channels)
+      const nextChannels: GuildChannel[] = Array.isArray(channelsData.channels)
         ? channelsData.channels
         : [];
+      const nextRoles: GuildRole[] = Array.isArray(rolesData.roles)
+        ? rolesData.roles
+        : [];
+
+      const nextPostChannels = nextChannels.filter((channel) =>
+        [0, 5, 15].includes(Number(channel.type)),
+      );
+      const nextCategoryChannels = nextChannels.filter(
+        (channel) => Number(channel.type) === 4,
+      );
+      const nextTranscriptChannels = nextChannels.filter((channel) =>
+        [0, 5].includes(Number(channel.type)),
+      );
 
       setChannels(nextChannels);
+      setRoles(nextRoles);
       setEmojis(Array.isArray(emojiData.emojis) ? emojiData.emojis : []);
 
-      if (!postChannelId && nextChannels[0]?.id) {
-        setPostChannelId(nextChannels[0].id);
-      }
-
-      if (!ticketCategoryId && nextChannels[0]?.id) {
-        setTicketCategoryId(nextChannels[0].id);
-      }
+      setPostChannelId((current) => current || nextPostChannels[0]?.id || "");
+      setTicketCategoryId(
+        (current) => current || nextCategoryChannels[0]?.id || "",
+      );
+      setTranscriptChannelId(
+        (current) => current || nextTranscriptChannels[0]?.id || "",
+      );
     }
 
     loadData();
-  }, [guildId, postChannelId, ticketCategoryId]);
+  }, [guildId]);
 
   useEffect(() => {
     syncDiscordEditorContent(greetingRef.current, greeting);
@@ -393,7 +427,7 @@ export default function TicketPanelForm({
                     value={postChannelId}
                     onChange={(e) => setPostChannelId(e.target.value)}
                   >
-                    {channels.map((channel) => (
+                    {postChannels.map((channel) => (
                       <option key={channel.id} value={channel.id}>
                         #{channel.name}
                       </option>
@@ -408,7 +442,7 @@ export default function TicketPanelForm({
                     value={ticketCategoryId}
                     onChange={(e) => setTicketCategoryId(e.target.value)}
                   >
-                    {channels.map((channel) => (
+                    {categoryChannels.map((channel) => (
                       <option key={channel.id} value={channel.id}>
                         #{channel.name}
                       </option>
@@ -420,22 +454,34 @@ export default function TicketPanelForm({
               <div className={styles.rowFields}>
                 <div className={styles.fieldGroup}>
                   <label className={styles.label}>Role To Ping</label>
-                  <input
-                    className={styles.input}
+                  <select
+                    className={styles.glassSelect}
                     value={roleToPing}
                     onChange={(e) => setRoleToPing(e.target.value)}
-                    placeholder="Role ID"
-                  />
+                  >
+                    <option value="">No role</option>
+                    {roles.map((role) => (
+                      <option key={role.id} value={role.id}>
+                        @{role.name}
+                      </option>
+                    ))}
+                  </select>
                 </div>
 
                 <div className={styles.fieldGroup}>
                   <label className={styles.label}>Transcript Channel</label>
-                  <input
-                    className={styles.input}
+                  <select
+                    className={styles.glassSelect}
                     value={transcriptChannelId}
                     onChange={(e) => setTranscriptChannelId(e.target.value)}
-                    placeholder="Channel ID"
-                  />
+                  >
+                    <option value="">No transcript channel</option>
+                    {transcriptChannels.map((channel) => (
+                      <option key={channel.id} value={channel.id}>
+                        #{channel.name}
+                      </option>
+                    ))}
+                  </select>
                 </div>
               </div>
 
