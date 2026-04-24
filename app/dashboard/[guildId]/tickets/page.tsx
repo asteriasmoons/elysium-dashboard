@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useState, useCallback } from "react";
 import Link from "next/link";
 import Image from "next/image";
 import { useParams } from "next/navigation";
@@ -65,8 +65,12 @@ export default function TicketsPage() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
   const [confirmDeleteId, setConfirmDeleteId] = useState<string | null>(null);
+  const [sendStatus, setSendStatus] = useState<{
+    type: "success" | "error";
+    message: string;
+  } | null>(null);
 
-  async function fetchPanels() {
+  const fetchPanels = useCallback(async () => {
     try {
       setLoading(true);
       setError("");
@@ -84,11 +88,11 @@ export default function TicketsPage() {
     } finally {
       setLoading(false);
     }
-  }
+  }, [guildId]);
 
   useEffect(() => {
     fetchPanels();
-  }, [guildId]);
+  }, [fetchPanels]);
 
   useEffect(() => {
     async function fetchGuildMeta() {
@@ -194,6 +198,23 @@ export default function TicketsPage() {
         {error ? (
           <div className={styles.emptyState}>
             <p className={styles.emptyText}>{error}</p>
+          </div>
+        ) : null}
+
+        {sendStatus ? (
+          <div
+            className={`${styles.sendStatusBox} ${
+              sendStatus.type === "success"
+                ? styles.sendStatusSuccess
+                : styles.sendStatusError
+            }`}
+          >
+            <p className={styles.sendStatusKicker}>
+              {sendStatus.type === "success"
+                ? "Panel Sent"
+                : "Panel Not Sent"}
+            </p>
+            <p className={styles.sendStatusMessage}>{sendStatus.message}</p>
           </div>
         ) : null}
 
@@ -418,6 +439,8 @@ export default function TicketsPage() {
                     className={styles.primaryLink}
                     onClick={async () => {
                       try {
+                        setSendStatus(null);
+
                         const res = await fetch(
                           `/api/tickets/${panel._id}/send`,
                           {
@@ -425,7 +448,10 @@ export default function TicketsPage() {
                             headers: {
                               "Content-Type": "application/json",
                             },
-                            body: JSON.stringify({ guildId }),
+                            body: JSON.stringify({
+                              guildId,
+                              channelId: panel.postChannelId,
+                            }),
                           },
                         );
 
@@ -437,13 +463,18 @@ export default function TicketsPage() {
                           );
                         }
 
-                        alert("Ticket panel sent successfully.");
+                        setSendStatus({
+                          type: "success",
+                          message: `Ticket panel sent to ${getChannelName(panel.postChannelId)}.`,
+                        });
                       } catch (err) {
-                        alert(
-                          err instanceof Error
-                            ? err.message
-                            : "Failed to send panel",
-                        );
+                        setSendStatus({
+                          type: "error",
+                          message:
+                            err instanceof Error
+                              ? err.message
+                              : "Failed to send ticket panel.",
+                        });
                       }
                     }}
                   >

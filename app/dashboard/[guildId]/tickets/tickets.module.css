@@ -560,3 +560,44 @@
     grid-template-columns: repeat(5, 1fr);
   }
 }
+/* Status Box Styles */
+.sendStatusBox {
+  margin: 0 0 18px;
+  padding: 16px 18px;
+  border-radius: 18px;
+  border: 1px solid rgba(255, 255, 255, 0.16);
+  background: rgba(255, 255, 255, 0.08);
+  box-shadow: 0 14px 36px rgba(0, 0, 0, 0.28);
+  backdrop-filter: blur(18px);
+  -webkit-backdrop-filter: blur(18px);
+}
+
+.sendStatusSuccess {
+  border-color: rgba(3, 227, 252, 0.42);
+  background:
+    linear-gradient(135deg, rgba(3, 227, 252, 0.16), rgba(96, 85, 247, 0.18)),
+    rgba(255, 255, 255, 0.06);
+}
+
+.sendStatusError {
+  border-color: rgba(255, 120, 160, 0.45);
+  background:
+    linear-gradient(135deg, rgba(255, 120, 160, 0.16), rgba(96, 85, 247, 0.14)),
+    rgba(255, 255, 255, 0.06);
+}
+
+.sendStatusKicker {
+  margin: 0 0 4px;
+  font-family: var(--font-title);
+  font-size: 1rem;
+  font-weight: 800;
+  color: #ffffff;
+}
+
+.sendStatusMessage {
+  margin: 0;
+  font-family: var(--font-body);
+  font-size: 0.92rem;
+  line-height: 1.45;
+  color: rgba(244, 244, 245, 0.76);
+}
