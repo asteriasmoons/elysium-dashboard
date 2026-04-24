@@ -88,7 +88,6 @@
 
 }
 
-
 .headerRow {
   display: flex;
   justify-content: space-between;
@@ -195,4 +194,45 @@
   .grid {
     grid-template-columns: repeat(3, minmax(0, 1fr));
   }
+}
+
+.topBarNav {
+  width: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 18px;
+}
+
+.topBarBrand {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.topBarKicker {
+  font-size: 0.75rem;
+  opacity: 0.7;
+}
+
+.topBarTitle {
+  font-size: 1.1rem;
+  font-weight: 700;
+  font-family: var(--font-title);
+}
+
+.notificationButton {
+  width: 42px;
+  height: 42px;
+  border-radius: 14px;
+  border: 1px solid rgba(255, 255, 255, 0.16);
+  background: rgba(255, 255, 255, 0.08);
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+}
+
+.notificationButton:hover {
+  background: rgba(255, 255, 255, 0.14);
 }

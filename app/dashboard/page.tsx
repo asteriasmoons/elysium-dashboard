@@ -3,6 +3,7 @@ import { auth } from "@/lib/auth"
 import { redirect } from "next/navigation"
 import { GuildCard } from "@/components/GuildCard"
 import { fetchUserGuilds, filterManageableGuilds, isBotInGuild, getGuildIconUrl } from "@/lib/discord"
+import PushNotificationPopup from "@/components/push/PushNotificationPopup";
 
 import styles from "./dashboard.module.css"
 
@@ -62,6 +63,15 @@ export default async function DashboardPage() {
   return (
     <div className={styles.page}>
       <div className={styles.container}>
+        <div className={styles.topBarNav}>
+          <div className={styles.topBarBrand}>
+            <span className={styles.topBarKicker}>Elysium</span>
+            <span className={styles.topBarTitle}>Bot Dashboard</span>
+          </div>
+
+          <PushNotificationPopup />
+        </div>
+
         <div className={styles.headerRow}>
           <div className={styles.divider} />
           <div>
