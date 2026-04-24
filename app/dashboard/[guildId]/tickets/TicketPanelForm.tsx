@@ -332,6 +332,16 @@ export default function TicketPanelForm({
               transcript settings.
             </p>
           </div>
+
+          <div className={styles.actions}>
+            <button
+              type="button"
+              className={styles.primaryLink}
+              onClick={() => router.push(`/dashboard/${guildId}/tickets`)}
+            >
+              Back
+            </button>
+          </div>
         </div>
 
         <form onSubmit={handleSubmit} className={styles.formStack}>
