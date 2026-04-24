@@ -1,4 +1,5 @@
 import TicketPanelForm from "../TicketPanelForm";
+import { getTicketPanelById } from "@/lib/ticketAccess";
 
 type PageProps = {
   params: Promise<{
@@ -8,18 +9,29 @@ type PageProps = {
 };
 
 async function getPanel(guildId: string, id: string) {
-  const res = await fetch(
-    `/api/tickets/${id}?guildId=${guildId}`,
-    {
-      cache: "no-store",
-    },
-  );
+  const panel = await getTicketPanelById(guildId, id);
 
-  if (!res.ok) {
+  if (!panel) {
     return null;
   }
 
-  return res.json();
+  return {
+    _id: String(panel._id),
+    guildId: panel.guildId,
+    panelName: panel.panelName,
+    creatorId: panel.creatorId,
+    emoji: panel.emoji ?? null,
+    greeting: panel.greeting ?? "",
+    postChannelId: panel.postChannelId,
+    ticketCategoryId: panel.ticketCategoryId,
+    transcriptsEnabled: Boolean(panel.transcriptsEnabled),
+    transcriptChannelId: panel.transcriptChannelId ?? null,
+    roleToPing: panel.roleToPing ?? null,
+    embed: panel.embed,
+    greetingEmbed: panel.greetingEmbed ?? null,
+    createdAt: panel.createdAt ? new Date(panel.createdAt).toISOString() : null,
+    updatedAt: panel.updatedAt ? new Date(panel.updatedAt).toISOString() : null,
+  };
 }
 
 export default async function EditTicketPanelPage({ params }: PageProps) {
