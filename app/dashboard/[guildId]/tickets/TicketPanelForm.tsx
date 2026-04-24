@@ -9,7 +9,7 @@ import EmojiPicker, {
 } from "@/components/discord/EmojiPicker";
 import RenderDiscordText from "@/components/discord/RenderDiscordText";
 import {
-  insertDiscordEmojiTagIntoEditor,
+  getDiscordEmojiSrc,
   serializeDiscordEditorContent,
   syncDiscordEditorContent,
 } from "@/lib/discordEmojiEditor";
@@ -83,6 +83,69 @@ const emptyEmbed: TicketEmbedData = {
   thumbnail: "",
   image: "",
 };
+
+function createEmojiNode(tag: string): HTMLSpanElement | null {
+  const match = tag.match(/^<(a)?:([a-zA-Z0-9_]+):(\d+)>$/);
+  if (!match) return null;
+
+  const [, animatedFlag, name, id] = match;
+  const span = document.createElement("span");
+  const img = document.createElement("img");
+
+  span.contentEditable = "false";
+  span.setAttribute("data-emoji-tag", tag);
+  span.style.display = "inline-flex";
+  span.style.alignItems = "center";
+  span.style.verticalAlign = "-0.2em";
+
+  img.src = getDiscordEmojiSrc(id, Boolean(animatedFlag));
+  img.alt = `:${name}:`;
+  img.title = `:${name}:`;
+  img.width = 22;
+  img.height = 22;
+  img.style.display = "block";
+
+  span.appendChild(img);
+  return span;
+}
+
+function insertEmojiNodeAtCursor(
+  editor: HTMLDivElement | null,
+  tag: string,
+  setValue: (value: string) => void,
+) {
+  if (!editor) return;
+
+  editor.focus();
+
+  const selection = window.getSelection();
+  const emojiNode = createEmojiNode(tag);
+  if (!emojiNode) return;
+
+  const spacer = document.createTextNode("\u200B");
+
+  if (!selection || selection.rangeCount === 0) {
+    editor.appendChild(emojiNode);
+    editor.appendChild(spacer);
+  } else {
+    const range = selection.getRangeAt(0);
+
+    if (!editor.contains(range.commonAncestorContainer)) {
+      editor.appendChild(emojiNode);
+      editor.appendChild(spacer);
+    } else {
+      range.deleteContents();
+      range.insertNode(spacer);
+      range.insertNode(emojiNode);
+      range.setStartAfter(spacer);
+      range.collapse(true);
+      selection.removeAllRanges();
+      selection.addRange(range);
+    }
+  }
+
+  setValue(serializeDiscordEditorContent(editor));
+}
 
 export default function TicketPanelForm({
   guildId,
@@ -251,57 +314,40 @@ export default function TicketPanelForm({
     }
 
     if (activeEditor === "greeting") {
-      insertDiscordEmojiTagIntoEditor(
-        greetingRef.current,
-        greeting,
-        setGreeting,
-        tag,
-        () => setShowEmojiPicker(false),
-      );
+      insertEmojiNodeAtCursor(greetingRef.current, tag, setGreeting);
+      setShowEmojiPicker(false);
       return;
     }
 
     if (activeEditor === "embedTitle") {
-      insertDiscordEmojiTagIntoEditor(
-        embedTitleRef.current,
-        embed.title ?? "",
-        (value) => updateEmbedField("title", value),
-        tag,
-        () => setShowEmojiPicker(false),
+      insertEmojiNodeAtCursor(embedTitleRef.current, tag, (value) =>
+        updateEmbedField("title", value),
       );
+      setShowEmojiPicker(false);
       return;
     }
 
     if (activeEditor === "embedDescription") {
-      insertDiscordEmojiTagIntoEditor(
-        embedDescriptionRef.current,
-        embed.description ?? "",
-        (value) => updateEmbedField("description", value),
-        tag,
-        () => setShowEmojiPicker(false),
+      insertEmojiNodeAtCursor(embedDescriptionRef.current, tag, (value) =>
+        updateEmbedField("description", value),
       );
+      setShowEmojiPicker(false);
       return;
     }
 
     if (activeEditor === "greetingTitle") {
-      insertDiscordEmojiTagIntoEditor(
-        greetingTitleRef.current,
-        greetingEmbed.title ?? "",
-        (value) => updateGreetingEmbedField("title", value),
-        tag,
-        () => setShowEmojiPicker(false),
+      insertEmojiNodeAtCursor(greetingTitleRef.current, tag, (value) =>
+        updateGreetingEmbedField("title", value),
       );
+      setShowEmojiPicker(false);
       return;
     }
 
     if (activeEditor === "greetingDescription") {
-      insertDiscordEmojiTagIntoEditor(
-        greetingDescriptionRef.current,
-        greetingEmbed.description ?? "",
-        (value) => updateGreetingEmbedField("description", value),
-        tag,
-        () => setShowEmojiPicker(false),
+      insertEmojiNodeAtCursor(greetingDescriptionRef.current, tag, (value) =>
+        updateGreetingEmbedField("description", value),
       );
+      setShowEmojiPicker(false);
     }
   }
 
