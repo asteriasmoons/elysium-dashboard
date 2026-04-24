@@ -75,7 +75,6 @@ export default async function DashboardPage() {
         <div className={styles.headerRow}>
           <div className={styles.divider} />
           <div>
-            <h1 className={styles.title}>Dashboard</h1>
             <p className={styles.subtitle}>Welcome, {session.user?.name}!</p>
           </div>
 
