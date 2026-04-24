@@ -9,7 +9,7 @@ type PageProps = {
 
 async function getPanel(guildId: string, id: string) {
   const res = await fetch(
-    `${process.env.NEXT_PUBLIC_BASE_URL}/api/tickets/${id}?guildId=${guildId}`,
+    `/api/tickets/${id}?guildId=${guildId}`,
     {
       cache: "no-store",
     },

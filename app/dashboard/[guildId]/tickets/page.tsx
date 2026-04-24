@@ -358,6 +358,34 @@ export default function TicketsPage() {
 
                   <button
                     type="button"
+                    className={styles.primaryLink}
+                    onClick={async () => {
+                      try {
+                        const res = await fetch(`/api/tickets/${panel._id}/send`, {
+                          method: "POST",
+                          headers: {
+                            "Content-Type": "application/json",
+                          },
+                          body: JSON.stringify({ guildId }),
+                        });
+
+                        const data = await res.json();
+
+                        if (!res.ok) {
+                          throw new Error(data?.error || "Failed to send panel");
+                        }
+
+                        alert("Ticket panel sent successfully.");
+                      } catch (err) {
+                        alert(err instanceof Error ? err.message : "Failed to send panel");
+                      }
+                    }}
+                  >
+                    Send
+                  </button>
+
+                  <button
+                    type="button"
                     className={styles.deleteButton}
                     onClick={() => setConfirmDeleteId(panel._id)}
                   >
