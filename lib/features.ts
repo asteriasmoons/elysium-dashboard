@@ -4,6 +4,7 @@ export type FeatureKey =
   | "mood-tracker"
   | "reading"
   | "embeds"
+  | "tickets"
   | "reminders"
   | "prompts"
   | "sprints"
@@ -63,6 +64,14 @@ export const FEATURES: FeatureItem[] = [
     scope: "guild",
     status: "ready",
   },
+  {
+    key: "tickets",
+    title: "Ticket Panels",
+    description: "Create, edit and send ticket panels to your discord channels.",
+    href: (guildId) => `/dashboard/${guildId}/tickets`,
+    scope: "guild",
+    status: "ready",
+  }, 
   {
     key: "sprints",
     title: "Sprints",
