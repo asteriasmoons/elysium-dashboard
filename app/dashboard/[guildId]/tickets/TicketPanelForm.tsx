@@ -120,19 +120,7 @@ function cleanEditorValue(value: string) {
 }
 
 function serializeTicketEditorContent(editor: HTMLDivElement) {
-  const blockTags = new Set([
-    "DIV",
-    "P",
-    "LI",
-    "UL",
-    "OL",
-    "H1",
-    "H2",
-    "H3",
-    "H4",
-    "H5",
-    "H6",
-  ]);
+  const blockTags = new Set(["DIV", "P"]);
 
   function walk(node: Node): string {
     if (node.nodeType === Node.TEXT_NODE) {
@@ -153,16 +141,36 @@ function serializeTicketEditorContent(editor: HTMLDivElement) {
       return "\n";
     }
 
-    const content = Array.from(element.childNodes).map(walk).join("");
-
-    if (blockTags.has(element.tagName)) {
-      return content.endsWith("\n") ? content : `${content}\n`;
-    }
-
-    return content;
+    return Array.from(element.childNodes).map(walk).join("");
   }
 
-  return cleanEditorValue(Array.from(editor.childNodes).map(walk).join(""));
+  let output = "";
+
+  for (const node of Array.from(editor.childNodes)) {
+    if (node.nodeType === Node.ELEMENT_NODE) {
+      const element = node as HTMLElement;
+
+      if (blockTags.has(element.tagName)) {
+        const content = walk(element);
+
+        if (output && !output.endsWith("\n")) {
+          output += "\n";
+        }
+
+        output += content;
+
+        if (!output.endsWith("\n")) {
+          output += "\n";
+        }
+
+        continue;
+      }
+    }
+
+    output += walk(node);
+  }
+
+  return cleanEditorValue(output);
 }
 
 function insertEmojiNodeAtCursor(
