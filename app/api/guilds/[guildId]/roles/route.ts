@@ -10,9 +10,8 @@ export async function GET(_: Request, { params }: RouteContext) {
   const { guildId } = await params;
 
   const botApiUrl = process.env.BOT_API_URL;
-  const botApiKey = process.env.BOT_API_KEY;
 
-  if (!botApiUrl || !botApiKey) {
+  if (!botApiUrl) {
     return NextResponse.json(
       { error: "Missing bot API configuration" },
       { status: 500 },
@@ -20,9 +19,6 @@ export async function GET(_: Request, { params }: RouteContext) {
   }
 
   const response = await fetch(`${botApiUrl}/guilds/${guildId}/roles`, {
-    headers: {
-      Authorization: `Bearer ${botApiKey}`,
-    },
     cache: "no-store",
   });
 
