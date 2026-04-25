@@ -5,6 +5,7 @@ export type FeatureKey =
   | "reading"
   | "embeds"
   | "tickets"
+  | "role-panels"
   | "reminders"
   | "prompts"
   | "sprints"
@@ -72,6 +73,14 @@ export const FEATURES: FeatureItem[] = [
     scope: "guild",
     status: "ready",
   }, 
+  {
+    key: "role-panels",
+    title: "Role Panels",
+    description: "Create, edit and send role panels to your Discord channels.",
+    href: (guildId) => `/dashboard/${guildId}/role-panels`,
+    scope: "guild",
+    status: "ready",
+  },
   {
     key: "sprints",
     title: "Sprints",
