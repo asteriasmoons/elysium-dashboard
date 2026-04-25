@@ -3,6 +3,7 @@
 import { useEffect, useState, useCallback } from "react";
 import { use } from "react";
 import Link from "next/link";
+import { useRouter } from "next/navigation";
 import styles from "./role-panels.module.css";
 
 type Role = {
@@ -33,6 +34,7 @@ export default function RolePanelsPage({
   params: Promise<{ guildId: string }>;
 }) {
   const { guildId } = use(params);
+  const router = useRouter();
 
   const [panels, setPanels] = useState<RolePanel[]>([]);
   const [loading, setLoading] = useState(true);
@@ -72,12 +74,22 @@ export default function RolePanelsPage({
           <p className={styles.subtitle}>Manage your server role panels</p>
         </div>
 
-        <Link
-          href={`/dashboard/${guildId}/role-panels/new`}
-          className={styles.primaryButton}
-        >
-          New Panel
-        </Link>
+        <div className={styles.actions}>
+          <button
+            type="button"
+            className={styles.backButton}
+            onClick={() => router.push(`/dashboard/${guildId}`)}
+          >
+            Back
+          </button>
+
+          <Link
+            href={`/dashboard/${guildId}/role-panels/new`}
+            className={styles.primaryButton}
+          >
+            New Panel
+          </Link>
+        </div>
       </div>
 
       {loading && (

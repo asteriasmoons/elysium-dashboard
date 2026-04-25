@@ -43,6 +43,24 @@
   background: linear-gradient(135deg, #03dbfc, #7d19f7);
 }
 
+.backButton {
+  border: 1px solid rgba(255, 255, 255, 0.15);
+  border-radius: 12px;
+  padding: 10px 14px;
+  color: rgba(244, 244, 245, 0.8);
+  text-decoration: none;
+  font-family: var(--font-title);
+  font-weight: 800;
+  cursor: pointer;
+  background: rgba(255, 255, 255, 0.06);
+}
+
+.actions {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
 .grid {
   max-width: 1120px;
   margin: 0 auto;
