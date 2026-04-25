@@ -64,6 +64,7 @@ export default function RolePanelForm({
   initialPanel,
 }: Props) {
   const router = useRouter();
+  const safeGuildId = String(guildId ?? "").trim();
 
   const [guildRoles, setGuildRoles] = useState<GuildRole[]>([]);
   const [emojis, setEmojis] = useState<DiscordEmoji[]>([]);
@@ -100,10 +101,13 @@ export default function RolePanelForm({
     async function loadOptions() {
       try {
         setError("");
+        if (!safeGuildId) {
+          throw new Error("Missing guild ID");
+        }
 
         const [channelsRes, rolesRes, emojiRes] = await Promise.all([
-          fetch(`/api/guilds/${guildId}/channels`),
-          fetch(`/api/guilds/${guildId}/roles`),
+          fetch(`/api/guilds/${safeGuildId}/channels`),
+          fetch(`/api/guilds/${safeGuildId}/roles`),
           fetch("/api/emojis"),
         ]);
 
@@ -154,7 +158,7 @@ export default function RolePanelForm({
     }
 
     loadOptions();
-  }, [guildId]);
+  }, [safeGuildId]);
 
   function updateRole(index: number, patch: Partial<PanelRole>) {
     setRoles((current) =>
@@ -211,7 +215,7 @@ export default function RolePanelForm({
         .filter((role) => role.roleId && role.label);
 
       const payload = {
-        guildId,
+        guildId: safeGuildId,
         panelName,
         type,
         selectMode,
@@ -225,7 +229,7 @@ export default function RolePanelForm({
 
       const res = await fetch(
         mode === "edit" && panelId
-          ? `/api/role-panels/${panelId}?guildId=${guildId}`
+          ? `/api/role-panels/${panelId}?guildId=${safeGuildId}`
           : "/api/role-panels",
         {
           method: mode === "edit" ? "PATCH" : "POST",
@@ -242,7 +246,7 @@ export default function RolePanelForm({
         throw new Error(data?.error || "Failed to save role panel");
       }
 
-      router.push(`/dashboard/${guildId}/role-panels`);
+      router.push(`/dashboard/${safeGuildId}/role-panels`);
       router.refresh();
     } catch (err) {
       setError(err instanceof Error ? err.message : "Failed to save panel");
@@ -266,7 +270,7 @@ export default function RolePanelForm({
         <button
           type="button"
           className={styles.editButton}
-          onClick={() => router.push(`/dashboard/${guildId}/role-panels`)}
+          onClick={() => router.push(`/dashboard/${safeGuildId}/role-panels`)}
         >
           Back
         </button>
