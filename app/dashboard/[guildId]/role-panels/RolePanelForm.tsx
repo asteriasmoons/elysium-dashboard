@@ -93,65 +93,63 @@ export default function RolePanelForm({
   const [error, setError] = useState("");
 
   const postChannels = channels.filter((channel) =>
-    [0, 5].includes(Number(channel.type)),
+    [0, 5, 15].includes(Number(channel.type)),
   );
 
   useEffect(() => {
     async function loadOptions() {
-      const [rolesResult, channelsResult, emojiResult] = await Promise.allSettled([
-        fetch(`/api/guilds/${guildId}/roles`).then(async (res) => {
-          const data = await res.json();
-          if (!res.ok) throw new Error(data?.error || "Failed to load roles");
-          return data;
-        }),
-        fetch(`/api/guilds/${guildId}/channels`).then(async (res) => {
-          const data = await res.json();
-          if (!res.ok) throw new Error(data?.error || "Failed to load channels");
-          return data;
-        }),
-        fetch("/api/emojis").then(async (res) => {
-          const data = await res.json();
-          if (!res.ok) throw new Error(data?.error || "Failed to load emojis");
-          return data;
-        }),
-      ]);
+      try {
+        setError("");
 
-      const nextRoles =
-        rolesResult.status === "fulfilled" && Array.isArray(rolesResult.value.roles)
-          ? rolesResult.value.roles
+        const [channelsRes, rolesRes, emojiRes] = await Promise.all([
+          fetch(`/api/guilds/${guildId}/channels`),
+          fetch(`/api/guilds/${guildId}/roles`),
+          fetch("/api/emojis"),
+        ]);
+
+        const channelsData = await channelsRes.json();
+        const rolesData = await rolesRes.json();
+        const emojiData = await emojiRes.json();
+
+        if (!channelsRes.ok) {
+          throw new Error(channelsData?.error || "Failed to load channels");
+        }
+
+        if (!rolesRes.ok) {
+          throw new Error(rolesData?.error || "Failed to load roles");
+        }
+
+        if (!emojiRes.ok) {
+          throw new Error(emojiData?.error || "Failed to load emojis");
+        }
+
+        const nextChannels: GuildChannel[] = Array.isArray(channelsData.channels)
+          ? channelsData.channels
+          : [];
+        const nextRoles: GuildRole[] = Array.isArray(rolesData.roles)
+          ? rolesData.roles
+          : [];
+        const nextEmojis: DiscordEmoji[] = Array.isArray(emojiData.emojis)
+          ? emojiData.emojis
           : [];
 
-      const nextChannels =
-        channelsResult.status === "fulfilled" &&
-        Array.isArray(channelsResult.value.channels)
-          ? channelsResult.value.channels
-          : [];
-
-      const nextEmojis =
-        emojiResult.status === "fulfilled" && Array.isArray(emojiResult.value.emojis)
-          ? emojiResult.value.emojis
-          : [];
-
-      setGuildRoles(nextRoles);
-      setChannels(nextChannels);
-      setEmojis(nextEmojis);
-
-      const nextPostChannels = nextChannels.filter((channel: GuildChannel) =>
-        [0, 5, 15].includes(Number(channel.type)),
-      );
-
-      setChannelId((current) => current || nextPostChannels[0]?.id || "");
-
-      const failedLoads = [rolesResult, channelsResult, emojiResult]
-        .filter((result) => result.status === "rejected")
-        .map((result) =>
-          result.status === "rejected" && result.reason instanceof Error
-            ? result.reason.message
-            : "Failed to load dashboard options",
+        const nextPostChannels = nextChannels.filter((channel) =>
+          [0, 5, 15].includes(Number(channel.type)),
         );
 
-      if (failedLoads.length > 0) {
-        setError(failedLoads.join(" | "));
+        setChannels(nextChannels);
+        setGuildRoles(nextRoles);
+        setEmojis(nextEmojis);
+        setChannelId((current) => current || nextPostChannels[0]?.id || "");
+      } catch (err) {
+        setChannels([]);
+        setGuildRoles([]);
+        setEmojis([]);
+        setError(
+          err instanceof Error
+            ? err.message
+            : "Failed to load dashboard options",
+        );
       }
     }
 
@@ -492,7 +490,11 @@ export default function RolePanelForm({
         ) : null}
 
         <div className={styles.formActions}>
-          <button type="submit" className={styles.primaryButton}>
+          <button
+            type="submit"
+            className={styles.primaryButton}
+            disabled={saving}
+          >
             {saving
               ? "Saving..."
               : mode === "edit"
