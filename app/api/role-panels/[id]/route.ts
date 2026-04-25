@@ -6,15 +6,15 @@ import {
 } from "@/lib/rolePanelAccess";
 
 type Params = {
-  params: {
+  params: Promise<{
     id: string;
-  };
+  }>;
 };
 
 export async function GET(req: Request, { params }: Params) {
   const url = new URL(req.url);
   const guildId = String(url.searchParams.get("guildId") ?? "").trim();
-  const id = params.id;
+  const { id } = await params;
 
   if (!guildId) {
     return NextResponse.json({ error: "Missing guildId" }, { status: 400 });
@@ -52,7 +52,7 @@ export async function GET(req: Request, { params }: Params) {
 export async function PATCH(req: Request, { params }: Params) {
   const url = new URL(req.url);
   const guildId = String(url.searchParams.get("guildId") ?? "").trim();
-  const id = params.id;
+  const { id } = await params;
 
   if (!guildId) {
     return NextResponse.json({ error: "Missing guildId" }, { status: 400 });
@@ -82,7 +82,7 @@ export async function PATCH(req: Request, { params }: Params) {
 export async function DELETE(req: Request, { params }: Params) {
   const url = new URL(req.url);
   const guildId = String(url.searchParams.get("guildId") ?? "").trim();
-  const id = params.id;
+  const { id } = await params;
 
   if (!guildId) {
     return NextResponse.json({ error: "Missing guildId" }, { status: 400 });
