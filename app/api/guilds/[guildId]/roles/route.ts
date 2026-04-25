@@ -18,7 +18,9 @@ export async function GET(_: Request, { params }: RouteContext) {
     );
   }
 
-  const response = await fetch(`${botApiUrl}/guilds/${guildId}/roles`, {
+  const targetUrl = `${botApiUrl}/guilds/${guildId}/roles`;
+
+  const response = await fetch(targetUrl, {
     cache: "no-store",
   });
 
@@ -26,7 +28,11 @@ export async function GET(_: Request, { params }: RouteContext) {
 
   if (!response.ok) {
     return NextResponse.json(
-      { error: data?.error || "Failed to load roles" },
+      {
+        error: data?.error || "Failed to load roles",
+        guildId,
+        targetUrl,
+      },
       { status: response.status },
     );
   }
