@@ -1,11 +1,13 @@
 import RolePanelForm from "../RolePanelForm";
 
-export default function NewRolePanelPage({
-  params,
-}: {
-  params: { guildId: string };
-}) {
-  const { guildId } = params;
+type PageProps = {
+  params: Promise<{
+    guildId: string;
+  }>;
+};
+
+export default async function NewRolePanelPage({ params }: PageProps) {
+  const { guildId } = await params;
 
   return <RolePanelForm guildId={guildId} mode="create" />;
 }
