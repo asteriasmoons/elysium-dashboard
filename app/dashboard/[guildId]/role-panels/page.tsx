@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useState, useCallback } from "react";
+import { use } from "react";
 import Link from "next/link";
 import styles from "./role-panels.module.css";
 
@@ -29,9 +30,9 @@ type RolePanel = {
 export default function RolePanelsPage({
   params,
 }: {
-  params: { guildId: string };
+  params: Promise<{ guildId: string }>;
 }) {
-  const { guildId } = params;
+  const { guildId } = use(params);
 
   const [panels, setPanels] = useState<RolePanel[]>([]);
   const [loading, setLoading] = useState(true);
