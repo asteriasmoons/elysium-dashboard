@@ -98,35 +98,60 @@ export default function RolePanelForm({
 
   useEffect(() => {
     async function loadOptions() {
-      try {
-        const [rolesRes, channelsRes, emojiRes] = await Promise.all([
-          fetch(`/api/guilds/${guildId}/roles`),
-          fetch(`/api/guilds/${guildId}/channels`),
-          fetch("/api/emojis"),
-        ]);
+      const [rolesResult, channelsResult, emojiResult] = await Promise.allSettled([
+        fetch(`/api/guilds/${guildId}/roles`).then(async (res) => {
+          const data = await res.json();
+          if (!res.ok) throw new Error(data?.error || "Failed to load roles");
+          return data;
+        }),
+        fetch(`/api/guilds/${guildId}/channels`).then(async (res) => {
+          const data = await res.json();
+          if (!res.ok) throw new Error(data?.error || "Failed to load channels");
+          return data;
+        }),
+        fetch("/api/emojis").then(async (res) => {
+          const data = await res.json();
+          if (!res.ok) throw new Error(data?.error || "Failed to load emojis");
+          return data;
+        }),
+      ]);
 
-        const rolesData = await rolesRes.json();
-        const channelsData = await channelsRes.json();
-        const emojiData = await emojiRes.json();
-
-        const nextRoles = Array.isArray(rolesData.roles) ? rolesData.roles : [];
-        const nextChannels = Array.isArray(channelsData.channels)
-          ? channelsData.channels
+      const nextRoles =
+        rolesResult.status === "fulfilled" && Array.isArray(rolesResult.value.roles)
+          ? rolesResult.value.roles
           : [];
 
-        setGuildRoles(nextRoles);
-        setChannels(nextChannels);
-        setEmojis(Array.isArray(emojiData.emojis) ? emojiData.emojis : []);
+      const nextChannels =
+        channelsResult.status === "fulfilled" &&
+        Array.isArray(channelsResult.value.channels)
+          ? channelsResult.value.channels
+          : [];
 
-        const nextPostChannels = nextChannels.filter((channel: GuildChannel) =>
-          [0, 5].includes(Number(channel.type)),
+      const nextEmojis =
+        emojiResult.status === "fulfilled" && Array.isArray(emojiResult.value.emojis)
+          ? emojiResult.value.emojis
+          : [];
+
+      setGuildRoles(nextRoles);
+      setChannels(nextChannels);
+      setEmojis(nextEmojis);
+
+      const nextPostChannels = nextChannels.filter((channel: GuildChannel) =>
+        [0, 5, 15].includes(Number(channel.type)),
+      );
+
+      setChannelId((current) => current || nextPostChannels[0]?.id || "");
+
+      const failedLoads = [rolesResult, channelsResult, emojiResult]
+        .filter((result) => result.status === "rejected")
+        .map((result) =>
+          result.status === "rejected" && result.reason instanceof Error
+            ? result.reason.message
+            : "Failed to load dashboard options",
         );
 
-        setChannelId((current) => current || nextPostChannels[0]?.id || "");
-      } catch {
-        setGuildRoles([]);
-        setChannels([]);
-        setEmojis([]);
+      if (failedLoads.length > 0) {
+        setError(failedLoads.join(" | "));
       }
     }
 
