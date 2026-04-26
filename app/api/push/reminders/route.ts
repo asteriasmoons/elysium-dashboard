@@ -2,11 +2,19 @@ import { NextResponse } from "next/server";
 import webpush from "web-push";
 import clientPromise from "@/lib/mongodb";
 
-webpush.setVapidDetails(
-  process.env.VAPID_SUBJECT!,
-  process.env.NEXT_PUBLIC_VAPID_PUBLIC_KEY!,
-  process.env.VAPID_PRIVATE_KEY!,
-);
+function configureWebPush() {
+  const vapidSubject = process.env.VAPID_SUBJECT;
+  const vapidPublicKey = process.env.NEXT_PUBLIC_VAPID_PUBLIC_KEY;
+  const vapidPrivateKey = process.env.VAPID_PRIVATE_KEY;
+
+  if (!vapidSubject || !vapidPublicKey || !vapidPrivateKey) {
+    throw new Error(
+      "Missing VAPID env vars. Required: VAPID_SUBJECT, NEXT_PUBLIC_VAPID_PUBLIC_KEY, VAPID_PRIVATE_KEY",
+    );
+  }
+
+  webpush.setVapidDetails(vapidSubject, vapidPublicKey, vapidPrivateKey);
+}
 
 type ReminderDoc = {
   _id: unknown;
@@ -107,6 +115,7 @@ function isReminderDue(reminder: ReminderDoc, now: Date) {
 }
 
 async function runReminderPushCron() {
+  configureWebPush();
   const client = await clientPromise;
   const db = client.db();
   const now = new Date();
@@ -168,13 +177,33 @@ async function runReminderPushCron() {
 }
 
 export async function POST(req: Request) {
-  const authHeader = req.headers.get("authorization");
+  try {
+    const authHeader = req.headers.get("authorization");
+    const cronSecret = process.env.PUSH_CRON_SECRET;
 
-  if (authHeader !== `Bearer ${process.env.PUSH_CRON_SECRET}`) {
-    return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+    if (!cronSecret) {
+      console.error("Missing PUSH_CRON_SECRET env var");
+      return NextResponse.json(
+        { success: false, error: "Server is missing PUSH_CRON_SECRET" },
+        { status: 500 },
+      );
+    }
+
+    if (authHeader !== `Bearer ${cronSecret}`) {
+      return NextResponse.json({ success: false, error: "Unauthorized" }, { status: 401 });
+    }
+
+    const result = await runReminderPushCron();
+
+    return NextResponse.json({ success: true, ...result });
+  } catch (err) {
+    console.error("Reminder push cron failed", err);
+
+    const message = err instanceof Error ? err.message : "Unknown cron error";
+
+    return NextResponse.json(
+      { success: false, error: message },
+      { status: 500 },
+    );
   }
-
-  const result = await runReminderPushCron();
-
-  return NextResponse.json({ success: true, ...result });
 }
