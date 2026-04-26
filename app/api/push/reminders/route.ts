@@ -48,6 +48,14 @@ const WEEKDAY_TO_NUMBER: Record<string, number> = {
   Sat: 6,
 };
 
+const TIMEZONE_MAP: Record<string, string> = {
+  "Indian Standard Time": "Asia/Kolkata",
+  "Eastern Standard Time": "America/New_York",
+  "Central Standard Time": "America/Chicago",
+  "Mountain Standard Time": "America/Denver",
+  "Pacific Standard Time": "America/Los_Angeles",
+};
+
 function getZonedParts(date: Date, timeZone: string): ZonedParts {
   const parts = new Intl.DateTimeFormat("en-US", {
     timeZone,
@@ -77,14 +85,27 @@ function getZonedParts(date: Date, timeZone: string): ZonedParts {
 }
 
 function isReminderDue(reminder: ReminderDoc, now: Date) {
-  const zone = String(reminder.zone ?? "UTC").trim() || "UTC";
+  let zone = String(reminder.zone ?? "UTC").trim() || "UTC";
+
+  if (TIMEZONE_MAP[zone]) {
+    zone = TIMEZONE_MAP[zone];
+  }
+
   const hour = Number(reminder.hour);
   const minute = Number(reminder.minute);
 
   if (!Number.isInteger(hour) || hour < 0 || hour > 23) return null;
   if (!Number.isInteger(minute) || minute < 0 || minute > 59) return null;
 
-  const local = getZonedParts(now, zone);
+  let local: ZonedParts;
+
+  try {
+    local = getZonedParts(now, zone);
+  } catch (err) {
+    console.error("Invalid timezone, falling back to UTC:", zone);
+    local = getZonedParts(now, "UTC");
+  }
+
   const currentTotalMinutes = local.hour * 60 + local.minute;
   const scheduledTotalMinutes = hour * 60 + minute;
   const minutesAfterScheduled = currentTotalMinutes - scheduledTotalMinutes;
