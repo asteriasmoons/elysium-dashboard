@@ -195,7 +195,7 @@
 .completedBadge {
   font-size: 0.72rem;
   font-weight: 700;
-  font-family: var(--font-extra);
+  font-family: var(--font-title);
   padding: 5px 9px;
   border-radius: 999px;
   white-space: nowrap;
@@ -499,7 +499,7 @@
   color: white;
   font-weight: 600;
   font-size: 0.95rem;
-  font-family: var(--font-extra);
+  font-family: var(--font-title);
   text-decoration: none;
   display: inline-flex;
   align-items: center;
@@ -520,7 +520,7 @@
   color: white;
   font-weight: 600;
   font-size: 0.95rem;
-  font-family: var(--font-extra);
+  font-family: var(--font-title);
   cursor: pointer;
   transition: transform 0.15s ease, opacity 0.15s ease;
 }
