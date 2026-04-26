@@ -135,7 +135,7 @@ function isReminderDue(reminder: ReminderDoc, now: Date) {
   return sentKey;
 }
 
-async function runReminderPushCron() {
+export async function runReminderPushCron() {
   configureWebPush();
   const client = await clientPromise;
   const db = client.db();

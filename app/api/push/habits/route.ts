@@ -166,7 +166,7 @@ function isHabitDue(habit: HabitDoc, now: Date) {
   return sentKey;
 }
 
-async function runHabitPushCron() {
+export async function runHabitPushCron() {
   configureWebPush();
 
   const client = await clientPromise;
