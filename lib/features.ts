@@ -9,7 +9,8 @@ export type FeatureKey =
   | "reminders"
   | "prompts"
   | "sprints"
-  | "buddy-reads";
+  | "buddy-reads"
+  | "afk";
 
 export type FeatureStatus = "planned" | "in-progress" | "ready";
 
@@ -103,6 +104,14 @@ export const FEATURES: FeatureItem[] = [
     description: "Create, edit, and audit scheduled reminders.",
     href: "/dashboard/reminders",
     scope: "user",
+    status: "ready",
+  },
+  {
+    key: "afk",
+    title: "AFK",
+    description: "Configure AFK behavior and messages for your server.",
+    href: (guildId) => `/dashboard/${guildId}/afk`,
+    scope: "guild",
     status: "ready",
   },
 ];
