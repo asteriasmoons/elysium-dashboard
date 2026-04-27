@@ -162,7 +162,7 @@ export async function updateReminder(
 
   const setFields: Record<string, unknown> = { updatedAt: new Date() };
   if (input.interval !== undefined) setFields.interval = normalizeString(input.interval);
-  if (input.startDate !== undefined) setFields.startDate = normalizeDate(input.startDate);
+  if (input.startDate !== undefined) { setFields.startDate = normalizeDate(input.startDate); setFields.lastSent = null; }
   if (input.dayOfWeek !== undefined) setFields.dayOfWeek = input.dayOfWeek ? normalizeString(input.dayOfWeek) : null;
   if (input.embedTitle !== undefined) setFields.embedTitle = normalizeString(input.embedTitle, "Reminder!") || "Reminder!";
   if (input.embedDescription !== undefined) setFields.embedDescription = normalizeString(input.embedDescription);
