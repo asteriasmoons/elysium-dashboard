@@ -83,8 +83,20 @@ export default function NewReminderPage() {
 
   useEffect(() => {
     if (reminderType !== "guild") return;
-    setLoadingGuilds(true);
-    fetch("/api/guilds").then(r => r.ok ? r.json() : null).then(d => { if (d?.guilds) setGuilds(d.guilds); }).catch(console.error).finally(() => setLoadingGuilds(false));
+    async function loadGuilds() {
+      setLoadingGuilds(true);
+      try {
+        const response = await fetch("/api/guilds");
+        if (!response.ok) return;
+        const data = await response.json();
+        setGuilds(Array.isArray(data.guilds) ? data.guilds : []);
+      } catch (err) {
+        console.error(err);
+      } finally {
+        setLoadingGuilds(false);
+      }
+    }
+    loadGuilds();
   }, [reminderType]);
 
   useEffect(() => {
@@ -222,13 +234,9 @@ export default function NewReminderPage() {
                   onBlur={(e) => setEmbedTitle(serializeDiscordEditorContent(e.currentTarget))}
                   style={{ minHeight: 44, paddingRight: 42, whiteSpace: "pre-wrap", overflowWrap: "break-word" }} />
                 <button type="button" className={styles.emojiButton}
-                  onPointerDown={(e) => e.preventDefault()}
                   onClick={() => { setActiveEditor("title"); setShowEmojiPicker(v => !v); }}>
                   <Image src="/img/icons/face.svg" alt="emoji" width={20} height={20} unoptimized />
                 </button>
-                {showEmojiPicker && activeEditor === "title" ? (
-                  <EmojiPicker emojis={emojis} onPick={insertEmojiTag} className={styles.emojiPopover} itemClassName={styles.emojiItem} />
-                ) : null}
               </div>
             </div>
 
@@ -241,15 +249,15 @@ export default function NewReminderPage() {
                   onBlur={(e) => setEmbedDescription(serializeDiscordEditorContent(e.currentTarget))}
                   style={{ paddingRight: 42 }} />
                 <button type="button" className={styles.emojiButton}
-                  onPointerDown={(e) => e.preventDefault()}
                   onClick={() => { setActiveEditor("description"); setShowEmojiPicker(v => !v); }}>
                   <Image src="/img/icons/face.svg" alt="emoji" width={20} height={20} unoptimized />
                 </button>
-                {showEmojiPicker && activeEditor === "description" ? (
-                  <EmojiPicker emojis={emojis} onPick={insertEmojiTag} className={styles.emojiPopover} itemClassName={styles.emojiItem} />
-                ) : null}
               </div>
             </div>
+
+            {showEmojiPicker ? (
+              <EmojiPicker emojis={emojis} onPick={insertEmojiTag} className={styles.emojiPopover} itemClassName={styles.emojiItem} />
+            ) : null}
 
             <div className={styles.fieldGroup}>
               <label className={styles.label}>Embed color</label>
