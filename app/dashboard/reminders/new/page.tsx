@@ -190,7 +190,15 @@ export default function NewReminderPage() {
   return (
     <div className={styles.page}>
       <div className={styles.container}>
-        <h1 className={styles.title}>New Reminder</h1>
+        <div className={styles.headerRow}>
+          <div>
+            <h1 className={styles.title}>New Reminder</h1>
+            <p className={styles.subtitle}>Create a new DM or server reminder.</p>
+          </div>
+          <div className={styles.actions}>
+            <a href="/dashboard/reminders" className={styles.secondaryLink}>Back</a>
+          </div>
+        </div>
         <form onSubmit={handleSubmit} className={styles.panel}>
           <div className={styles.formStack}>
             {error ? <p style={{ color: "#f87171", margin: 0 }}>{error}</p> : null}
@@ -201,8 +209,7 @@ export default function NewReminderPage() {
               <div style={{ display: "flex", gap: 8 }}>
                 {(["dm","guild"] as const).map((t) => (
                   <button key={t} type="button" onClick={() => { setReminderType(t); setGuildId(""); setChannelId(""); setPing(""); }}
-                    className={styles.primaryLink}
-                    style={{ opacity: reminderType === t ? 1 : 0.55, outline: reminderType === t ? "2px solid rgba(255,255,255,0.32)" : "none", textTransform: "uppercase", fontSize: "0.8rem" }}>
+                    className={`${styles.typeButton} ${reminderType === t ? styles.typeButtonActive : ""}`}>
                     {t === "dm" ? "DM" : "Server"}
                   </button>
                 ))}
@@ -313,13 +320,12 @@ export default function NewReminderPage() {
               <div style={{ display: "flex", gap: 8, flexWrap: "wrap", marginBottom: 8 }}>
                 {INTERVAL_PRESETS.map((preset) => (
                   <button key={preset.value} type="button" onClick={() => { setInterval(preset.value); setUseCustomInterval(false); }}
-                    className={styles.primaryLink}
-                    style={{ opacity: !useCustomInterval && interval === preset.value ? 1 : 0.55, outline: !useCustomInterval && interval === preset.value ? "2px solid rgba(255,255,255,0.32)" : "none" }}>
+                    className={`${styles.intervalButton} ${!useCustomInterval && interval === preset.value ? styles.intervalButtonActive : ""}`}>
                     {preset.label}
                   </button>
                 ))}
-                <button type="button" onClick={() => setUseCustomInterval(true)} className={styles.primaryLink}
-                  style={{ opacity: useCustomInterval ? 1 : 0.55, outline: useCustomInterval ? "2px solid rgba(255,255,255,0.32)" : "none" }}>
+                <button type="button" onClick={() => setUseCustomInterval(true)}
+                  className={`${styles.intervalButton} ${useCustomInterval ? styles.intervalButtonActive : ""}`}>
                   Custom
                 </button>
               </div>
@@ -351,7 +357,7 @@ export default function NewReminderPage() {
 
             <div className={styles.formActions}>
               <button type="button" onClick={() => router.push("/dashboard/reminders")} className={styles.secondaryLink}>Cancel</button>
-              <button type="submit" disabled={loading} className={styles.primaryLink}>{loading ? "Creating..." : "Create Reminder"}</button>
+              <button type="submit" disabled={loading} className={styles.formButton}>{loading ? "Creating..." : "Create Reminder"}</button>
             </div>
           </div>
         </form>

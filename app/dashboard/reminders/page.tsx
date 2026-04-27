@@ -19,7 +19,7 @@ export default async function RemindersPage() {
   if (!session) return null;
 
   const userId = getSessionUserId(session);
-  const reminders = await listUserReminders(userId);
+  const reminders = (await listUserReminders(userId)).filter(r => r.name && String(r.name).trim());
 
   async function deleteReminderAction(formData: FormData) {
     "use server";

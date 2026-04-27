@@ -228,7 +228,15 @@ export default function EditReminderPage() {
   return (
     <div className={styles.page}>
       <div className={styles.container}>
-        <h1 className={styles.title}>Edit Reminder</h1>
+        <div className={styles.headerRow}>
+          <div>
+            <h1 className={styles.title}>Edit Reminder</h1>
+            <p className={styles.subtitle}>Update your reminder settings.</p>
+          </div>
+          <div className={styles.actions}>
+            <a href="/dashboard/reminders" className={styles.secondaryLink}>Back</a>
+          </div>
+        </div>
         <form onSubmit={handleSubmit} className={styles.panel}>
           <div className={styles.formStack}>
             {error ? <p style={{ color: "#f87171", margin: 0 }}>{error}</p> : null}
@@ -314,13 +322,12 @@ export default function EditReminderPage() {
               <div style={{ display: "flex", gap: 8, flexWrap: "wrap", marginBottom: 8 }}>
                 {INTERVAL_PRESETS.map((preset) => (
                   <button key={preset.value} type="button" onClick={() => { setInterval(preset.value); setUseCustomInterval(false); }}
-                    className={styles.primaryLink}
-                    style={{ opacity: !useCustomInterval && interval === preset.value ? 1 : 0.55, outline: !useCustomInterval && interval === preset.value ? "2px solid rgba(255,255,255,0.32)" : "none" }}>
+                    className={`${styles.intervalButton} ${!useCustomInterval && interval === preset.value ? styles.intervalButtonActive : ""}`}>
                     {preset.label}
                   </button>
                 ))}
-                <button type="button" onClick={() => setUseCustomInterval(true)} className={styles.primaryLink}
-                  style={{ opacity: useCustomInterval ? 1 : 0.55, outline: useCustomInterval ? "2px solid rgba(255,255,255,0.32)" : "none" }}>
+                <button type="button" onClick={() => setUseCustomInterval(true)}
+                  className={`${styles.intervalButton} ${useCustomInterval ? styles.intervalButtonActive : ""}`}>
                   Custom
                 </button>
               </div>
@@ -352,7 +359,7 @@ export default function EditReminderPage() {
 
             <div className={styles.formActions}>
               <button type="button" onClick={() => router.push("/dashboard/reminders")} className={styles.secondaryLink}>Cancel</button>
-              <button type="submit" disabled={saving} className={styles.primaryLink}>{saving ? "Saving..." : "Save Reminder"}</button>
+              <button type="submit" disabled={saving} className={styles.formButton}>{saving ? "Saving..." : "Save Reminder"}</button>
             </div>
           </div>
         </form>
