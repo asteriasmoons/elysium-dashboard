@@ -267,6 +267,7 @@
 
 .fieldGroup {
   display: flex;
+  position: relative;
   flex-direction: column;
   gap: 8px;
 }
@@ -284,11 +285,14 @@
   border: 1px solid rgba(255, 255, 255, 0.12);
   background: #0a0c1c;
   color: #f4f4f5;
-  padding: 12px 14px;
+  padding: 12px 48px 12px 14px;
   font: inherit;
   box-sizing: border-box;
   outline: none;
-  transition: border-color 160ms ease, box-shadow 160ms ease, background 160ms ease;
+  transition:
+    border-color 160ms ease,
+    box-shadow 160ms ease,
+    background 160ms ease;
 }
 
 /* Textarea specific */
@@ -597,8 +601,9 @@
 
 .emojiButton {
   position: absolute;
-  right: 10px;
-  bottom: 10px;
+  right: 12px;
+  bottom: 12px;
+  z-index: 5;
   background: rgba(255, 255, 255, 0.08);
   border: 1px solid rgba(255, 255, 255, 0.12);
   border-radius: 10px;
@@ -1138,21 +1143,7 @@
   margin-bottom: 22px;
 }
 
-.fieldGroup {
-  position: relative;
-}
-
-.input,
-.textarea {
-  padding-right: 48px;
-}
-
-.emojiButton {
-  right: 12px;
-  bottom: 12px;
-  z-index: 5;
-}
-
+/* MOBILE SETTINGS */
 @media (max-width: 720px) {
   .page {
     padding: 28px 12px;
@@ -1216,9 +1207,7 @@
     width: min(320px, calc(100vw - 32px));
     max-width: calc(100vw - 32px);
   }
-}
 
-@media (max-width: 720px) {
   .emojiButton {
     right: 12px;
     bottom: 12px;
