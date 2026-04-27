@@ -1,65 +1,47 @@
+/* ─── PAGE SHELL ─────────────────────────────────────────────────── */
 .page {
   min-height: 100dvh;
   width: 100%;
-  padding: 40px 24px;
-
-  /* darker base */
+  padding: 32px 16px;
   background-color: #02030a;
-
-  /* deeper gradient */
-  background-image: linear-gradient(
-    135deg,
-    #019fb3 0%,
-    #3f36c9 100%
-  );
-
+  background-image: linear-gradient(135deg, #019fb3 0%, #3f36c9 100%);
   position: relative;
   overflow: clip;
   color: #f4f4f5;
-
   -webkit-transform: translateZ(0);
   transform: translateZ(0);
 }
 
-/* GLOW LAYER (blurred color bloom) */
 .page::before {
   content: "";
   position: absolute;
   inset: 0;
-
   background:
     radial-gradient(circle at 20% 30%, rgba(3, 227, 252, 0.35), transparent 60%),
     radial-gradient(circle at 80% 70%, rgba(96, 85, 247, 0.4), transparent 65%);
-
   filter: blur(140px);
   opacity: 0.55;
   z-index: 0;
 }
 
-/* GLASS OVERLAY (this is the important upgrade) */
 .page::after {
   content: "";
   position: absolute;
   inset: 0;
-
-  /* darker sheer */
   background: rgba(0, 0, 0, 0.55);
-
-  /* actual glass blur */
   backdrop-filter: blur(40px);
   -webkit-backdrop-filter: blur(40px);
-
   z-index: 1;
 }
 
-/* keep content above everything */
 .page > * {
   position: relative;
   z-index: 2;
 }
 
+/* ─── LAYOUT ─────────────────────────────────────────────────────── */
 .container {
-  max-width: 1120px;
+  max-width: 780px;
   margin: 0 auto;
   position: relative;
   z-index: 2;
@@ -69,19 +51,21 @@
   display: flex;
   justify-content: space-between;
   align-items: flex-end;
-  gap: 18px;
+  gap: 14px;
   margin-bottom: 18px;
+  flex-wrap: wrap;
 }
 
 .title {
   margin: 0;
-  font-size: 1.9rem;
+  font-size: 1.6rem;
   font-weight: 800;
   font-family: var(--font-title);
 }
 
 .subtitle {
-  margin: 8px 0 0;
+  margin: 6px 0 0;
+  font-size: 0.88rem;
   font-family: var(--font-body);
   color: rgba(244, 244, 245, 0.70);
 }
@@ -92,15 +76,17 @@
   align-items: center;
 }
 
+/* ─── NAV LINKS (Back, etc.) ─────────────────────────────────────── */
 .primaryLink,
 .secondaryLink {
   text-decoration: none;
-  padding: 10px 14px;
+  padding: 8px 14px;
   border-radius: 12px;
   border: 1px solid rgba(255, 255, 255, 0.14);
   transition: background 160ms ease, border-color 160ms ease;
   color: rgba(244, 244, 245, 0.88);
   font-family: var(--font-title);
+  font-size: 0.85rem;
   background: rgba(255, 255, 255, 0.08);
 }
 
@@ -110,263 +96,142 @@
   border-color: rgba(255, 255, 255, 0.22);
 }
 
+/* ─── FORM PANEL ─────────────────────────────────────────────────── */
 .panel {
   position: relative;
   background: rgba(255, 255, 255, 0.08);
   border: 1px solid rgba(255, 255, 255, 0.12);
   border-radius: 18px;
-  padding: 22px;
+  padding: 20px;
   backdrop-filter: blur(14px);
   -webkit-backdrop-filter: blur(14px);
   box-shadow: 0 18px 60px rgba(0, 0, 0, 0.45);
 }
 
-.grid {
-  display: grid;
-  gap: 14px;
-  grid-template-columns: repeat(1, minmax(0, 1fr));
-}
-
-@media (min-width: 720px) {
-  .grid {
-    grid-template-columns: repeat(2, minmax(0, 1fr));
-  }
-}
-
-@media (min-width: 1024px) {
-  .grid {
-    grid-template-columns: repeat(3, minmax(0, 1fr));
-  }
-}
-
-.card {
-  display: block;
-  text-decoration: none;
-  color: inherit;
-  border-radius: 14px;
-  padding: 28px 18px 18px;
-  background: #0a0c1c;
-  background-clip: padding-box;
-  -webkit-backface-visibility: hidden;
-  border: 1px solid rgba(255, 255, 255, 0.1);
-  position: relative;
-  transition: transform 160ms ease, box-shadow 160ms ease, border-color 160ms ease;
-  overflow: hidden;
-  box-sizing: border-box;
-  min-height: 110px;
-}
-
-.card::before {
-  content: "";
-  position: absolute;
-  top: 0;
-  left: 0;
-  right: 0;
-  height: 8px;
-  background: linear-gradient(135deg, #03e3fc, #6055f7);
-  border-top-left-radius: 14px;
-  border-top-right-radius: 14px;
-}
-
-.card:hover {
-  transform: translateY(-2px);
-  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.4);
-  border-color: rgba(255, 255, 255, 0.2);
-}
-
-.cardTop {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: 10px;
-  margin-bottom: 8px;
-}
-
-.cardTitle {
-  margin: 0;
-  font-size: 0.98rem;
-  font-weight: 780;
-  font-family: var(--font-title);
-  color: rgba(244, 244, 245, 0.95);
-  letter-spacing: 0.2px;
-}
-
-.activeBadge,
-.completedBadge {
-  font-size: 0.72rem;
-  font-weight: 700;
-  font-family: var(--font-title);
-  padding: 5px 9px;
-  border-radius: 999px;
-  white-space: nowrap;
-}
-
-.activeBadge {
-  color: rgba(244, 244, 245, 0.85);
-  border: 1px solid rgba(255, 255, 255, 0.12);
-  background: rgba(255, 255, 255, 0.06);
-}
-
-.completedBadge {
-  color: #c522aa;
-  border: 1px solid rgba(197, 34, 151, 0.413);
-  background: rgba(34, 197, 94, 0.10);
-}
-
-.cardDescription {
-  margin: 0;
-  font-size: 0.86rem;
-  font-family: var(--font-body);
-  line-height: 1.4;
-  color: rgba(244, 244, 245, 0.65);
-}
-
-.cardDescriptionMuted {
-  margin: 0;
-  font-size: 0.86rem;
-  color: rgba(244, 244, 245, 0.4);
-}
-
-.cardTime {
-  margin-top: 10px;
-  font-size: 0.8rem;
-  font-weight: 600;
-  font-family: var(--font-title);
-  color: rgba(3, 227, 252, 0.9);
-}
-
-.cardActions {
-  margin-top: 12px;
-  padding-top: 10px;
-  border-top: 1px solid rgba(255, 255, 255, 0.10);
-}
-
-.emptyState {
-  border: 1px dashed rgba(255, 255, 255, 0.18);
-  border-radius: 16px;
-  padding: 22px;
-  background: rgba(255, 255, 255, 0.03);
-}
-
-.emptyTitle {
-  margin: 0;
-  font-weight: 800;
-  font-size: 1rem;
-}
-
-.emptyText {
-  margin: 8px 0 14px;
-  color: rgba(244, 244, 245, 0.68);
-}
-
+/* ─── FORM STRUCTURE ─────────────────────────────────────────────── */
 .formStack {
   display: flex;
   flex-direction: column;
-  gap: 20px;
+  gap: 18px;
 }
 
 .fieldGroup {
   display: flex;
   flex-direction: column;
-  gap: 8px;
+  gap: 7px;
+  position: relative;
 }
 
 .label {
-  font-size: 0.85rem;
+  font-size: 0.82rem;
   font-weight: 700;
+  font-family: var(--font-title);
   color: rgba(244, 244, 245, 0.88);
 }
 
-.textarea,
-.input {
+/* ─── INPUTS ─────────────────────────────────────────────────────── */
+.input,
+.textarea {
   width: 100%;
-  border-radius: 14px;
+  border-radius: 12px;
   border: 1px solid rgba(255, 255, 255, 0.12);
   background: #0a0c1c;
   color: #f4f4f5;
-  padding: 12px 14px;
+  padding: 11px 13px;
   font: inherit;
+  font-size: 0.9rem;
   box-sizing: border-box;
   outline: none;
   transition: border-color 160ms ease, box-shadow 160ms ease, background 160ms ease;
 }
 
-/* Textarea specific */
 .textarea {
-  min-height: 160px;
+  min-height: 140px;
   resize: vertical;
   line-height: 1.5;
 }
 
-/* Placeholder styling */
-.textarea::placeholder,
-.input::placeholder {
-  color: rgba(244, 244, 245, 0.42);
+.input::placeholder,
+.textarea::placeholder {
+  color: rgba(244, 244, 245, 0.4);
 }
 
-/* Focus state (glow matches your theme) */
-.textarea:focus,
-.input:focus {
+.input:focus,
+.textarea:focus {
   border-color: rgba(3, 227, 252, 0.55);
   box-shadow: 0 0 0 3px rgba(3, 227, 252, 0.12);
   background: #0d1022;
 }
 
-/* Date + time row */
-.pickerRow {
-  display: grid;
-  grid-template-columns: repeat(2, minmax(0, 1fr));
-  gap: 14px;
+/* ─── EDITOR WRAP (for emoji button positioning) ─────────────────── */
+.editorWrap {
+  position: relative;
 }
 
-.formActions {
-  display: flex;
-  justify-content: flex-end;
-  gap: 10px;
-  padding-top: 8px;
-  border-top: 1px solid rgba(255, 255, 255, 0.08);
-}
-
-.formButton {
-  padding: 10px 22px;
-  border-radius: 12px;
-  border: none;
-  background: linear-gradient(135deg, #03dbfc, #7d19f7);
-  color: white;
-  font-weight: 700;
-  font-size: 0.9rem;
-  font-family: var(--font-title);
+/* ─── EMOJI BUTTON ───────────────────────────────────────────────── */
+.emojiButton {
+  position: absolute;
+  right: 9px;
+  bottom: 9px;
+  background: rgba(255, 255, 255, 0.08);
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  border-radius: 9px;
+  padding: 5px;
   cursor: pointer;
-  transition: opacity 0.15s ease, transform 0.15s ease;
-  text-decoration: none;
-  display: inline-flex;
-  align-items: center;
+  line-height: 0;
+  transition: background 160ms ease;
 }
 
-.formButton:hover {
-  opacity: 0.88;
-  transform: translateY(-1px);
+.emojiButton:hover {
+  background: rgba(255, 255, 255, 0.14);
 }
 
-.formButton:disabled {
-  opacity: 0.5;
-  cursor: not-allowed;
-  transform: none;
+/* ─── EMOJI POPOVER ──────────────────────────────────────────────── */
+.emojiPopover {
+  position: absolute;
+  top: calc(100% + 8px);
+  right: 0;
+  z-index: 999;
+  background: #0b0f1f;
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  border-radius: 12px;
+  padding: 10px;
+  display: grid;
+  grid-template-columns: repeat(6, 1fr);
+  gap: 6px;
+  width: 280px;
+  max-height: 260px;
+  overflow-y: auto;
+  box-shadow: 0 16px 48px rgba(0, 0, 0, 0.5);
 }
 
+.emojiItem {
+  background: transparent;
+  border: none;
+  cursor: pointer;
+  padding: 3px;
+  border-radius: 7px;
+  transition: background 120ms ease;
+}
+
+.emojiItem:hover {
+  background: rgba(255, 255, 255, 0.1);
+}
+
+/* ─── TYPE TOGGLE (DM / Server) ──────────────────────────────────── */
 .typeButton {
-  padding: 9px 18px;
+  padding: 7px 16px;
   border-radius: 10px;
   border: 1px solid rgba(255, 255, 255, 0.14);
   background: rgba(255, 255, 255, 0.06);
-  color: rgba(244, 244, 245, 0.7);
+  color: rgba(244, 244, 245, 0.65);
   font-weight: 700;
-  font-size: 0.82rem;
+  font-size: 0.78rem;
   font-family: var(--font-title);
   letter-spacing: 0.5px;
   cursor: pointer;
-  transition: background 160ms ease, border-color 160ms ease, color 160ms ease;
   text-transform: uppercase;
+  transition: background 160ms ease, border-color 160ms ease, color 160ms ease;
 }
 
 .typeButton:hover {
@@ -381,14 +246,15 @@
   box-shadow: 0 0 0 2px rgba(3, 227, 252, 0.18);
 }
 
+/* ─── INTERVAL BUTTONS ───────────────────────────────────────────── */
 .intervalButton {
-  padding: 8px 16px;
-  border-radius: 10px;
+  padding: 7px 13px;
+  border-radius: 9px;
   border: 1px solid rgba(255, 255, 255, 0.12);
   background: rgba(255, 255, 255, 0.05);
-  color: rgba(244, 244, 245, 0.65);
+  color: rgba(244, 244, 245, 0.6);
   font-weight: 600;
-  font-size: 0.85rem;
+  font-size: 0.8rem;
   font-family: var(--font-title);
   cursor: pointer;
   transition: background 160ms ease, border-color 160ms ease, color 160ms ease;
@@ -405,165 +271,166 @@
   color: #03e3fc;
 }
 
-.dateField {
-  position: relative;
+/* ─── FORM ACTIONS ───────────────────────────────────────────────── */
+.formActions {
+  display: flex;
+  justify-content: flex-end;
+  align-items: center;
+  gap: 10px;
+  padding-top: 8px;
+  border-top: 1px solid rgba(255, 255, 255, 0.08);
 }
 
-.dateButton {
-  width: 100%;
-  border-radius: 14px;
-  border: 1px solid rgba(255, 255, 255, 0.12);
-  background: #0a0c1c;
-  color: #f4f4f5;
-  padding: 12px 14px;
-  font: inherit;
-  text-align: left;
+.formButton {
+  padding: 9px 20px;
+  border-radius: 11px;
+  border: none;
+  background: linear-gradient(135deg, #03dbfc, #7d19f7);
+  color: white;
+  font-weight: 700;
+  font-size: 0.88rem;
+  font-family: var(--font-title);
   cursor: pointer;
+  transition: opacity 0.15s ease, transform 0.15s ease;
+  display: inline-flex;
+  align-items: center;
+}
+
+.formButton:hover {
+  opacity: 0.88;
+  transform: translateY(-1px);
+}
+
+.formButton:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+  transform: none;
+}
+
+/* ─── LIST PAGE: CARD GRID ───────────────────────────────────────── */
+.grid {
+  display: grid;
+  gap: 12px;
+  grid-template-columns: 1fr;
+}
+
+@media (min-width: 640px) {
+  .grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+
+@media (min-width: 1024px) {
+  .grid {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+  }
+}
+
+.card {
+  border-radius: 14px;
+  padding: 24px 16px 16px;
+  background: #0a0c1c;
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  position: relative;
+  transition: transform 160ms ease, box-shadow 160ms ease, border-color 160ms ease;
+  overflow: hidden;
   box-sizing: border-box;
-  outline: none;
-  transition: border-color 160ms ease, box-shadow 160ms ease, background 160ms ease;
+  min-height: 100px;
 }
 
-.dateButton:hover,
-.dateButton:focus {
-  border-color: rgba(3, 227, 252, 0.6);
-  box-shadow: 0 0 0 3px rgba(3, 227, 252, 0.15);
-  background: #0d1022;
-}
-
-/* POPUP */
-.datePopover {
+.card::before {
+  content: "";
   position: absolute;
-  top: calc(100% + 10px);
+  top: 0;
   left: 0;
-  z-index: 50;
-
-  width: 320px;
-  border-radius: 18px;
-  padding: 14px;
-
-  background: rgba(10, 12, 28, 0.95);
-  border: 1px solid rgba(255, 255, 255, 0.12);
-
-  backdrop-filter: blur(18px);
-  -webkit-backdrop-filter: blur(18px);
-
-  box-shadow: 0 18px 50px rgba(0, 0, 0, 0.55);
+  right: 0;
+  height: 7px;
+  background: linear-gradient(135deg, #03e3fc, #6055f7);
+  border-top-left-radius: 14px;
+  border-top-right-radius: 14px;
 }
 
-/* HEADER */
-.calendarHeader {
+.card:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.4);
+  border-color: rgba(255, 255, 255, 0.2);
+}
+
+.cardTop {
   display: flex;
   align-items: center;
   justify-content: space-between;
-  margin-bottom: 12px;
+  gap: 8px;
+  margin-bottom: 7px;
 }
 
-.calendarMonthLabel {
-  font-size: 0.95rem;
-  font-weight: 700;
+.cardTitle {
+  margin: 0;
+  font-size: 0.92rem;
+  font-weight: 780;
+  font-family: var(--font-title);
   color: rgba(244, 244, 245, 0.95);
 }
 
-/* NAV BUTTONS */
-.calendarNav {
-  width: 34px;
-  height: 34px;
-  border-radius: 10px;
+.activeBadge,
+.completedBadge {
+  font-size: 0.68rem;
+  font-weight: 700;
+  font-family: var(--font-title);
+  padding: 4px 8px;
+  border-radius: 999px;
+  white-space: nowrap;
+}
 
+.activeBadge {
+  color: rgba(244, 244, 245, 0.85);
   border: 1px solid rgba(255, 255, 255, 0.12);
   background: rgba(255, 255, 255, 0.06);
-  color: rgba(244, 244, 245, 0.88);
-
-  cursor: pointer;
-
-  transition: background 160ms ease, border-color 160ms ease, transform 160ms ease;
 }
 
-.calendarNav:hover {
-  background: rgba(255, 255, 255, 0.14);
-  border-color: rgba(255, 255, 255, 0.22);
-  transform: translateY(-1px);
+.completedBadge {
+  color: #c522aa;
+  border: 1px solid rgba(197, 34, 151, 0.4);
+  background: rgba(34, 197, 94, 0.10);
 }
 
-/* WEEKDAYS */
-.calendarWeekdays {
-  display: grid;
-  grid-template-columns: repeat(7, 1fr);
-  gap: 6px;
-  margin-bottom: 8px;
+.cardDescription {
+  margin: 0;
+  font-size: 0.82rem;
+  font-family: var(--font-body);
+  line-height: 1.4;
+  color: rgba(244, 244, 245, 0.65);
 }
 
-.weekday {
-  text-align: center;
-  font-size: 0.72rem;
-  font-weight: 700;
-  color: rgba(244, 244, 245, 0.45);
+.cardDescriptionMuted {
+  margin: 0;
+  font-size: 0.82rem;
+  color: rgba(244, 244, 245, 0.38);
 }
 
-/* GRID */
-.calendarGrid {
-  display: grid;
-  grid-template-columns: repeat(7, 1fr);
-  gap: 6px;
-}
-
-/* DAYS */
-.dayButton {
-  min-height: 38px;
-  border-radius: 10px;
-
-  border: 1px solid rgba(255, 255, 255, 0.08);
-  background: rgba(255, 255, 255, 0.04);
-
-  color: rgba(244, 244, 245, 0.92);
-  font: inherit;
-
-  cursor: pointer;
-
-  transition: background 160ms ease, border-color 160ms ease, transform 160ms ease;
-}
-
-.dayButton:hover {
-  background: rgba(255, 255, 255, 0.14);
-  border-color: rgba(255, 255, 255, 0.2);
-  transform: translateY(-1px);
-}
-
-/* OTHER MONTH DAYS */
-.dayButtonMuted {
-  color: rgba(244, 244, 245, 0.28);
-}
-
-/* SELECTED DAY */
-.dayButtonSelected {
-  background: linear-gradient(135deg, #03e3fc, #6055f7);
-  border-color: transparent;
-  color: #ffffff;
-  font-weight: 700;
-}
-
-/* TODAY */
-.dayButtonToday {
-  box-shadow: inset 0 0 0 1px rgba(3, 227, 252, 0.6);
+.cardTime {
+  margin-top: 8px;
+  font-size: 0.76rem;
+  font-weight: 600;
+  font-family: var(--font-title);
+  color: rgba(3, 227, 252, 0.9);
 }
 
 .cardActions {
-  margin-top: 12px;
+  margin-top: 10px;
   padding-top: 10px;
   border-top: 1px solid rgba(255, 255, 255, 0.10);
   display: flex;
-  gap: 10px;
+  gap: 8px;
 }
 
-/* EDIT (Link styled as button) */
 .editLink {
-  padding: 8px 16px;
-  border-radius: 14px;
+  padding: 6px 13px;
+  border-radius: 10px;
   background: linear-gradient(135deg, #03dbfc, #7d19f7);
   color: white;
   font-weight: 600;
-  font-size: 0.95rem;
+  font-size: 0.8rem;
   font-family: var(--font-title);
   text-decoration: none;
   display: inline-flex;
@@ -578,578 +445,134 @@
 }
 
 .deleteButton {
-  padding: 8px 16px;
-  border-radius: 14px;
-  border: none;
-  background: linear-gradient(135deg, #03dbfc, #7d19f7);
-  color: white;
+  padding: 6px 13px;
+  border-radius: 10px;
+  border: 1px solid rgba(255, 255, 255, 0.14);
+  background: rgba(255, 255, 255, 0.06);
+  color: rgba(244, 244, 245, 0.75);
   font-weight: 600;
-  font-size: 0.95rem;
+  font-size: 0.8rem;
   font-family: var(--font-title);
   cursor: pointer;
-  transition: transform 0.15s ease, opacity 0.15s ease;
+  transition: background 160ms ease, color 160ms ease;
 }
 
 .deleteButton:hover {
-  transform: translateY(-1px);
-  opacity: 0.9;
+  background: rgba(197, 34, 170, 0.15);
+  color: #c522aa;
+  border-color: rgba(197, 34, 170, 0.3);
 }
 
-.emojiButton {
-  position: absolute;
-  right: 10px;
-  bottom: 10px;
-  background: rgba(255, 255, 255, 0.08);
-  border: 1px solid rgba(255, 255, 255, 0.12);
-  border-radius: 10px;
-  padding: 6px;
-  cursor: pointer;
+/* ─── EMPTY STATE ────────────────────────────────────────────────── */
+.emptyState {
+  border: 1px dashed rgba(255, 255, 255, 0.18);
+  border-radius: 16px;
+  padding: 28px 20px;
+  background: rgba(255, 255, 255, 0.03);
+  text-align: center;
 }
 
-.emojiPopover {
-  position: absolute;
-  top: calc(100% + 8px); /* 👈 forces it BELOW the button */
-  right: 0;
-  z-index: 999;
-  background: #0b0f1f;
-  border-radius: 12px;
-  padding: 10px;
-  display: grid;
-  grid-template-columns: repeat(6, 1fr);
-  gap: 8px;
-  width: 320px;
-  max-height: 300px;
-  overflow-y: auto;
-}
-
-.emojiItem {
-  background: transparent;
-  border: none;
-  cursor: pointer;
-  padding: 4px;
-}
-
-.emojiItem:hover {
-  background: rgba(255,255,255,0.1);
-  border-radius: 8px;
-}
-
-.glassSelect {
-  width: 100%;
-  min-height: 54px;
-  padding: 0 18px;
-  border-radius: 999px;
-  border: 1px solid rgba(255, 255, 255, 0.22);
-  background:
-    linear-gradient(
-      180deg,
-      rgba(255, 255, 255, 0.22) 0%,
-      rgba(255, 255, 255, 0.10) 48%,
-      rgba(255, 255, 255, 0.06) 100%
-    );
-  backdrop-filter: blur(16px);
-  -webkit-backdrop-filter: blur(16px);
-  box-shadow:
-    inset 0 1px 0 rgba(255, 255, 255, 0.30),
-    inset 0 -1px 0 rgba(255, 255, 255, 0.08),
-    0 10px 30px rgba(0, 0, 0, 0.18);
-  color: rgba(255, 255, 255, 0.96);
-  font-size: 0.95rem;
-  font-weight: 500;
-  font-family: var(--font-title);
-  line-height: 1;
-  appearance: none;
-  -webkit-appearance: none;
-  -moz-appearance: none;
-  outline: none;
-  cursor: pointer;
-  background-image:
-    linear-gradient(
-      180deg,
-      rgba(255, 255, 255, 0.22) 0%,
-      rgba(255, 255, 255, 0.10) 48%,
-      rgba(255, 255, 255, 0.06) 100%
-    ),
-    url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='20' height='20' viewBox='0 0 20 20' fill='none'%3E%3Cpath d='M5.25 7.5L10 12.25L14.75 7.5' stroke='rgba(255,255,255,0.92)' stroke-width='1.8' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E");
-  background-repeat: no-repeat, no-repeat;
-  background-position: 0 0, right 16px center;
-  background-size: auto, 18px;
-  padding-right: 48px;
-}
-
-.glassSelect:hover {
-  border-color: rgba(255, 255, 255, 0.30);
-  background-image:
-    linear-gradient(
-      180deg,
-      rgba(255, 255, 255, 0.28) 0%,
-      rgba(255, 255, 255, 0.12) 48%,
-      rgba(255, 255, 255, 0.07) 100%
-    ),
-    url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='20' height='20' viewBox='0 0 20 20' fill='none'%3E%3Cpath d='M5.25 7.5L10 12.25L14.75 7.5' stroke='rgba(255,255,255,0.92)' stroke-width='1.8' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E");
-  box-shadow:
-    inset 0 1px 0 rgba(255, 255, 255, 0.34),
-    inset 0 -1px 0 rgba(255, 255, 255, 0.10),
-    0 12px 34px rgba(0, 0, 0, 0.22);
-}
-
-.glassSelect:focus {
-  border-color: rgba(255, 255, 255, 0.38);
-  box-shadow:
-    inset 0 1px 0 rgba(255, 255, 255, 0.36),
-    inset 0 -1px 0 rgba(255, 255, 255, 0.10),
-    0 0 0 3px rgba(255, 255, 255, 0.10),
-    0 12px 34px rgba(0, 0, 0, 0.22);
-}
-
-.glassSelect option {
-  background: #1f2230;
-  color: white;
-}
-
-.pillGroup {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 10px;
-  margin-top: 10px;
-}
-
-.pillInput {
-  position: absolute;
-  opacity: 0;
-  pointer-events: none;
-}
-
-.pill {
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  min-height: 46px;
-  padding: 0 18px;
-  border-radius: 999px;
-
-  border: 1px solid rgba(255, 255, 255, 0.18);
-
-  background:
-    linear-gradient(180deg, rgba(255,255,255,0.16) 0%, rgba(255,255,255,0.08) 100%);
-
-  box-shadow:
-    inset 0 1px 0 rgba(255,255,255,0.24),
-    0 8px 24px rgba(0,0,0,0.18);
-
-  color: rgba(255,255,255,0.96);
-  cursor: pointer;
-  user-select: none;
-
-  transition: all 0.2s ease;
-}
-
-.pill:hover {
-  background:
-    linear-gradient(180deg, rgba(255,255,255,0.22) 0%, rgba(255,255,255,0.10) 100%);
-}
-
-.pillActive {
-  border: 1px solid rgba(255, 255, 255, 0.32);
-
-  background:
-    linear-gradient(180deg, rgba(255,255,255,0.28) 0%, rgba(255,255,255,0.12) 100%);
-
-  box-shadow:
-    inset 0 1px 0 rgba(255,255,255,0.32),
-    0 10px 28px rgba(0,0,0,0.22),
-    0 0 0 2px rgba(255,255,255,0.10);
-}
-
-.pillSmall {
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  min-height: 42px;
-  padding: 0 16px;
-  border-radius: 999px;
-  border: 1px solid rgba(255, 255, 255, 0.18);
-  background: linear-gradient(180deg, rgba(255,255,255,0.16) 0%, rgba(255,255,255,0.08) 100%);
-  box-shadow: inset 0 1px 0 rgba(255,255,255,0.24), 0 8px 24px rgba(0,0,0,0.18);
-  color: rgba(255,255,255,0.96);
-  cursor: pointer;
-  user-select: none;
-  transition: all 0.2s ease;
-  font-size: 14px;
-}
-
-.pillSmallActive {
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  min-height: 42px;
-  padding: 0 16px;
-  border-radius: 999px;
-  border: 1px solid rgba(255, 255, 255, 0.32);
-  background: linear-gradient(180deg, rgba(255,255,255,0.28) 0%, rgba(255,255,255,0.12) 100%);
-  box-shadow: inset 0 1px 0 rgba(255,255,255,0.32), 0 10px 28px rgba(0,0,0,0.22), 0 0 0 2px rgba(255,255,255,0.10);
-  color: rgba(255,255,255,0.96);
-  cursor: pointer;
-  user-select: none;
-  transition: all 0.2s ease;
-  font-size: 14px;
-}
-
-.cardWide {
-  max-width: 980px;
-  overflow: visible;
-  position: relative;
-  z-index: 5;
-}
-
-.spacingMd {
-  margin-top: 14px;
-}
-
-.spacingLg {
-  margin-top: 20px;
-}
-
-.customSelect {
-  position: relative;
-  width: 100%;
-}
-
-.customSelect summary {
-  list-style: none;
-}
-
-.customSelect summary::-webkit-details-marker {
-  display: none;
-}
-
-.customSelectTrigger {
-  width: 100%;
-  min-height: 54px;
-  padding: 0 18px;
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: 12px;
-
-  border-radius: 999px;
-  border: 1px solid rgba(255, 255, 255, 0.22);
-
-  background:
-    linear-gradient(
-      180deg,
-      rgba(255, 255, 255, 0.22) 0%,
-      rgba(255, 255, 255, 0.10) 48%,
-      rgba(255, 255, 255, 0.06) 100%
-    );
-  backdrop-filter: blur(16px);
-  -webkit-backdrop-filter: blur(16px);
-
-  box-shadow:
-    inset 0 1px 0 rgba(255, 255, 255, 0.30),
-    inset 0 -1px 0 rgba(255, 255, 255, 0.08),
-    0 10px 30px rgba(0, 0, 0, 0.18);
-
-  color: rgba(255, 255, 255, 0.96);
-  cursor: pointer;
-  user-select: none;
-}
-
-.customSelect[open] .customSelectTrigger {
-  border-color: rgba(255, 255, 255, 0.32);
-  box-shadow:
-    inset 0 1px 0 rgba(255, 255, 255, 0.34),
-    inset 0 -1px 0 rgba(255, 255, 255, 0.10),
-    0 12px 34px rgba(0, 0, 0, 0.22),
-    0 0 0 2px rgba(255, 255, 255, 0.10);
-}
-
-.customSelectChevron {
-  font-size: 0.95rem;
-  line-height: 1;
-  opacity: 0.9;
-}
-
-.customSelectMenu {
-  position: absolute;
-  top: calc(100% + 10px);
-  left: 0;
-  right: 0;
-  z-index: 50;
-
-  display: flex;
-  flex-direction: column;
-  gap: 8px;
-  padding: 12px;
-
-  max-height: 260px;
-  overflow-y: auto;
-
-  border-radius: 24px;
-  border: 1px solid rgba(255, 255, 255, 0.18);
-
-  background:
-    linear-gradient(
-      180deg,
-      rgba(255, 255, 255, 0.16) 0%,
-      rgba(255, 255, 255, 0.08) 100%
-    ),
-    rgba(19, 25, 52, 0.92);
-
-  backdrop-filter: blur(20px);
-  -webkit-backdrop-filter: blur(20px);
-
-  box-shadow:
-    inset 0 1px 0 rgba(255, 255, 255, 0.22),
-    0 18px 40px rgba(0, 0, 0, 0.28);
-}
-
-.customSelectMenuGrid {
-  position: absolute;
-  top: calc(100% + 10px);
-  left: 0;
-  right: 0;
-  z-index: 50;
-
-  display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(64px, 1fr));
-  gap: 8px;
-  padding: 12px;
-
-  max-height: 260px;
-  overflow-y: auto;
-
-  border-radius: 24px;
-  border: 1px solid rgba(255, 255, 255, 0.18);
-
-  background:
-    linear-gradient(
-      180deg,
-      rgba(255, 255, 255, 0.16) 0%,
-      rgba(255, 255, 255, 0.08) 100%
-    ),
-    rgba(19, 25, 52, 0.92);
-
-  backdrop-filter: blur(20px);
-  -webkit-backdrop-filter: blur(20px);
-
-  box-shadow:
-    inset 0 1px 0 rgba(255, 255, 255, 0.22),
-    0 18px 40px rgba(0, 0, 0, 0.28);
-}
-
-.customSelectInput {
-  position: absolute;
-  opacity: 0;
-  pointer-events: none;
-}
-
-.customSelectOption {
-  position: relative;
-  min-height: 46px;
-  padding: 0 16px;
-  display: flex;
-  align-items: center;
-  justify-content: flex-start;
-
-  border-radius: 999px;
-  border: 1px solid rgba(255, 255, 255, 0.14);
-
-  background:
-    linear-gradient(
-      180deg,
-      rgba(255, 255, 255, 0.14) 0%,
-      rgba(255, 255, 255, 0.06) 100%
-    );
-
-  box-shadow:
-    inset 0 1px 0 rgba(255, 255, 255, 0.18),
-    0 8px 20px rgba(0, 0, 0, 0.18);
-
-  color: rgba(255, 255, 255, 0.96);
-  cursor: pointer;
-  user-select: none;
-  transition: all 0.18s ease;
-}
-
-.customSelectOption:hover {
-  border-color: rgba(255, 255, 255, 0.24);
-  background:
-    linear-gradient(
-      180deg,
-      rgba(255, 255, 255, 0.22) 0%,
-      rgba(255, 255, 255, 0.09) 100%
-    );
-}
-
-.customSelectOptionSelected {
-  border-color: rgba(255, 255, 255, 0.28);
-  background:
-    linear-gradient(
-      180deg,
-      rgba(255, 255, 255, 0.26) 0%,
-      rgba(255, 255, 255, 0.12) 100%
-    );
-
-  box-shadow:
-    inset 0 1px 0 rgba(255, 255, 255, 0.26),
-    0 10px 24px rgba(0, 0, 0, 0.22),
-    0 0 0 2px rgba(255, 255, 255, 0.08);
-}
-
-.customSelectMenu,
-.customSelectMenuGrid {
-  scrollbar-width: thin;
-  scrollbar-color: #7d19f7 rgba(255, 255, 255, 0.08);
-}
-
-.customSelectMenu,
-.customSelectMenuGrid {
-  scrollbar-width: none;
-}
-
-.customSelectMenu::-webkit-scrollbar,
-.customSelectMenuGrid::-webkit-scrollbar {
-  display: none;
-}
-
-.scrollWrapper {
-  position: relative;
-}
-
-.fakeScrollbar {
-  position: absolute;
-  top: 10px;
-  right: 6px;
-  bottom: 10px;
-  width: 8px;
-
-  z-index: 999; /* THIS is the fix */
-
-  pointer-events: none;
-
-  border-radius: 999px;
-  background: rgba(255, 255, 255, 0.08);
-}
-
-.fakeThumb {
-  position: absolute;
-  width: 100%;
-  height: 40px;
-
-  border-radius: 999px;
-
-  background: linear-gradient(
-    180deg,
-    #03dbfc 0%,
-    #7d19f7 100%
-  );
-
-  z-index: 1000; /* ensures thumb stays on top */
-}
-
-.rowFields {
-  display: grid;
-  grid-template-columns: repeat(2, minmax(0, 1fr));
-  gap: 16px;
-  margin-bottom: 22px;
-}
-
-.dateInput {
-  width: 100%;
-  height: 48px;
-
-  border-radius: 999px;
-  border: 1px solid rgba(255, 255, 255, 0.2);
-
-  background:
-    linear-gradient(
-      180deg,
-      rgba(255, 255, 255, 0.18) 0%,
-      rgba(255, 255, 255, 0.08) 100%
-    );
-
-  backdrop-filter: blur(12px);
-  -webkit-backdrop-filter: blur(12px);
-
-  padding: 0 14px;
-
-  color: rgba(255, 255, 255, 0.95);
-  font-size: 0.95rem;
-
-  outline: none;
-}
-
-.dateInput::-webkit-calendar-picker-indicator {
-  filter: invert(1) brightness(1.2);
-  cursor: pointer;
-}
-
-.scheduleDateButton {
-  width: 100%;
-  min-height: 54px;
-  padding: 0 18px;
-
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-
-  border-radius: 999px;
-  border: 1px solid rgba(255, 255, 255, 0.22);
-
-  background:
-    linear-gradient(
-      180deg,
-      rgba(255, 255, 255, 0.22) 0%,
-      rgba(255, 255, 255, 0.10) 48%,
-      rgba(255, 255, 255, 0.06) 100%
-    );
-
-  backdrop-filter: blur(16px);
-  -webkit-backdrop-filter: blur(16px);
-
-  box-shadow:
-    inset 0 1px 0 rgba(255, 255, 255, 0.30),
-    inset 0 -1px 0 rgba(255, 255, 255, 0.08),
-    0 10px 30px rgba(0, 0, 0, 0.18);
-
-  color: rgba(255, 255, 255, 0.96);
+.emptyTitle {
+  margin: 0;
+  font-weight: 800;
   font-size: 0.95rem;
   font-family: var(--font-title);
-
-  cursor: pointer;
-  outline: none;
-  transition: all 0.18s ease;
 }
 
-.scheduleDateButton:hover {
-  border-color: rgba(255, 255, 255, 0.30);
-
-  background:
-    linear-gradient(
-      180deg,
-      rgba(255, 255, 255, 0.28) 0%,
-      rgba(255, 255, 255, 0.12) 48%,
-      rgba(255, 255, 255, 0.07) 100%
-    );
-
-  box-shadow:
-    inset 0 1px 0 rgba(255, 255, 255, 0.34),
-    inset 0 -1px 0 rgba(255, 255, 255, 0.10),
-    0 12px 34px rgba(0, 0, 0, 0.22);
+.emptyText {
+  margin: 8px 0 14px;
+  font-size: 0.85rem;
+  color: rgba(244, 244, 245, 0.62);
 }
 
-.scheduleDateButton:focus {
-  border-color: rgba(255, 255, 255, 0.38);
+/* ─── MOBILE ─────────────────────────────────────────────────────── */
+@media (max-width: 600px) {
+  .page {
+    padding: 20px 12px;
+  }
 
-  box-shadow:
-    inset 0 1px 0 rgba(255, 255, 255, 0.36),
-    inset 0 -1px 0 rgba(255, 255, 255, 0.10),
-    0 0 0 3px rgba(255, 255, 255, 0.10),
-    0 12px 34px rgba(0, 0, 0, 0.22);
-}
+  .title {
+    font-size: 1.3rem;
+  }
 
-.dateField {
-  position: relative;
-  margin-bottom: 22px;
+  .subtitle {
+    font-size: 0.82rem;
+  }
+
+  .panel {
+    padding: 16px 14px;
+    border-radius: 14px;
+  }
+
+  .formStack {
+    gap: 15px;
+  }
+
+  .input,
+  .textarea {
+    font-size: 0.85rem;
+    padding: 10px 12px;
+    border-radius: 10px;
+  }
+
+  .textarea {
+    min-height: 110px;
+  }
+
+  .label {
+    font-size: 0.78rem;
+  }
+
+  .typeButton {
+    padding: 6px 13px;
+    font-size: 0.72rem;
+  }
+
+  .intervalButton {
+    padding: 6px 10px;
+    font-size: 0.74rem;
+    border-radius: 8px;
+  }
+
+  .formButton {
+    padding: 8px 16px;
+    font-size: 0.82rem;
+  }
+
+  .primaryLink,
+  .secondaryLink {
+    padding: 7px 12px;
+    font-size: 0.78rem;
+  }
+
+  .emojiPopover {
+    width: 240px;
+    grid-template-columns: repeat(5, 1fr);
+    right: 0;
+    left: auto;
+  }
+
+  .headerRow {
+    flex-direction: row;
+    align-items: center;
+  }
+
+  .cardTitle {
+    font-size: 0.86rem;
+  }
+
+  .cardDescription,
+  .cardDescriptionMuted {
+    font-size: 0.78rem;
+  }
+
+  .cardTime {
+    font-size: 0.72rem;
+  }
+
+  .editLink,
+  .deleteButton {
+    padding: 5px 11px;
+    font-size: 0.76rem;
+  }
 }
