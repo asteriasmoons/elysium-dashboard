@@ -2,6 +2,7 @@
 
 import { useEffect, useRef, useState } from "react";
 import { useRouter } from "next/navigation";
+import Link from "next/link";
 import Image from "next/image";
 import styles from "../reminders.module.css";
 import EmojiPicker, { type DiscordEmoji } from "@/components/discord/EmojiPicker";
@@ -153,13 +154,13 @@ export default function NewReminderPage() {
             <p className={styles.subtitle}>Create a new DM or server reminder.</p>
           </div>
           <div className={styles.actions}>
-            <a href="/dashboard/reminders" className={styles.secondaryLink}>Back</a>
+            <Link href="/dashboard/reminders" className={styles.secondaryLink}>Back</Link>
           </div>
         </div>
 
         <form onSubmit={handleSubmit} className={styles.panel}>
           <div className={styles.formStack}>
-            {error ? <p style={{ color: "#f87171", margin: 0 }}>{error}</p> : null}
+            {error ? <p style={{ color: "#f871e8ff", margin: 0 }}>{error}</p> : null}
 
             <div className={styles.fieldGroup}>
               <label className={styles.label}>Type</label>

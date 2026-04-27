@@ -149,6 +149,11 @@
   transition: border-color 160ms ease, box-shadow 160ms ease, background 160ms ease;
 }
 
+input[type="datetime-local"].input {
+  -webkit-appearance: none;
+  appearance: none;
+}
+
 .textarea {
   min-height: 140px;
   resize: vertical;

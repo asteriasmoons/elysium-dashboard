@@ -2,6 +2,7 @@
 
 import { useEffect, useRef, useState } from "react";
 import { useParams, useRouter } from "next/navigation";
+import Link from "next/link";
 import Image from "next/image";
 import styles from "../reminders.module.css";
 import EmojiPicker, { type DiscordEmoji } from "@/components/discord/EmojiPicker";
@@ -190,7 +191,7 @@ export default function EditReminderPage() {
             <p className={styles.subtitle}>Update your reminder settings.</p>
           </div>
           <div className={styles.actions}>
-            <a href="/dashboard/reminders" className={styles.secondaryLink}>Back</a>
+            <Link href="/dashboard/reminders" className={styles.secondaryLink}>Back</Link>
           </div>
         </div>
 
