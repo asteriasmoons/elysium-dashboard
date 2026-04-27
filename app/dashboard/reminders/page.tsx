@@ -5,13 +5,41 @@ import { getSessionUserId } from "@/lib/journalAccess";
 import { deleteReminder, listUserReminders } from "@/lib/reminderAccess";
 import styles from "./reminders.module.css";
 
-function formatNextFire(startDate: Date, interval: string): string {
-  return new Date(startDate).toLocaleString(undefined, {
-    month: "short",
-    day: "numeric",
-    hour: "numeric",
-    minute: "2-digit",
-  });
+function parseIntervalMs(interval: string): number | null {
+  const m = interval.match(/^(\d+)\s*([smhdw])$/i);
+  if (!m) return null;
+  const num = parseInt(m[1], 10);
+  const unit = m[2].toLowerCase();
+  const map: Record<string, number> = { s: 1000, m: 60000, h: 3600000, d: 86400000, w: 604800000 };
+  return num * (map[unit] ?? 0);
+}
+
+function formatNextFire(startDate: Date, interval: string, lastSent: Date | null, timezone: string): string {
+  const intervalMs = parseIntervalMs(interval);
+  let next: Date;
+  if (intervalMs && lastSent) {
+    next = new Date(new Date(lastSent).getTime() + intervalMs);
+  } else {
+    next = new Date(startDate);
+  }
+  try {
+    return next.toLocaleString("en-US", {
+      timeZone: timezone || "America/Chicago",
+      month: "short",
+      day: "numeric",
+      hour: "numeric",
+      minute: "2-digit",
+      hour12: true,
+    });
+  } catch {
+    return next.toLocaleString("en-US", {
+      month: "short",
+      day: "numeric",
+      hour: "numeric",
+      minute: "2-digit",
+      hour12: true,
+    });
+  }
 }
 
 export default async function RemindersPage() {
@@ -95,7 +123,7 @@ export default async function RemindersPage() {
 
                     {reminder.startDate ? (
                       <p className={styles.cardTime} style={{ opacity: 0.6, fontSize: "0.8rem" }}>
-                        Next: {formatNextFire(reminder.startDate, reminder.interval)}
+                        Next: {formatNextFire(reminder.startDate, reminder.interval, reminder.lastSent ?? null, reminder.timezone)}
                       </p>
                     ) : null}
 
