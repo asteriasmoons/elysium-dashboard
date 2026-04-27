@@ -100,7 +100,7 @@ export async function listUserReminders(userId: string): Promise<ReminderDoc[]> 
   const db = client.db();
   return db
     .collection<ReminderDoc>(REMINDER_COLLECTION)
-    .find({ type: "dm", userId })
+    .find({ $or: [{ userId }, { creatorId: userId }] })
     .sort({ name: 1 })
     .toArray();
 }
