@@ -16,11 +16,13 @@ function parseIntervalMs(interval: string): number | null {
 
 function formatNextFire(startDate: Date, interval: string, lastSent: Date | null, timezone: string): string {
   const intervalMs = parseIntervalMs(interval);
+  const start = new Date(startDate);
+  const now = new Date();
   let next: Date;
-  if (intervalMs && lastSent) {
+  if (intervalMs && lastSent && start <= now) {
     next = new Date(new Date(lastSent).getTime() + intervalMs);
   } else {
-    next = new Date(startDate);
+    next = start;
   }
   try {
     return next.toLocaleString("en-US", {
