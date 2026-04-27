@@ -1138,6 +1138,21 @@
   margin-bottom: 22px;
 }
 
+.fieldGroup {
+  position: relative;
+}
+
+.input,
+.textarea {
+  padding-right: 48px;
+}
+
+.emojiButton {
+  right: 12px;
+  bottom: 12px;
+  z-index: 5;
+}
+
 @media (max-width: 720px) {
   .page {
     padding: 28px 12px;
@@ -1200,5 +1215,17 @@
   .emojiPopover {
     width: min(320px, calc(100vw - 32px));
     max-width: calc(100vw - 32px);
+  }
+}
+
+@media (max-width: 720px) {
+  .emojiButton {
+    right: 12px;
+    bottom: 12px;
+  }
+
+  .input,
+  .textarea {
+    padding-right: 52px;
   }
 }
