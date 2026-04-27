@@ -13,7 +13,7 @@ import {
   serializeDiscordEditorContent,
   syncDiscordEditorContent,
 } from "@/lib/discordEmojiEditor";
-import styles from "./afk.module.css";
+import styles from "../afk.module.css";
 
 type AfkConfig = {
   guildId: string;
