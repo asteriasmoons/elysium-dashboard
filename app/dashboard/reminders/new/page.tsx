@@ -96,7 +96,17 @@ export default function NewReminderPage() {
   const resolvedInterval = useCustomInterval ? customInterval : interval;
 
   useEffect(() => {
-    fetch("/api/emojis").then(r => r.ok ? r.json() : null).then(d => { if (d?.emojis) setEmojis(d.emojis); }).catch(console.error);
+    async function loadEmojis() {
+      try {
+        const response = await fetch("/api/emojis");
+        if (!response.ok) return;
+        const data = await response.json();
+        setEmojis(Array.isArray(data.emojis) ? data.emojis : []);
+      } catch (err) {
+        console.error(err);
+      }
+    }
+    loadEmojis();
   }, []);
 
   useEffect(() => {
@@ -291,7 +301,7 @@ export default function NewReminderPage() {
               </button>
               {showEmojiPicker ? (
                 <div className={styles.emojiPopover} onMouseDown={(e) => e.preventDefault()}>
-                  {emojis.length > 0 ? emojis.map((emoji) => {
+                  {emojis.map((emoji) => {
                     const tag = `<${emoji.animated?"a":""}:${emoji.name}:${emoji.id}>`;
                     return (
                       <button key={emoji.id} type="button" className={styles.emojiItem}
@@ -299,7 +309,7 @@ export default function NewReminderPage() {
                         <Image src={getEmojiSrc(emoji.id, emoji.animated)} alt={emoji.name} width={28} height={28} unoptimized />
                       </button>
                     );
-                  }) : <div className={styles.emojiEmpty}>No emojis found</div>}
+                  })}
                 </div>
               ) : null}
             </div>
