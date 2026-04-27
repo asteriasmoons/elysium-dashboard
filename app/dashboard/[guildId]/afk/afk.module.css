@@ -147,6 +147,82 @@
   overflow: visible;
 }
 
+.viewCard {
+  max-width: 760px;
+}
+
+.viewGrid {
+  display: grid;
+  gap: 14px;
+}
+
+.viewItem {
+  display: grid;
+  gap: 6px;
+  padding: 14px;
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: 12px;
+  background: rgba(255, 255, 255, 0.055);
+}
+
+.viewValue {
+  margin: 0;
+  color: #dbdee1;
+  font-size: 0.95rem;
+  line-height: 1.5;
+  white-space: pre-wrap;
+  overflow-wrap: break-word;
+}
+
+.statusPill {
+  width: fit-content;
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 7px 10px;
+  border: 1px solid rgba(255, 255, 255, 0.14);
+  border-radius: 999px;
+  background: rgba(255, 255, 255, 0.08);
+  color: #ffffff;
+  font-size: 0.82rem;
+  font-weight: 800;
+}
+
+.statusDot {
+  width: 8px;
+  height: 8px;
+  border-radius: 999px;
+  background: #9ff7c3;
+  box-shadow: 0 0 14px rgba(159, 247, 195, 0.55);
+}
+
+.statusDotOff {
+  background: #ff9898;
+  box-shadow: 0 0 14px rgba(255, 152, 152, 0.45);
+}
+
+.colorRow {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.colorSwatch {
+  width: 42px;
+  height: 24px;
+  flex: 0 0 auto;
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  border-radius: 8px;
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.22);
+}
+
+.colorText {
+  margin: 0;
+  color: rgba(255, 255, 255, 0.66);
+  font-size: 0.88rem;
+  font-family: var(--font-body);
+}
+
 .previewCard {
   position: sticky;
   top: 24px;
@@ -370,5 +446,13 @@
 
   .previewCard {
     position: static;
+  }
+
+  .viewCard {
+    max-width: none;
+  }
+
+  .viewItem {
+    padding: 12px;
   }
 }
