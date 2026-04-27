@@ -221,10 +221,14 @@ export default function NewReminderPage() {
                   onInput={(e) => setEmbedTitle(serializeDiscordEditorContent(e.currentTarget))}
                   onBlur={(e) => setEmbedTitle(serializeDiscordEditorContent(e.currentTarget))}
                   style={{ minHeight: 44, paddingRight: 42, whiteSpace: "pre-wrap", overflowWrap: "break-word" }} />
-                <button type="button" className={styles.emojiButton} onMouseDown={(e) => e.preventDefault()}
+                <button type="button" className={styles.emojiButton}
+                  onPointerDown={(e) => e.preventDefault()}
                   onClick={() => { setActiveEditor("title"); setShowEmojiPicker(v => !v); }}>
                   <Image src="/img/icons/face.svg" alt="emoji" width={20} height={20} unoptimized />
                 </button>
+                {showEmojiPicker && activeEditor === "title" ? (
+                  <EmojiPicker emojis={emojis} onPick={insertEmojiTag} className={styles.emojiPopover} itemClassName={styles.emojiItem} />
+                ) : null}
               </div>
             </div>
 
@@ -236,16 +240,16 @@ export default function NewReminderPage() {
                   onInput={(e) => setEmbedDescription(serializeDiscordEditorContent(e.currentTarget))}
                   onBlur={(e) => setEmbedDescription(serializeDiscordEditorContent(e.currentTarget))}
                   style={{ paddingRight: 42 }} />
-                <button type="button" className={styles.emojiButton} onMouseDown={(e) => e.preventDefault()}
+                <button type="button" className={styles.emojiButton}
+                  onPointerDown={(e) => e.preventDefault()}
                   onClick={() => { setActiveEditor("description"); setShowEmojiPicker(v => !v); }}>
                   <Image src="/img/icons/face.svg" alt="emoji" width={20} height={20} unoptimized />
                 </button>
+                {showEmojiPicker && activeEditor === "description" ? (
+                  <EmojiPicker emojis={emojis} onPick={insertEmojiTag} className={styles.emojiPopover} itemClassName={styles.emojiItem} />
+                ) : null}
               </div>
             </div>
-
-            {showEmojiPicker ? (
-              <EmojiPicker emojis={emojis} onPick={insertEmojiTag} className={styles.emojiPopover} itemClassName={styles.emojiItem} />
-            ) : null}
 
             <div className={styles.fieldGroup}>
               <label className={styles.label}>Embed color</label>

@@ -145,7 +145,6 @@
   font-size: 0.9rem;
   box-sizing: border-box;
   outline: none;
-  overflow: hidden;
   transition: border-color 160ms ease, box-shadow 160ms ease, background 160ms ease;
 }
 
