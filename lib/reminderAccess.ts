@@ -3,168 +3,178 @@ import { ObjectId, type Document } from "mongodb";
 
 export const REMINDER_COLLECTION = "reminders";
 
-export type ReminderFrequency = "daily" | "weekly" | "monthly";
-
-export interface ReminderScheduleInput {
-  frequency?: ReminderFrequency;
-  dayOfWeek?: number | null;
-  dayOfMonth?: number | null;
-}
+export type ReminderType = "guild" | "dm";
 
 export interface ReminderDoc extends Document {
   _id: ObjectId;
-  userId: string;
+  type: ReminderType;
   guildId: string | null;
-  hour: number;
-  minute: number;
-  text: string;
-  zone: string;
-  frequency: ReminderFrequency;
-  dayOfWeek: number | null;
-  dayOfMonth: number | null;
-  reminderSentAt: Date | null;
-  completed?: boolean;
+  userId: string | null;
+  name: string;
+  creatorId: string;
+  interval: string;
+  startDate: Date;
+  ping: string;
+  channelId: string | null;
+  dayOfWeek: string | null;
+  embedTitle: string;
+  embedDescription: string;
+  embedColor: string;
+  timezone: string;
+  lastSent: Date | null;
+  createdAt?: Date;
+  updatedAt?: Date;
 }
 
-function requireUserId(userId: string | null | undefined): string {
-  const trimmed = (userId ?? "").trim();
-  if (!trimmed) throw new Error("Missing userId");
-  return trimmed;
+export interface ReminderInput {
+  type: ReminderType;
+  name: string;
+  creatorId: string;
+  interval: string;
+  startDate: Date | string;
+  ping?: string;
+  channelId?: string | null;
+  dayOfWeek?: string | null;
+  embedTitle?: string;
+  embedDescription?: string;
+  embedColor?: string;
+  timezone?: string;
+  lastSent?: Date | string | null;
 }
 
-function normalizeReminderSchedule(input?: ReminderScheduleInput) {
-  const frequency = input?.frequency ?? "daily";
+function requireObjectId(id: string | null | undefined): ObjectId {
+  const trimmed = String(id ?? "").trim();
+  if (!ObjectId.isValid(trimmed)) throw new Error("Invalid id");
+  return new ObjectId(trimmed);
+}
 
-  if (!["daily", "weekly", "monthly"].includes(frequency)) {
-    throw new Error("Frequency must be daily, weekly, or monthly");
+function normalizeString(value: unknown, fallback = ""): string {
+  return String(value ?? fallback).trim();
+}
+
+function normalizeDate(value: Date | string | null | undefined, fallback?: Date): Date {
+  if (value instanceof Date && !Number.isNaN(value.getTime())) return value;
+  if (typeof value === "string") {
+    const parsed = new Date(value);
+    if (!Number.isNaN(parsed.getTime())) return parsed;
   }
+  if (fallback) return fallback;
+  throw new Error("Invalid date");
+}
 
-  let dayOfWeek: number | null = input?.dayOfWeek ?? null;
-  let dayOfMonth: number | null = input?.dayOfMonth ?? null;
+function normalizeNullableDate(value: Date | string | null | undefined): Date | null {
+  if (value == null || value === "") return null;
+  return normalizeDate(value);
+}
 
-  if (frequency === "weekly") {
-    if (
-      dayOfWeek == null ||
-      !Number.isInteger(dayOfWeek) ||
-      dayOfWeek < 0 ||
-      dayOfWeek > 6
-    ) {
-      throw new Error("Weekly reminders require dayOfWeek between 0 and 6");
-    }
-    dayOfMonth = null;
-  } else if (frequency === "monthly") {
-    if (
-      dayOfMonth == null ||
-      !Number.isInteger(dayOfMonth) ||
-      dayOfMonth < 1 ||
-      dayOfMonth > 31
-    ) {
-      throw new Error("Monthly reminders require dayOfMonth between 1 and 31");
-    }
-    dayOfWeek = null;
-  } else {
-    dayOfWeek = null;
-    dayOfMonth = null;
-  }
+function normalizeReminderInput(input: ReminderInput) {
+  const type: ReminderType = input.type === "dm" ? "dm" : "guild";
+  const name = normalizeString(input.name);
+  const creatorId = normalizeString(input.creatorId);
+  const interval = normalizeString(input.interval);
+  const timezone = normalizeString(input.timezone, "America/Chicago") || "America/Chicago";
+
+  if (!name) throw new Error("Reminder name is required");
+  if (!creatorId) throw new Error("Reminder creatorId is required");
+  if (!interval) throw new Error("Reminder interval is required");
 
   return {
-    frequency,
-    dayOfWeek,
-    dayOfMonth,
+    type,
+    name,
+    creatorId,
+    interval,
+    startDate: normalizeDate(input.startDate),
+    ping: type === "guild" ? normalizeString(input.ping) : "",
+    channelId: type === "guild" ? (normalizeString(input.channelId) || null) : null,
+    dayOfWeek: input.dayOfWeek ? normalizeString(input.dayOfWeek) : null,
+    embedTitle: normalizeString(input.embedTitle, "Reminder!") || "Reminder!",
+    embedDescription: normalizeString(input.embedDescription),
+    embedColor: normalizeString(input.embedColor, "#8757f2") || "#8757f2",
+    timezone,
+    lastSent: normalizeNullableDate(input.lastSent),
   };
 }
 
-export async function listUserReminders(
-  userId: string,
-): Promise<ReminderDoc[]> {
-  const uid = requireUserId(userId);
+export async function listUserReminders(userId: string): Promise<ReminderDoc[]> {
   const client = await clientPromise;
   const db = client.db();
-
   return db
     .collection<ReminderDoc>(REMINDER_COLLECTION)
-    .find({ userId: uid })
-    .sort({ hour: 1, minute: 1 })
+    .find({ type: "dm", userId })
+    .sort({ name: 1 })
     .toArray();
+}
+
+export async function listGuildReminders(guildId: string): Promise<ReminderDoc[]> {
+  const client = await clientPromise;
+  const db = client.db();
+  return db
+    .collection<ReminderDoc>(REMINDER_COLLECTION)
+    .find({ type: "guild", guildId })
+    .sort({ name: 1 })
+    .toArray();
+}
+
+export async function getReminderById(
+  userId: string,
+  reminderId: string,
+): Promise<ReminderDoc | null> {
+  const _id = requireObjectId(reminderId);
+  const client = await clientPromise;
+  const db = client.db();
+  // Allow access if userId matches either userId (DM) or creatorId (guild)
+  return db.collection<ReminderDoc>(REMINDER_COLLECTION).findOne({
+    _id,
+    $or: [{ userId }, { creatorId: userId }],
+  });
 }
 
 export async function createReminder(
   userId: string,
-  text: string,
-  hour: number,
-  minute: number,
-  zone: string,
-  guildId: string | null,
-  schedule: ReminderScheduleInput | undefined,
-  reminderSentAt: Date | null,
+  input: ReminderInput,
 ): Promise<string> {
-  const uid = requireUserId(userId);
-  const trimmedText = String(text ?? "").trim();
-
-  if (!trimmedText) {
-    throw new Error("Reminder text is required");
-  }
-
-  if (!Number.isInteger(hour) || hour < 0 || hour > 23) {
-    throw new Error("Hour must be between 0 and 23");
-  }
-
-  if (!Number.isInteger(minute) || minute < 0 || minute > 59) {
-    throw new Error("Minute must be between 0 and 59");
-  }
-
-  const safeZone = String(zone ?? "").trim();
-  if (!safeZone) {
-    throw new Error("Time zone is required");
-  }
-
-  const normalizedSchedule = normalizeReminderSchedule(schedule);
-
   const client = await clientPromise;
   const db = client.db();
+  const normalized = normalizeReminderInput(input);
+  const now = new Date();
 
-  const result = await db.collection(REMINDER_COLLECTION).insertOne({
-    userId: uid,
-    guildId: guildId ?? null,
-    hour,
-    minute,
-    text: trimmedText,
-    zone: safeZone,
-    frequency: normalizedSchedule.frequency,
-    dayOfWeek: normalizedSchedule.dayOfWeek,
-    dayOfMonth: normalizedSchedule.dayOfMonth,
-    reminderSentAt: reminderSentAt ?? null,
-    completed: false,
-  });
+  const doc = {
+    _id: new ObjectId(),
+    ...normalized,
+    userId: normalized.type === "dm" ? userId : null,
+    guildId: normalized.type === "guild" ? (input as { guildId?: string }).guildId ?? null : null,
+    createdAt: now,
+    updatedAt: now,
+  };
 
+  const result = await db.collection<ReminderDoc>(REMINDER_COLLECTION).insertOne(doc);
   return result.insertedId.toString();
 }
 
-export async function toggleReminder(
+export async function updateReminder(
   userId: string,
   reminderId: string,
+  input: Partial<ReminderInput>,
 ): Promise<boolean> {
-  const uid = requireUserId(userId);
-
-  if (!ObjectId.isValid(reminderId)) return false;
-
+  const _id = requireObjectId(reminderId);
   const client = await clientPromise;
   const db = client.db();
 
-  const _id = new ObjectId(reminderId);
+  const setFields: Record<string, unknown> = { updatedAt: new Date() };
+  if (input.interval !== undefined) setFields.interval = normalizeString(input.interval);
+  if (input.startDate !== undefined) setFields.startDate = normalizeDate(input.startDate);
+  if (input.dayOfWeek !== undefined) setFields.dayOfWeek = input.dayOfWeek ? normalizeString(input.dayOfWeek) : null;
+  if (input.embedTitle !== undefined) setFields.embedTitle = normalizeString(input.embedTitle, "Reminder!") || "Reminder!";
+  if (input.embedDescription !== undefined) setFields.embedDescription = normalizeString(input.embedDescription);
+  if (input.embedColor !== undefined) setFields.embedColor = normalizeString(input.embedColor, "#8757f2") || "#8757f2";
+  if (input.timezone !== undefined) setFields.timezone = normalizeString(input.timezone, "America/Chicago") || "America/Chicago";
+  if (input.ping !== undefined) setFields.ping = normalizeString(input.ping);
+  if (input.channelId !== undefined) setFields.channelId = input.channelId ?? null;
 
-  const reminder = await db
-    .collection<ReminderDoc>(REMINDER_COLLECTION)
-    .findOne({ _id, userId: uid });
-
-  if (!reminder) return false;
-
-  const result = await db
-    .collection(REMINDER_COLLECTION)
-    .updateOne(
-      { _id, userId: uid },
-      { $set: { completed: !reminder.completed } },
-    );
+  const result = await db.collection<ReminderDoc>(REMINDER_COLLECTION).updateOne(
+    { _id, $or: [{ userId }, { creatorId: userId }] },
+    { $set: setFields },
+  );
 
   return result.matchedCount > 0;
 }
@@ -173,93 +183,13 @@ export async function deleteReminder(
   userId: string,
   reminderId: string,
 ): Promise<boolean> {
-  const uid = requireUserId(userId);
-
-  if (!ObjectId.isValid(reminderId)) return false;
-
+  const _id = requireObjectId(reminderId);
   const client = await clientPromise;
   const db = client.db();
-
-  const _id = new ObjectId(reminderId);
 
   const result = await db
-    .collection(REMINDER_COLLECTION)
-    .deleteOne({ _id, userId: uid });
+    .collection<ReminderDoc>(REMINDER_COLLECTION)
+    .deleteOne({ _id, $or: [{ userId }, { creatorId: userId }] });
 
   return result.deletedCount > 0;
-}
-
-export async function getReminderById(
-  userId: string,
-  reminderId: string,
-): Promise<ReminderDoc | null> {
-  const uid = requireUserId(userId);
-
-  if (!ObjectId.isValid(reminderId)) return null;
-
-  const client = await clientPromise;
-  const db = client.db();
-  const _id = new ObjectId(reminderId);
-
-  return db
-    .collection<ReminderDoc>(REMINDER_COLLECTION)
-    .findOne({ _id, userId: uid });
-}
-
-export async function updateReminder(
-  userId: string,
-  reminderId: string,
-  text: string,
-  hour: number,
-  minute: number,
-  zone: string,
-  guildId: string | null,
-  schedule: ReminderScheduleInput | undefined,
-  reminderSentAt: Date | null,
-): Promise<boolean> {
-  const uid = requireUserId(userId);
-  const trimmedText = String(text ?? "").trim();
-
-  if (!ObjectId.isValid(reminderId)) return false;
-  if (!trimmedText) {
-    throw new Error("Reminder text is required");
-  }
-
-  if (!Number.isInteger(hour) || hour < 0 || hour > 23) {
-    throw new Error("Hour must be between 0 and 23");
-  }
-
-  if (!Number.isInteger(minute) || minute < 0 || minute > 59) {
-    throw new Error("Minute must be between 0 and 59");
-  }
-
-  const safeZone = String(zone ?? "").trim();
-  if (!safeZone) {
-    throw new Error("Time zone is required");
-  }
-
-  const normalizedSchedule = normalizeReminderSchedule(schedule);
-
-  const client = await clientPromise;
-  const db = client.db();
-  const _id = new ObjectId(reminderId);
-
-  const result = await db.collection(REMINDER_COLLECTION).updateOne(
-    { _id, userId: uid },
-    {
-      $set: {
-        text: trimmedText,
-        hour,
-        minute,
-        zone: safeZone,
-        frequency: normalizedSchedule.frequency,
-        dayOfWeek: normalizedSchedule.dayOfWeek,
-        dayOfMonth: normalizedSchedule.dayOfMonth,
-        guildId: guildId ?? null,
-        reminderSentAt: reminderSentAt ?? null,
-      },
-    },
-  );
-
-  return result.matchedCount > 0;
 }

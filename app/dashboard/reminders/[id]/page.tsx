@@ -1,451 +1,227 @@
 "use client";
 
-import Image from "next/image";
-import { useEffect, useMemo, useRef, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { useParams, useRouter } from "next/navigation";
+import Image from "next/image";
 import styles from "../reminders.module.css";
 
-function pad(value: number): string {
-  return String(value).padStart(2, "0");
-}
+const TIMEZONE_OPTIONS = [
+  "America/Chicago","America/New_York","America/Denver","America/Los_Angeles",
+  "Europe/London","Europe/Paris","Asia/Tokyo","Asia/Singapore","Australia/Sydney","Pacific/Auckland",
+];
+const WEEKDAY_OPTIONS = ["Sunday","Monday","Tuesday","Wednesday","Thursday","Friday","Saturday"];
+const INTERVAL_PRESETS = [
+  { label: "30 min", value: "30m" },{ label: "1 hour", value: "1h" },{ label: "2 hours", value: "2h" },
+  { label: "6 hours", value: "6h" },{ label: "12 hours", value: "12h" },{ label: "Daily", value: "1d" },{ label: "Weekly", value: "1w" },
+];
 
-function formatDateInputValue(date: Date): string {
-  return `${date.getFullYear()}-${pad(date.getMonth() + 1)}-${pad(date.getDate())}`;
-}
-
-function formatDateLabel(dateValue: string): string {
-  const [year, month, day] = dateValue.split("-").map(Number);
-  const safeDate = new Date(year, month - 1, day);
-  return safeDate.toLocaleDateString(undefined, {
-    month: "long",
-    day: "numeric",
-    year: "numeric",
-  });
-}
-
-function getMonthLabel(date: Date): string {
-  return date.toLocaleDateString(undefined, {
-    month: "long",
-    year: "numeric",
-  });
-}
-
-function getDaysInMonth(year: number, monthIndex: number): number {
-  return new Date(year, monthIndex + 1, 0).getDate();
-}
-
-function isSameCalendarDay(a: Date, b: Date): boolean {
-  return (
-    a.getFullYear() === b.getFullYear() &&
-    a.getMonth() === b.getMonth() &&
-    a.getDate() === b.getDate()
-  );
-}
-
-function getEmojiSrc(emojiId: string, animated?: boolean): string {
-  const ext = animated ? "gif" : "png";
-  return `https://cdn.discordapp.com/emojis/${emojiId}.${ext}?size=64&quality=lossless`;
-}
-
-function escapeHtml(value: string): string {
-  return value
-    .replace(/&/g, "&amp;")
-    .replace(/</g, "&lt;")
-    .replace(/>/g, "&gt;")
-    .replace(/\"/g, "&quot;")
-    .replace(/'/g, "&#39;");
-}
-
-function renderEditorHtml(text: string): string {
-  const lines = text.split("\n");
-  const emojiRegex = /<(a)?:([a-zA-Z0-9_]+):(\d+)>/g;
-
-  return lines
-    .map((line) => {
-      let lastIndex = 0;
-      let html = "";
-      let match: RegExpExecArray | null;
-
-      while ((match = emojiRegex.exec(line)) !== null) {
-        const [fullMatch, animatedFlag, name, id] = match;
-        const start = match.index;
-
-        if (start > lastIndex) {
-          html += escapeHtml(line.slice(lastIndex, start));
-        }
-
-        const src = getEmojiSrc(id, Boolean(animatedFlag));
-        html += `<span contenteditable="false" data-emoji-tag="${escapeHtml(fullMatch)}" style="display:inline-flex;align-items:center;vertical-align:-0.2em;"><img src="${src}" alt=":${escapeHtml(name)}:" title=":${escapeHtml(name)}:" width="22" height="22" style="display:block;" /></span>\u200B`;
-        lastIndex = start + fullMatch.length;
-      }
-
-      if (lastIndex < line.length) {
-        html += escapeHtml(line.slice(lastIndex));
-      }
-
-      return html.length > 0 ? `<div>${html}</div>` : `<div><br></div>`;
-    })
-    .join("");
-}
-
-function serializeEditorNode(node: Node): string {
-  if (node.nodeType === Node.TEXT_NODE) {
-    return (node.textContent ?? "").replace(/\u200B/g, "");
-  }
-
-  if (node.nodeType !== Node.ELEMENT_NODE) {
-    return "";
-  }
-
-  const element = node as HTMLElement;
-
-  if (element.tagName === "BR") {
-    return "\n";
-  }
-
-  const emojiTag = element.getAttribute("data-emoji-tag");
-  if (emojiTag) {
-    return emojiTag;
-  }
-
-  const children = Array.from(element.childNodes).map(serializeEditorNode).join("");
-
-  if (element.tagName === "DIV" || element.tagName === "P") {
-    return `${children}\n`;
-  }
-
-  return children;
-}
-
-function serializeEditorContent(editor: HTMLDivElement): string {
-  return Array.from(editor.childNodes)
-    .map(serializeEditorNode)
-    .join("")
-    .replace(/\n+$/g, "");
-}
-
-type DiscordEmoji = {
-  id: string;
-  name: string;
-  animated?: boolean;
-};
-
-const WEEKDAY_OPTIONS = [
-  { value: 0, label: "Sunday" },
-  { value: 1, label: "Monday" },
-  { value: 2, label: "Tuesday" },
-  { value: 3, label: "Wednesday" },
-  { value: 4, label: "Thursday" },
-  { value: 5, label: "Friday" },
-  { value: 6, label: "Saturday" },
-] as const;
-
-const FREQUENCY_OPTIONS = [
-  { value: "daily", label: "Daily" },
-  { value: "weekly", label: "Weekly" },
-  { value: "monthly", label: "Monthly" },
-] as const;
+type DiscordEmoji = { id: string; name: string; animated?: boolean };
+type ActiveEditor = "title" | "description" | null;
+type Channel = { id: string; name: string };
+type Role = { id: string; name: string };
 
 type ReminderResponse = {
-  _id: string;
-  text: string;
-  hour: number;
-  minute: number;
-  zone?: string;
-  frequency?: "daily" | "weekly" | "monthly";
-  dayOfWeek?: number | null;
-  dayOfMonth?: number | null;
-  reminderSentAt?: string | null;
+  _id: string; type: "guild"|"dm"; name: string; interval: string;
+  startDate: string|null; ping: string; channelId: string|null;
+  dayOfWeek: string|null; embedTitle: string; embedDescription: string;
+  embedColor: string; timezone: string; guildId: string|null;
 };
+
+function pad(n: number) { return String(n).padStart(2,"0"); }
+function localDatetimeValue(date: Date) {
+  return `${date.getFullYear()}-${pad(date.getMonth()+1)}-${pad(date.getDate())}T${pad(date.getHours())}:${pad(date.getMinutes())}`;
+}
+function getEmojiSrc(id: string, animated?: boolean) {
+  return `https://cdn.discordapp.com/emojis/${id}.${animated?"gif":"png"}?size=64&quality=lossless`;
+}
+function escapeHtml(v: string) {
+  return v.replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;").replace(/"/g,"&quot;").replace(/'/g,"&#39;");
+}
+function renderEditorHtml(text: string): string {
+  const emojiRegex = /<(a)?:([a-zA-Z0-9_]+):(\d+)>/g;
+  return text.split("\n").map((line) => {
+    let lastIndex = 0; let html = ""; let match: RegExpExecArray|null;
+    while ((match = emojiRegex.exec(line)) !== null) {
+      const [fullMatch, animatedFlag, name, id] = match;
+      if (match.index > lastIndex) html += escapeHtml(line.slice(lastIndex, match.index));
+      html += `<span contenteditable="false" data-emoji-tag="${escapeHtml(fullMatch)}" style="display:inline-flex;align-items:center;vertical-align:-0.2em;"><img src="${getEmojiSrc(id,Boolean(animatedFlag))}" alt=":${escapeHtml(name)}:" title=":${escapeHtml(name)}:" width="22" height="22" style="display:block;" /></span>\u200B`;
+      lastIndex = match.index + fullMatch.length;
+    }
+    if (lastIndex < line.length) html += escapeHtml(line.slice(lastIndex));
+    return html.length > 0 ? `<div>${html}</div>` : `<div><br></div>`;
+  }).join("");
+}
+function serializeEditorNode(node: Node): string {
+  if (node.nodeType === Node.TEXT_NODE) return (node.textContent ?? "").replace(/\u200B/g,"");
+  if (node.nodeType !== Node.ELEMENT_NODE) return "";
+  const el = node as HTMLElement;
+  if (el.tagName === "BR") return "\n";
+  const emojiTag = el.getAttribute("data-emoji-tag");
+  if (emojiTag) return emojiTag;
+  const children = Array.from(el.childNodes).map(serializeEditorNode).join("");
+  if (el.tagName === "DIV" || el.tagName === "P") return `${children}\n`;
+  return children;
+}
+function serializeEditorContent(editor: HTMLDivElement) {
+  return Array.from(editor.childNodes).map(serializeEditorNode).join("").replace(/\n+$/g,"");
+}
 
 export default function EditReminderPage() {
   const router = useRouter();
   const params = useParams<{ id: string }>();
   const reminderId = params.id;
 
-  const today = useMemo(() => new Date(), []);
-  const todayValue = formatDateInputValue(today);
-
-  const [text, setText] = useState("");
-  const [date, setDate] = useState(todayValue);
-  const [time, setTime] = useState("09:00");
-  const [loading, setLoading] = useState(false);
   const [loadingReminder, setLoadingReminder] = useState(true);
-  const [frequency, setFrequency] = useState<"daily" | "weekly" | "monthly">("daily");
-  const [dayOfWeek, setDayOfWeek] = useState<number>(today.getDay());
-  const [dayOfMonth, setDayOfMonth] = useState<number>(today.getDate());
+  const [saving, setSaving] = useState(false);
+  const [error, setError] = useState("");
+  const [reminderType, setReminderType] = useState<"guild"|"dm">("dm");
 
-  const [showDatePicker, setShowDatePicker] = useState(false);
-  const [displayMonth, setDisplayMonth] = useState(
-    () => new Date(today.getFullYear(), today.getMonth(), 1),
-  );
-  const dateButtonRef = useRef<HTMLButtonElement | null>(null);
+  const [interval, setInterval] = useState("1d");
+  const [customInterval, setCustomInterval] = useState("");
+  const [useCustomInterval, setUseCustomInterval] = useState(false);
+  const [startDatetime, setStartDatetime] = useState("");
+  const [timezone, setTimezone] = useState("America/Chicago");
+  const [dayOfWeek, setDayOfWeek] = useState("");
+  const [embedTitle, setEmbedTitle] = useState("Reminder!");
+  const [embedDescription, setEmbedDescription] = useState("");
+  const [embedColor, setEmbedColor] = useState("#8757f2");
+  const [ping, setPing] = useState("");
+  const [channelId, setChannelId] = useState("");
+  const [guildId, setGuildId] = useState("");
 
-  const selectedDate = useMemo(() => {
-    const [year, month, day] = date.split("-").map(Number);
-    return new Date(year, month - 1, day);
-  }, [date]);
-
-  const [showEmojiPicker, setShowEmojiPicker] = useState(false);
   const [emojis, setEmojis] = useState<DiscordEmoji[]>([]);
-  const editorRef = useRef<HTMLDivElement | null>(null);
+  const [showEmojiPicker, setShowEmojiPicker] = useState(false);
+  const [activeEditor, setActiveEditor] = useState<ActiveEditor>(null);
+  const titleEditorRef = useRef<HTMLDivElement|null>(null);
+  const descEditorRef = useRef<HTMLDivElement|null>(null);
+
+  const [channels, setChannels] = useState<Channel[]>([]);
+  const [roles, setRoles] = useState<Role[]>([]);
+  const [loadingChannels, setLoadingChannels] = useState(false);
+
+  const resolvedInterval = useCustomInterval ? customInterval : interval;
 
   useEffect(() => {
-    async function loadReminder() {
+    fetch("/api/emojis").then(r => r.ok ? r.json() : null).then(d => { if (d?.emojis) setEmojis(d.emojis); }).catch(console.error);
+  }, []);
+
+  useEffect(() => {
+    async function load() {
       try {
-        const response = await fetch(`/api/reminders/${reminderId}`);
-        if (!response.ok) {
-          throw new Error("Failed to load reminder");
-        }
+        const res = await fetch(`/api/reminders/${reminderId}`);
+        if (!res.ok) throw new Error("Failed to load reminder");
+        const data = (await res.json()) as ReminderResponse;
 
-        const data = (await response.json()) as ReminderResponse;
-        setText(data.text ?? "");
-        setTime(`${pad(data.hour ?? 0)}:${pad(data.minute ?? 0)}`);
-        setFrequency(data.frequency ?? "daily");
-        setDayOfWeek(
-          typeof data.dayOfWeek === "number" ? data.dayOfWeek : today.getDay(),
-        );
-        setDayOfMonth(
-          typeof data.dayOfMonth === "number" ? data.dayOfMonth : today.getDate(),
-        );
-
-        if (data.reminderSentAt) {
-          const savedDate = new Date(data.reminderSentAt);
-          if (!Number.isNaN(savedDate.getTime())) {
-            const nextDate = formatDateInputValue(savedDate);
-            setDate(nextDate);
-            setDisplayMonth(
-              new Date(savedDate.getFullYear(), savedDate.getMonth(), 1),
-            );
-          }
+        setReminderType(data.type);
+        const preset = INTERVAL_PRESETS.find(p => p.value === data.interval);
+        if (preset) { setInterval(data.interval); setUseCustomInterval(false); }
+        else { setCustomInterval(data.interval); setUseCustomInterval(true); }
+        if (data.startDate) {
+          const d = new Date(data.startDate);
+          if (!Number.isNaN(d.getTime())) setStartDatetime(localDatetimeValue(d));
         }
-      } catch (error) {
-        console.error(error);
-        alert("Failed to load reminder");
+        setTimezone(data.timezone || "America/Chicago");
+        setDayOfWeek(data.dayOfWeek || "");
+        setEmbedTitle(data.embedTitle || "Reminder!");
+        setEmbedDescription(data.embedDescription || "");
+        setEmbedColor(data.embedColor || "#8757f2");
+        setPing(data.ping || "");
+        setChannelId(data.channelId || "");
+        setGuildId(data.guildId || "");
+      } catch (err) {
+        setError("Failed to load reminder."); console.error(err);
       } finally {
         setLoadingReminder(false);
       }
     }
-
-    if (reminderId) {
-      loadReminder();
-    }
+    if (reminderId) load();
   }, [reminderId]);
 
+  // Load channels + roles when guildId is known and type is guild
   useEffect(() => {
-    async function loadEmojis() {
-      try {
-        const response = await fetch("/api/emojis");
-        if (!response.ok) return;
-
-        const data = await response.json();
-        const nextEmojis = Array.isArray(data.emojis) ? data.emojis : [];
-        setEmojis(nextEmojis);
-      } catch (error) {
-        console.error(error);
-      }
-    }
-
-    loadEmojis();
-  }, []);
+    if (!guildId || reminderType !== "guild") { setChannels([]); setRoles([]); return; }
+    setLoadingChannels(true);
+    Promise.all([
+      fetch(`/api/guilds/${guildId}/channels`).then(r => r.ok ? r.json() : null),
+      fetch(`/api/guilds/${guildId}/roles`).then(r => r.ok ? r.json() : null),
+    ]).then(([chData, roData]) => {
+      setChannels(chData?.channels ?? []);
+      setRoles(roData?.roles ?? []);
+    }).catch(console.error).finally(() => setLoadingChannels(false));
+  }, [guildId, reminderType]);
 
   useEffect(() => {
-    const editor = editorRef.current;
+    const editor = titleEditorRef.current;
     if (!editor) return;
+    if (serializeEditorContent(editor) !== embedTitle) editor.innerHTML = renderEditorHtml(embedTitle);
+  }, [embedTitle]);
 
-    const currentSerialized = serializeEditorContent(editor);
-    if (currentSerialized !== text) {
-      editor.innerHTML = renderEditorHtml(text);
-    }
-  }, [text]);
+  useEffect(() => {
+    const editor = descEditorRef.current;
+    if (!editor) return;
+    if (serializeEditorContent(editor) !== embedDescription) editor.innerHTML = renderEditorHtml(embedDescription);
+  }, [embedDescription]);
 
-  const calendarCells = useMemo(() => {
-    const year = displayMonth.getFullYear();
-    const monthIndex = displayMonth.getMonth();
-    const firstDay = new Date(year, monthIndex, 1).getDay();
-    const daysInMonth = getDaysInMonth(year, monthIndex);
-    const daysInPrevMonth = getDaysInMonth(year, monthIndex - 1);
-
-    const cells: Array<{
-      key: string;
-      date: Date;
-      label: number;
-      inCurrentMonth: boolean;
-    }> = [];
-
-    for (let i = firstDay - 1; i >= 0; i -= 1) {
-      const day = daysInPrevMonth - i;
-      const cellDate = new Date(year, monthIndex - 1, day);
-      cells.push({
-        key: `prev-${day}`,
-        date: cellDate,
-        label: day,
-        inCurrentMonth: false,
-      });
-    }
-
-    for (let day = 1; day <= daysInMonth; day += 1) {
-      const cellDate = new Date(year, monthIndex, day);
-      cells.push({
-        key: `current-${day}`,
-        date: cellDate,
-        label: day,
-        inCurrentMonth: true,
-      });
-    }
-
-    const remainder = cells.length % 7;
-    const trailing = remainder === 0 ? 0 : 7 - remainder;
-
-    for (let day = 1; day <= trailing; day += 1) {
-      const cellDate = new Date(year, monthIndex + 1, day);
-      cells.push({
-        key: `next-${day}`,
-        date: cellDate,
-        label: day,
-        inCurrentMonth: false,
-      });
-    }
-
-    return cells;
-  }, [displayMonth]);
-
-  function changeMonth(offset: number) {
-    setDisplayMonth(
-      (current) =>
-        new Date(current.getFullYear(), current.getMonth() + offset, 1),
-    );
-  }
-
-  function selectDate(nextDate: Date) {
-    setDate(formatDateInputValue(nextDate));
-    setDisplayMonth(new Date(nextDate.getFullYear(), nextDate.getMonth(), 1));
-    setShowDatePicker(false);
-    dateButtonRef.current?.focus();
-  }
-
-  function insertEmoji(emoji: DiscordEmoji) {
-    const tag = `<${emoji.animated ? "a" : ""}:${emoji.name}:${emoji.id}>`;
-    const editor = editorRef.current;
-
-    if (!editor) {
-      setText((prev) => prev + tag);
-      setShowEmojiPicker(false);
-      return;
-    }
-
+  function insertEmojiTag(tag: string) {
+    const editor = activeEditor === "title" ? titleEditorRef.current : descEditorRef.current;
+    if (!editor) return;
     editor.focus();
-
     const selection = window.getSelection();
-    let range: Range;
-
     if (selection && selection.rangeCount > 0) {
-      range = selection.getRangeAt(0);
-      if (!editor.contains(range.startContainer)) {
-        range = document.createRange();
-        range.selectNodeContents(editor);
-        range.collapse(false);
+      const range = selection.getRangeAt(0);
+      if (editor.contains(range.startContainer)) {
+        range.deleteContents();
+        const textNode = document.createTextNode(tag);
+        range.insertNode(textNode);
+        range.setStartAfter(textNode);
+        range.collapse(true);
+        selection.removeAllRanges();
+        selection.addRange(range);
       }
-    } else {
-      range = document.createRange();
-      range.selectNodeContents(editor);
-      range.collapse(false);
     }
-
-    range.deleteContents();
-
-    const span = document.createElement("span");
-    span.setAttribute("contenteditable", "false");
-    span.setAttribute("data-emoji-tag", tag);
-    span.style.display = "inline-flex";
-    span.style.alignItems = "center";
-    span.style.verticalAlign = "-0.2em";
-
-    const img = document.createElement("img");
-    img.src = getEmojiSrc(emoji.id, emoji.animated);
-    img.alt = `:${emoji.name}:`;
-    img.title = `:${emoji.name}:`;
-    img.width = 22;
-    img.height = 22;
-    img.style.display = "block";
-
-    span.appendChild(img);
-
-    const trailingSpace = document.createTextNode("\u200B");
-
-    range.insertNode(trailingSpace);
-    range.insertNode(span);
-
-    const nextRange = document.createRange();
-    nextRange.setStartAfter(trailingSpace);
-    nextRange.collapse(true);
-
-    selection?.removeAllRanges();
-    selection?.addRange(nextRange);
-
-    setText(serializeEditorContent(editor));
+    const next = serializeEditorContent(editor);
+    editor.innerHTML = renderEditorHtml(next);
+    if (activeEditor === "title") setEmbedTitle(next); else setEmbedDescription(next);
     setShowEmojiPicker(false);
-  }
-
-  function handleEditorInput() {
-    const editor = editorRef.current;
-    if (!editor) return;
-    setText(serializeEditorContent(editor));
   }
 
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
-    setLoading(true);
-
+    setError("");
+    if (!resolvedInterval.trim()) return setError("Interval is required.");
+    if (!startDatetime) return setError("Start date is required.");
+    if (reminderType === "guild" && !channelId) return setError("Please select a channel.");
+    setSaving(true);
     try {
-      const [hourString, minuteString] = time.split(":");
-      const hour = Number(hourString);
-      const minute = Number(minuteString);
-      const zone = Intl.DateTimeFormat().resolvedOptions().timeZone;
-      const reminderSentAt = new Date(`${date}T${time}`);
-      const resolvedDayOfWeek = frequency === "weekly" ? dayOfWeek : null;
-      const resolvedDayOfMonth = frequency === "monthly" ? dayOfMonth : null;
-
-      const response = await fetch(`/api/reminders/${reminderId}`, {
+      const body: Record<string, unknown> = {
+        interval: resolvedInterval.trim(),
+        startDate: new Date(startDatetime).toISOString(),
+        dayOfWeek: dayOfWeek || null,
+        embedTitle: embedTitle.trim() || "Reminder!",
+        embedDescription: embedDescription.trim(),
+        embedColor,
+        timezone,
+        ...(reminderType === "guild" ? { ping, channelId: channelId || null } : {}),
+      };
+      const res = await fetch(`/api/reminders/${reminderId}`, {
         method: "PATCH",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({
-          text,
-          hour,
-          minute,
-          zone,
-          guildId: null,
-          frequency,
-          dayOfWeek: resolvedDayOfWeek,
-          dayOfMonth: resolvedDayOfMonth,
-          reminderSentAt: reminderSentAt.toISOString(),
-        }),
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(body),
       });
-
-      if (!response.ok) {
-        throw new Error("Failed to save reminder");
-      }
-
+      if (!res.ok) { const d = await res.json(); throw new Error(d.error ?? "Failed to save reminder"); }
       router.push("/dashboard/reminders");
-    } catch (error) {
-      console.error(error);
-      alert("Failed to save reminder");
+    } catch (err) {
+      setError(err instanceof Error ? err.message : "Something went wrong.");
     } finally {
-      setLoading(false);
+      setSaving(false);
     }
   }
 
   if (loadingReminder) {
     return (
-      <div className={styles.page}>
-        <div className={styles.container}>
-          <div className={styles.panel}>
-            <p className={styles.emptyText}>Loading reminder...</p>
-          </div>
-        </div>
-      </div>
+      <div className={styles.page}><div className={styles.container}><div className={styles.panel}>
+        <p className={styles.emptyText}>Loading reminder...</p>
+      </div></div></div>
     );
   }
 
@@ -453,272 +229,130 @@ export default function EditReminderPage() {
     <div className={styles.page}>
       <div className={styles.container}>
         <h1 className={styles.title}>Edit Reminder</h1>
-
         <form onSubmit={handleSubmit} className={styles.panel}>
           <div className={styles.formStack}>
-            <div className={styles.fieldGroup}>
-              <label className={styles.label} htmlFor="reminder-text">
-                Reminder text
-              </label>
-              <div style={{ position: "relative", overflow: "visible" }}>
-                {!text ? (
-                  <div
-                    style={{
-                      position: "absolute",
-                      top: 12,
-                      left: 14,
-                      color: "rgba(244, 244, 245, 0.42)",
-                      pointerEvents: "none",
-                      zIndex: 1,
-                    }}
-                  >
-                    Write your reminder...
-                  </div>
-                ) : null}
+            {error ? <p style={{ color: "#f87171", margin: 0 }}>{error}</p> : null}
 
-                <div
-                  ref={editorRef}
-                  contentEditable
-                  suppressContentEditableWarning
-                  onInput={handleEditorInput}
-                  className={styles.textarea}
-                  style={{ whiteSpace: "pre-wrap" }}
-                />
-
-                <button
-                  type="button"
-                  onClick={() => setShowEmojiPicker((v) => !v)}
-                  className={styles.emojiButton}
-                >
-                  <Image
-                    src="/img/icons/xsmile.svg"
-                    alt="Emoji picker"
-                    width={18}
-                    height={18}
-                  />
-                </button>
-
-                {showEmojiPicker ? (
-                  <div
-                    className={styles.emojiPopover}
-                    style={{ top: "calc(100% + 8px)", bottom: "auto", right: 0, left: "auto" }}
-                  >
-                    {emojis.length > 0 ? (
-                      emojis.map((emoji) => {
-                        const src = getEmojiSrc(emoji.id, emoji.animated);
-
-                        return (
-                          <button
-                            key={emoji.id}
-                            type="button"
-                            className={styles.emojiItem}
-                            onClick={() => insertEmoji(emoji)}
-                            title={`:${emoji.name}:`}
-                          >
-                            <Image
-                              src={src}
-                              alt={emoji.name}
-                              width={24}
-                              height={24}
-                              unoptimized
-                            />
-                          </button>
-                        );
-                      })
-                    ) : (
-                      <div className={styles.emojiEmpty}>No emojis found</div>
-                    )}
-                  </div>
-                ) : null}
-              </div>
-            </div>
-
-            <div className={styles.pickerRow}>
-              <div className={styles.fieldGroup}>
-                <label className={styles.label} htmlFor="reminder-date-button">
-                  Date
-                </label>
-                <div className={styles.dateField}>
-                  <button
-                    id="reminder-date-button"
-                    ref={dateButtonRef}
-                    type="button"
-                    className={styles.dateButton}
-                    onClick={() => setShowDatePicker((current) => !current)}
-                    aria-expanded={showDatePicker}
-                    aria-haspopup="dialog"
-                  >
-                    {formatDateLabel(date)}
-                  </button>
-
-                  {showDatePicker ? (
-                    <div
-                      className={styles.datePopover}
-                      role="dialog"
-                      aria-label="Choose date"
-                    >
-                      <div className={styles.calendarHeader}>
-                        <button
-                          type="button"
-                          className={styles.calendarNav}
-                          onClick={() => changeMonth(-1)}
-                          aria-label="Previous month"
-                        >
-                          ←
-                        </button>
-                        <span className={styles.calendarMonthLabel}>
-                          {getMonthLabel(displayMonth)}
-                        </span>
-                        <button
-                          type="button"
-                          className={styles.calendarNav}
-                          onClick={() => changeMonth(1)}
-                          aria-label="Next month"
-                        >
-                          →
-                        </button>
-                      </div>
-
-                      <div className={styles.calendarWeekdays}>
-                        {["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"].map(
-                          (day) => (
-                            <span key={day} className={styles.weekday}>
-                              {day}
-                            </span>
-                          ),
-                        )}
-                      </div>
-
-                      <div className={styles.calendarGrid}>
-                        {calendarCells.map((cell) => {
-                          const isSelected = isSameCalendarDay(
-                            cell.date,
-                            selectedDate,
-                          );
-                          const isToday = isSameCalendarDay(cell.date, today);
-
-                          const className = [
-                            styles.dayButton,
-                            !cell.inCurrentMonth ? styles.dayButtonMuted : "",
-                            isSelected ? styles.dayButtonSelected : "",
-                            isToday ? styles.dayButtonToday : "",
-                          ]
-                            .filter(Boolean)
-                            .join(" ");
-
-                          return (
-                            <button
-                              key={cell.key}
-                              type="button"
-                              className={className}
-                              onClick={() => selectDate(cell.date)}
-                            >
-                              {cell.label}
-                            </button>
-                          );
-                        })}
-                      </div>
-                    </div>
-                  ) : null}
-                </div>
-              </div>
-
-              <div className={styles.fieldGroup}>
-                <label className={styles.label} htmlFor="reminder-time">
-                  Time
-                </label>
-                <input
-                  id="reminder-time"
-                  type="time"
-                  value={time}
-                  onChange={(e) => setTime(e.target.value)}
-                  className={styles.input}
-                />
-              </div>
-            </div>
-
-            <div className={styles.fieldGroup}>
-              <label className={styles.label}>Frequency</label>
-              <div
-                style={{
-                  display: "flex",
-                  gap: 10,
-                  flexWrap: "wrap",
-                }}
-              >
-                {FREQUENCY_OPTIONS.map((option) => {
-                  const isActive = frequency === option.value;
-
-                  return (
-                    <button
-                      key={option.value}
-                      type="button"
-                      onClick={() => setFrequency(option.value)}
-                      className={styles.primaryLink}
-                      style={{
-                        opacity: isActive ? 1 : 0.72,
-                        outline: isActive
-                          ? "2px solid rgba(255, 255, 255, 0.32)"
-                          : "none",
-                      }}
-                    >
-                      {option.label}
-                    </button>
-                  );
-                })}
-              </div>
-            </div>
-
-            {frequency === "weekly" ? (
-              <div className={styles.fieldGroup}>
-                <label className={styles.label} htmlFor="reminder-day-of-week">
-                  Day of week
-                </label>
-                <select
-                  id="reminder-day-of-week"
-                  value={dayOfWeek}
-                  onChange={(e) => setDayOfWeek(Number(e.target.value))}
-                  className={styles.input}
-                >
-                  {WEEKDAY_OPTIONS.map((option) => (
-                    <option key={option.value} value={option.value}>
-                      {option.label}
-                    </option>
-                  ))}
-                </select>
-              </div>
-            ) : null}
-
-            {frequency === "monthly" ? (
-              <div className={styles.fieldGroup}>
-                <label className={styles.label} htmlFor="reminder-day-of-month">
-                  Day of month
-                </label>
-                <select
-                  id="reminder-day-of-month"
-                  value={dayOfMonth}
-                  onChange={(e) => setDayOfMonth(Number(e.target.value))}
-                  className={styles.input}
-                >
-                  {Array.from({ length: 31 }, (_, index) => index + 1).map(
-                    (day) => (
-                      <option key={day} value={day}>
-                        {day}
-                      </option>
-                    ),
+            {/* Guild fields — only shown for guild type */}
+            {reminderType === "guild" && guildId ? (
+              <>
+                <div className={styles.fieldGroup}>
+                  <label className={styles.label}>Channel</label>
+                  {loadingChannels ? (
+                    <p className={styles.emptyText}>Loading channels...</p>
+                  ) : (
+                    <select value={channelId} onChange={(e) => setChannelId(e.target.value)} className={styles.input}>
+                      <option value="">Select a channel...</option>
+                      {channels.map((c) => <option key={c.id} value={c.id}>#{c.name}</option>)}
+                    </select>
                   )}
-                </select>
-              </div>
+                </div>
+                <div className={styles.fieldGroup}>
+                  <label className={styles.label}>Ping <span style={{ opacity: 0.5 }}>(optional)</span></label>
+                  <select value={ping} onChange={(e) => setPing(e.target.value)} className={styles.input}>
+                    <option value="">None</option>
+                    {roles.map((r) => <option key={r.id} value={`<@&${r.id}>`}>{r.name}</option>)}
+                  </select>
+                </div>
+              </>
             ) : null}
+
+            {/* Embed title */}
+            <div className={styles.fieldGroup} style={{ position: "relative" }}>
+              <label className={styles.label}>Embed title</label>
+              <div ref={titleEditorRef} contentEditable suppressContentEditableWarning className={styles.input}
+                onFocus={() => setActiveEditor("title")}
+                onInput={(e) => setEmbedTitle(serializeEditorContent(e.currentTarget))}
+                onBlur={(e) => setEmbedTitle(serializeEditorContent(e.currentTarget))}
+                style={{ minHeight: 44, paddingRight: 42, whiteSpace: "pre-wrap", overflowWrap: "break-word" }} />
+              <button type="button" className={styles.emojiButton} onMouseDown={(e) => e.preventDefault()}
+                onClick={() => { setActiveEditor("title"); setShowEmojiPicker(v => !v); }}>
+                <Image src="/img/icons/face.svg" alt="emoji" width={20} height={20} unoptimized />
+              </button>
+            </div>
+
+            {/* Embed description */}
+            <div className={styles.fieldGroup} style={{ position: "relative" }}>
+              <label className={styles.label}>Embed description</label>
+              <div ref={descEditorRef} contentEditable suppressContentEditableWarning className={styles.textarea}
+                onFocus={() => setActiveEditor("description")}
+                onInput={(e) => setEmbedDescription(serializeEditorContent(e.currentTarget))}
+                onBlur={(e) => setEmbedDescription(serializeEditorContent(e.currentTarget))}
+                style={{ paddingRight: 42 }} />
+              <button type="button" className={styles.emojiButton} onMouseDown={(e) => e.preventDefault()}
+                onClick={() => { setActiveEditor("description"); setShowEmojiPicker(v => !v); }}>
+                <Image src="/img/icons/face.svg" alt="emoji" width={20} height={20} unoptimized />
+              </button>
+              {showEmojiPicker ? (
+                <div className={styles.emojiPopover} onMouseDown={(e) => e.preventDefault()}>
+                  {emojis.length > 0 ? emojis.map((emoji) => {
+                    const tag = `<${emoji.animated?"a":""}:${emoji.name}:${emoji.id}>`;
+                    return (
+                      <button key={emoji.id} type="button" className={styles.emojiItem}
+                        onMouseDown={(e) => e.preventDefault()} onClick={() => insertEmojiTag(tag)} title={emoji.name}>
+                        <Image src={getEmojiSrc(emoji.id, emoji.animated)} alt={emoji.name} width={28} height={28} unoptimized />
+                      </button>
+                    );
+                  }) : <div className={styles.emojiEmpty}>No emojis found</div>}
+                </div>
+              ) : null}
+            </div>
+
+            {/* Embed color */}
+            <div className={styles.fieldGroup}>
+              <label className={styles.label}>Embed color</label>
+              <div style={{ display: "flex", gap: 10, alignItems: "center" }}>
+                <input type="color" value={embedColor} onChange={(e) => setEmbedColor(e.target.value)}
+                  style={{ width: 40, height: 36, padding: 2, cursor: "pointer", borderRadius: 6, border: "none", background: "none" }} />
+                <input type="text" value={embedColor} onChange={(e) => setEmbedColor(e.target.value)} className={styles.input} style={{ flex: 1 }} placeholder="#8757f2" />
+              </div>
+            </div>
+
+            {/* Interval */}
+            <div className={styles.fieldGroup}>
+              <label className={styles.label}>Interval</label>
+              <div style={{ display: "flex", gap: 8, flexWrap: "wrap", marginBottom: 8 }}>
+                {INTERVAL_PRESETS.map((preset) => (
+                  <button key={preset.value} type="button" onClick={() => { setInterval(preset.value); setUseCustomInterval(false); }}
+                    className={styles.primaryLink}
+                    style={{ opacity: !useCustomInterval && interval === preset.value ? 1 : 0.55, outline: !useCustomInterval && interval === preset.value ? "2px solid rgba(255,255,255,0.32)" : "none" }}>
+                    {preset.label}
+                  </button>
+                ))}
+                <button type="button" onClick={() => setUseCustomInterval(true)} className={styles.primaryLink}
+                  style={{ opacity: useCustomInterval ? 1 : 0.55, outline: useCustomInterval ? "2px solid rgba(255,255,255,0.32)" : "none" }}>
+                  Custom
+                </button>
+              </div>
+              {useCustomInterval ? <input type="text" value={customInterval} onChange={(e) => setCustomInterval(e.target.value)} className={styles.input} placeholder="e.g. 4h, 2d, 30m" /> : null}
+            </div>
+
+            {/* Start datetime */}
+            <div className={styles.fieldGroup}>
+              <label className={styles.label} htmlFor="start-datetime">Start date &amp; time</label>
+              <input id="start-datetime" type="datetime-local" value={startDatetime} onChange={(e) => setStartDatetime(e.target.value)} className={styles.input} />
+            </div>
+
+            {/* Timezone */}
+            <div className={styles.fieldGroup}>
+              <label className={styles.label} htmlFor="timezone">Timezone</label>
+              <select id="timezone" value={timezone} onChange={(e) => setTimezone(e.target.value)} className={styles.input}>
+                {TIMEZONE_OPTIONS.map((tz) => <option key={tz} value={tz}>{tz}</option>)}
+              </select>
+            </div>
+
+            {/* Day of week */}
+            <div className={styles.fieldGroup}>
+              <label className={styles.label} htmlFor="day-of-week">Day of week <span style={{ opacity: 0.5 }}>(optional)</span></label>
+              <select id="day-of-week" value={dayOfWeek} onChange={(e) => setDayOfWeek(e.target.value)} className={styles.input}>
+                <option value="">Every day</option>
+                {WEEKDAY_OPTIONS.map((day) => <option key={day} value={day}>{day}</option>)}
+              </select>
+            </div>
 
             <div className={styles.formActions}>
-              <button
-                type="submit"
-                disabled={loading}
-                className={styles.primaryLink}
-              >
-                {loading ? "Saving..." : "Save Reminder"}
-              </button>
+              <button type="button" onClick={() => router.push("/dashboard/reminders")} className={styles.secondaryLink}>Cancel</button>
+              <button type="submit" disabled={saving} className={styles.primaryLink}>{saving ? "Saving..." : "Save Reminder"}</button>
             </div>
           </div>
         </form>
