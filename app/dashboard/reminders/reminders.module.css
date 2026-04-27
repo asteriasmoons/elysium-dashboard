@@ -76,7 +76,7 @@
   align-items: center;
 }
 
-/* ─── NAV LINKS (Back, etc.) ─────────────────────────────────────── */
+/* ─── NAV LINKS ──────────────────────────────────────────────────── */
 .primaryLink,
 .secondaryLink {
   text-decoration: none;
@@ -117,7 +117,6 @@
 
 .fieldGroup {
   display: flex;
-  position: relative;
   flex-direction: column;
   gap: 7px;
   position: relative;
@@ -138,19 +137,12 @@
   border: 1px solid rgba(255, 255, 255, 0.12);
   background: #0a0c1c;
   color: #f4f4f5;
-<<<<<<< HEAD
   padding: 11px 13px;
-=======
-  padding: 12px 48px 12px 14px;
->>>>>>> 0b437c734c10fd8a689006947aaf413ce28e4657
   font: inherit;
   font-size: 0.9rem;
   box-sizing: border-box;
   outline: none;
-  transition:
-    border-color 160ms ease,
-    box-shadow 160ms ease,
-    background 160ms ease;
+  transition: border-color 160ms ease, box-shadow 160ms ease, background 160ms ease;
 }
 
 .textarea {
@@ -171,7 +163,7 @@
   background: #0d1022;
 }
 
-/* ─── EDITOR WRAP (for emoji button positioning) ─────────────────── */
+/* ─── EDITOR WRAP ────────────────────────────────────────────────── */
 .editorWrap {
   position: relative;
 }
@@ -226,7 +218,7 @@
   background: rgba(255, 255, 255, 0.1);
 }
 
-/* ─── TYPE TOGGLE (DM / Server) ──────────────────────────────────── */
+/* ─── TYPE TOGGLE ────────────────────────────────────────────────── */
 .typeButton {
   padding: 7px 16px;
   border-radius: 10px;
@@ -399,7 +391,7 @@
 .completedBadge {
   color: #c522aa;
   border: 1px solid rgba(197, 34, 151, 0.4);
-  background: rgba(34, 197, 94, 0.10);
+  background: rgba(197, 34, 170, 0.10);
 }
 
 .cardDescription {
@@ -462,7 +454,7 @@
   font-size: 0.8rem;
   font-family: var(--font-title);
   cursor: pointer;
-  transition: background 160ms ease, color 160ms ease;
+  transition: background 160ms ease, color 160ms ease, border-color 160ms ease;
 }
 
 .deleteButton:hover {
@@ -471,7 +463,6 @@
   border-color: rgba(197, 34, 170, 0.3);
 }
 
-<<<<<<< HEAD
 /* ─── EMPTY STATE ────────────────────────────────────────────────── */
 .emptyState {
   border: 1px dashed rgba(255, 255, 255, 0.18);
@@ -484,512 +475,6 @@
 .emptyTitle {
   margin: 0;
   font-weight: 800;
-=======
-.emojiButton {
-  position: absolute;
-  right: 12px;
-  bottom: 12px;
-  z-index: 5;
-  background: rgba(255, 255, 255, 0.08);
-  border: 1px solid rgba(255, 255, 255, 0.12);
-  border-radius: 10px;
-  padding: 6px;
-  cursor: pointer;
-}
-
-.emojiPopover {
-  position: absolute;
-  top: calc(100% + 8px); /* 👈 forces it BELOW the button */
-  right: 0;
-  z-index: 999;
-  background: #0b0f1f;
-  border-radius: 12px;
-  padding: 10px;
-  display: grid;
-  grid-template-columns: repeat(6, 1fr);
-  gap: 8px;
-  width: 320px;
-  max-height: 300px;
-  overflow-y: auto;
-}
-
-.emojiItem {
-  background: transparent;
-  border: none;
-  cursor: pointer;
-  padding: 4px;
-}
-
-.emojiItem:hover {
-  background: rgba(255,255,255,0.1);
-  border-radius: 8px;
-}
-
-.glassSelect {
-  width: 100%;
-  min-height: 54px;
-  padding: 0 18px;
-  padding-right: 42px;
-
-  border-radius: 999px;
-  border: 1px solid rgba(255, 255, 255, 0.22);
-
-  background: linear-gradient(
-    180deg,
-    rgba(255, 255, 255, 0.22) 0%,
-    rgba(255, 255, 255, 0.10) 48%,
-    rgba(255, 255, 255, 0.06) 100%
-  );
-
-  backdrop-filter: blur(16px);
-  -webkit-backdrop-filter: blur(16px);
-
-  box-shadow:
-    inset 0 1px 0 rgba(255, 255, 255, 0.30),
-    inset 0 -1px 0 rgba(255, 255, 255, 0.08),
-    0 10px 30px rgba(0, 0, 0, 0.18);
-
-  color: rgba(255, 255, 255, 0.96);
-  font-size: 0.95rem;
-  font-family: var(--font-title);
-
-  appearance: none;
-  outline: none;
-  cursor: pointer;
-}
-
-.glassSelect:hover {
-  border-color: rgba(255, 255, 255, 0.30);
-  background: linear-gradient(
-    180deg,
-    rgba(255, 255, 255, 0.28) 0%,
-    rgba(255, 255, 255, 0.12) 48%,
-    rgba(255, 255, 255, 0.07) 100%
-  );
-}
-
-.glassSelect:focus {
-  border-color: rgba(255, 255, 255, 0.38);
-  box-shadow:
-    inset 0 1px 0 rgba(255, 255, 255, 0.36),
-    inset 0 -1px 0 rgba(255, 255, 255, 0.10),
-    0 0 0 3px rgba(255, 255, 255, 0.10),
-    0 12px 34px rgba(0, 0, 0, 0.22);
-}
-
-.glassSelect option {
-  background: #1f2230;
-  color: white;
-}
-
-.pillGroup {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 10px;
-  margin-top: 10px;
-}
-
-.pillInput {
-  position: absolute;
-  opacity: 0;
-  pointer-events: none;
-}
-
-.pill {
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  min-height: 46px;
-  padding: 0 18px;
-  border-radius: 999px;
-
-  border: 1px solid rgba(255, 255, 255, 0.18);
-
-  background:
-    linear-gradient(180deg, rgba(255,255,255,0.16) 0%, rgba(255,255,255,0.08) 100%);
-
-  box-shadow:
-    inset 0 1px 0 rgba(255,255,255,0.24),
-    0 8px 24px rgba(0,0,0,0.18);
-
-  color: rgba(255,255,255,0.96);
-  cursor: pointer;
-  user-select: none;
-
-  transition: all 0.2s ease;
-}
-
-.pill:hover {
-  background:
-    linear-gradient(180deg, rgba(255,255,255,0.22) 0%, rgba(255,255,255,0.10) 100%);
-}
-
-.pillActive {
-  border: 1px solid rgba(255, 255, 255, 0.32);
-
-  background:
-    linear-gradient(180deg, rgba(255,255,255,0.28) 0%, rgba(255,255,255,0.12) 100%);
-
-  box-shadow:
-    inset 0 1px 0 rgba(255,255,255,0.32),
-    0 10px 28px rgba(0,0,0,0.22),
-    0 0 0 2px rgba(255,255,255,0.10);
-}
-
-.pillSmall {
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  min-height: 42px;
-  padding: 0 16px;
-  border-radius: 999px;
-  border: 1px solid rgba(255, 255, 255, 0.18);
-  background: linear-gradient(180deg, rgba(255,255,255,0.16) 0%, rgba(255,255,255,0.08) 100%);
-  box-shadow: inset 0 1px 0 rgba(255,255,255,0.24), 0 8px 24px rgba(0,0,0,0.18);
-  color: rgba(255,255,255,0.96);
-  cursor: pointer;
-  user-select: none;
-  transition: all 0.2s ease;
-  font-size: 14px;
-}
-
-.pillSmallActive {
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  min-height: 42px;
-  padding: 0 16px;
-  border-radius: 999px;
-  border: 1px solid rgba(255, 255, 255, 0.32);
-  background: linear-gradient(180deg, rgba(255,255,255,0.28) 0%, rgba(255,255,255,0.12) 100%);
-  box-shadow: inset 0 1px 0 rgba(255,255,255,0.32), 0 10px 28px rgba(0,0,0,0.22), 0 0 0 2px rgba(255,255,255,0.10);
-  color: rgba(255,255,255,0.96);
-  cursor: pointer;
-  user-select: none;
-  transition: all 0.2s ease;
-  font-size: 14px;
-}
-
-.cardWide {
-  max-width: 980px;
-  overflow: visible;
-  position: relative;
-  z-index: 5;
-}
-
-.spacingMd {
-  margin-top: 14px;
-}
-
-.spacingLg {
-  margin-top: 20px;
-}
-
-.customSelect {
-  position: relative;
-  width: 100%;
-}
-
-.customSelect summary {
-  list-style: none;
-}
-
-.customSelect summary::-webkit-details-marker {
-  display: none;
-}
-
-.customSelectTrigger {
-  width: 100%;
-  min-height: 54px;
-  padding: 0 18px;
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: 12px;
-
-  border-radius: 999px;
-  border: 1px solid rgba(255, 255, 255, 0.22);
-
-  background:
-    linear-gradient(
-      180deg,
-      rgba(255, 255, 255, 0.22) 0%,
-      rgba(255, 255, 255, 0.10) 48%,
-      rgba(255, 255, 255, 0.06) 100%
-    );
-  backdrop-filter: blur(16px);
-  -webkit-backdrop-filter: blur(16px);
-
-  box-shadow:
-    inset 0 1px 0 rgba(255, 255, 255, 0.30),
-    inset 0 -1px 0 rgba(255, 255, 255, 0.08),
-    0 10px 30px rgba(0, 0, 0, 0.18);
-
-  color: rgba(255, 255, 255, 0.96);
-  cursor: pointer;
-  user-select: none;
-}
-
-.customSelect[open] .customSelectTrigger {
-  border-color: rgba(255, 255, 255, 0.32);
-  box-shadow:
-    inset 0 1px 0 rgba(255, 255, 255, 0.34),
-    inset 0 -1px 0 rgba(255, 255, 255, 0.10),
-    0 12px 34px rgba(0, 0, 0, 0.22),
-    0 0 0 2px rgba(255, 255, 255, 0.10);
-}
-
-.customSelectChevron {
-  font-size: 0.95rem;
-  line-height: 1;
-  opacity: 0.9;
-}
-
-.customSelectMenu {
-  position: absolute;
-  top: calc(100% + 10px);
-  left: 0;
-  right: 0;
-  z-index: 50;
-
-  display: flex;
-  flex-direction: column;
-  gap: 8px;
-  padding: 12px;
-
-  max-height: 260px;
-  overflow-y: auto;
-
-  border-radius: 24px;
-  border: 1px solid rgba(255, 255, 255, 0.18);
-
-  background:
-    linear-gradient(
-      180deg,
-      rgba(255, 255, 255, 0.16) 0%,
-      rgba(255, 255, 255, 0.08) 100%
-    ),
-    rgba(19, 25, 52, 0.92);
-
-  backdrop-filter: blur(20px);
-  -webkit-backdrop-filter: blur(20px);
-
-  box-shadow:
-    inset 0 1px 0 rgba(255, 255, 255, 0.22),
-    0 18px 40px rgba(0, 0, 0, 0.28);
-}
-
-.customSelectMenuGrid {
-  position: absolute;
-  top: calc(100% + 10px);
-  left: 0;
-  right: 0;
-  z-index: 50;
-
-  display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(64px, 1fr));
-  gap: 8px;
-  padding: 12px;
-
-  max-height: 260px;
-  overflow-y: auto;
-
-  border-radius: 24px;
-  border: 1px solid rgba(255, 255, 255, 0.18);
-
-  background:
-    linear-gradient(
-      180deg,
-      rgba(255, 255, 255, 0.16) 0%,
-      rgba(255, 255, 255, 0.08) 100%
-    ),
-    rgba(19, 25, 52, 0.92);
-
-  backdrop-filter: blur(20px);
-  -webkit-backdrop-filter: blur(20px);
-
-  box-shadow:
-    inset 0 1px 0 rgba(255, 255, 255, 0.22),
-    0 18px 40px rgba(0, 0, 0, 0.28);
-}
-
-.customSelectInput {
-  position: absolute;
-  opacity: 0;
-  pointer-events: none;
-}
-
-.customSelectOption {
-  position: relative;
-  min-height: 46px;
-  padding: 0 16px;
-  display: flex;
-  align-items: center;
-  justify-content: flex-start;
-
-  border-radius: 999px;
-  border: 1px solid rgba(255, 255, 255, 0.14);
-
-  background:
-    linear-gradient(
-      180deg,
-      rgba(255, 255, 255, 0.14) 0%,
-      rgba(255, 255, 255, 0.06) 100%
-    );
-
-  box-shadow:
-    inset 0 1px 0 rgba(255, 255, 255, 0.18),
-    0 8px 20px rgba(0, 0, 0, 0.18);
-
-  color: rgba(255, 255, 255, 0.96);
-  cursor: pointer;
-  user-select: none;
-  transition: all 0.18s ease;
-}
-
-.customSelectOption:hover {
-  border-color: rgba(255, 255, 255, 0.24);
-  background:
-    linear-gradient(
-      180deg,
-      rgba(255, 255, 255, 0.22) 0%,
-      rgba(255, 255, 255, 0.09) 100%
-    );
-}
-
-.customSelectOptionSelected {
-  border-color: rgba(255, 255, 255, 0.28);
-  background:
-    linear-gradient(
-      180deg,
-      rgba(255, 255, 255, 0.26) 0%,
-      rgba(255, 255, 255, 0.12) 100%
-    );
-
-  box-shadow:
-    inset 0 1px 0 rgba(255, 255, 255, 0.26),
-    0 10px 24px rgba(0, 0, 0, 0.22),
-    0 0 0 2px rgba(255, 255, 255, 0.08);
-}
-
-.customSelectMenu,
-.customSelectMenuGrid {
-  scrollbar-width: thin;
-  scrollbar-color: #7d19f7 rgba(255, 255, 255, 0.08);
-}
-
-.customSelectMenu,
-.customSelectMenuGrid {
-  scrollbar-width: none;
-}
-
-.customSelectMenu::-webkit-scrollbar,
-.customSelectMenuGrid::-webkit-scrollbar {
-  display: none;
-}
-
-.scrollWrapper {
-  position: relative;
-}
-
-.fakeScrollbar {
-  position: absolute;
-  top: 10px;
-  right: 6px;
-  bottom: 10px;
-  width: 8px;
-
-  z-index: 999; /* THIS is the fix */
-
-  pointer-events: none;
-
-  border-radius: 999px;
-  background: rgba(255, 255, 255, 0.08);
-}
-
-.fakeThumb {
-  position: absolute;
-  width: 100%;
-  height: 40px;
-
-  border-radius: 999px;
-
-  background: linear-gradient(
-    180deg,
-    #03dbfc 0%,
-    #7d19f7 100%
-  );
-
-  z-index: 1000; /* ensures thumb stays on top */
-}
-
-.rowFields {
-  display: grid;
-  grid-template-columns: repeat(2, minmax(0, 1fr));
-  gap: 16px;
-  margin-bottom: 22px;
-}
-
-.dateInput {
-  width: 100%;
-  height: 48px;
-
-  border-radius: 999px;
-  border: 1px solid rgba(255, 255, 255, 0.2);
-
-  background:
-    linear-gradient(
-      180deg,
-      rgba(255, 255, 255, 0.18) 0%,
-      rgba(255, 255, 255, 0.08) 100%
-    );
-
-  backdrop-filter: blur(12px);
-  -webkit-backdrop-filter: blur(12px);
-
-  padding: 0 14px;
-
-  color: rgba(255, 255, 255, 0.95);
-  font-size: 0.95rem;
-
-  outline: none;
-}
-
-.dateInput::-webkit-calendar-picker-indicator {
-  filter: invert(1) brightness(1.2);
-  cursor: pointer;
-}
-
-.scheduleDateButton {
-  width: 100%;
-  min-height: 54px;
-  padding: 0 18px;
-
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-
-  border-radius: 999px;
-  border: 1px solid rgba(255, 255, 255, 0.22);
-
-  background:
-    linear-gradient(
-      180deg,
-      rgba(255, 255, 255, 0.22) 0%,
-      rgba(255, 255, 255, 0.10) 48%,
-      rgba(255, 255, 255, 0.06) 100%
-    );
-
-  backdrop-filter: blur(16px);
-  -webkit-backdrop-filter: blur(16px);
-
-  box-shadow:
-    inset 0 1px 0 rgba(255, 255, 255, 0.30),
-    inset 0 -1px 0 rgba(255, 255, 255, 0.08),
-    0 10px 30px rgba(0, 0, 0, 0.18);
-
-  color: rgba(255, 255, 255, 0.96);
->>>>>>> 0b437c734c10fd8a689006947aaf413ce28e4657
   font-size: 0.95rem;
   font-family: var(--font-title);
 }
@@ -1091,87 +576,3 @@
     font-size: 0.76rem;
   }
 }
-<<<<<<< HEAD
-=======
-
-.dateField {
-  position: relative;
-  margin-bottom: 22px;
-}
-
-/* MOBILE SETTINGS */
-@media (max-width: 720px) {
-  .page {
-    padding: 28px 12px;
-    overflow-x: hidden;
-  }
-
-  .container {
-    width: 100%;
-    max-width: 100%;
-  }
-
-  .panel,
-  .card,
-  .cardWide {
-    width: 100%;
-    max-width: 100%;
-    box-sizing: border-box;
-  }
-
-  .rowFields,
-  .pickerRow {
-    grid-template-columns: 1fr;
-    gap: 14px;
-  }
-
-  .glassSelect,
-  .scheduleDateButton,
-  .dateButton,
-  .dateInput,
-  .input,
-  .textarea {
-    max-width: 100%;
-    box-sizing: border-box;
-  }
-
-  .pillGroup {
-    gap: 8px;
-  }
-
-  .pill,
-  .pillSmall,
-  .pillSmallActive {
-    min-height: 42px;
-    padding: 0 14px;
-    font-size: 0.82rem;
-  }
-
-  .formActions {
-    justify-content: stretch;
-  }
-
-  .formButton,
-  .editLink,
-  .deleteButton {
-    flex: 1;
-    justify-content: center;
-  }
-
-  .datePopover,
-  .emojiPopover {
-    width: min(320px, calc(100vw - 32px));
-    max-width: calc(100vw - 32px);
-  }
-
-  .emojiButton {
-    right: 12px;
-    bottom: 12px;
-  }
-
-  .input,
-  .textarea {
-    padding-right: 52px;
-  }
-}
->>>>>>> 0b437c734c10fd8a689006947aaf413ce28e4657
