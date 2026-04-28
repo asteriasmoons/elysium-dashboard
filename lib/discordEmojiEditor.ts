@@ -127,9 +127,9 @@ export function serializeDiscordEditorNode(node: Node): string {
   if (element.tagName === "DIV" || element.tagName === "P") {
     const rawText = element.textContent ?? "";
     const hasOnlyZeroWidthSpace = rawText.replace(/\u200B/g, "").trim().length === 0;
-    const hasOnlyInjectedSpacer = hasOnlyZeroWidthSpace && element.querySelector("[data-emoji-tag]");
+    const hasEmoji = Boolean(element.querySelector("[data-emoji-tag]"));
 
-    if (hasOnlyInjectedSpacer) return "";
+    if (hasOnlyZeroWidthSpace && !hasEmoji) return "\n";
 
     return `${children}\n`;
   }
@@ -141,7 +141,9 @@ export function serializeDiscordEditorContent(editor: HTMLDivElement): string {
   return Array.from(editor.childNodes)
     .map(serializeDiscordEditorNode)
     .join("")
+    .replace(/\u200B/g, "")
     .replace(/[ \t]+\n/g, "\n")
+    .replace(/\n{3,}/g, "\n\n")
     .replace(/\n+$/g, "");
 }
 
