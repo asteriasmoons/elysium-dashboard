@@ -62,6 +62,7 @@ export default function EditReminderPage() {
   const [guildId, setGuildId] = useState("");
 
   const [emojis, setEmojis] = useState<DiscordEmoji[]>([]);
+  const [emojiError, setEmojiError] = useState("");
   const [showEmojiPicker, setShowEmojiPicker] = useState(false);
   const [activeEditor, setActiveEditor] = useState<ActiveEditor>(null);
   const titleEditorRef = useRef<HTMLDivElement|null>(null);
@@ -76,14 +77,26 @@ export default function EditReminderPage() {
   useEffect(() => {
     async function loadEmojis() {
       try {
+        setEmojiError("");
+
         const response = await fetch("/api/emojis");
-        if (!response.ok) return;
-        const data = await response.json();
-        setEmojis(Array.isArray(data.emojis) ? data.emojis : []);
+        const data = await response.json().catch(() => null);
+
+        if (!response.ok) {
+          const message = data?.error || `Emoji request failed with status ${response.status}`;
+          setEmojiError(message);
+          console.error("Emoji request failed:", message);
+          return;
+        }
+
+        setEmojis(Array.isArray(data?.emojis) ? data.emojis : []);
       } catch (err) {
-        console.error(err);
+        const message = err instanceof Error ? err.message : "Failed to load emojis.";
+        setEmojiError(message);
+        console.error("Emoji load failed:", err);
       }
     }
+
     loadEmojis();
   }, []);
 
@@ -136,9 +149,24 @@ export default function EditReminderPage() {
 
   function insertEmojiTag(tag: string) {
     if (activeEditor === "title") {
-      insertDiscordEmojiTagIntoEditor(titleEditorRef.current, embedTitle, setEmbedTitle, tag, () => setShowEmojiPicker(false));
-    } else {
-      insertDiscordEmojiTagIntoEditor(descEditorRef.current, embedDescription, setEmbedDescription, tag, () => setShowEmojiPicker(false));
+      insertDiscordEmojiTagIntoEditor(
+        titleEditorRef.current,
+        embedTitle,
+        setEmbedTitle,
+        tag,
+        () => setShowEmojiPicker(false),
+      );
+      return;
+    }
+
+    if (activeEditor === "description") {
+      insertDiscordEmojiTagIntoEditor(
+        descEditorRef.current,
+        embedDescription,
+        setEmbedDescription,
+        tag,
+        () => setShowEmojiPicker(false),
+      );
     }
   }
 
@@ -223,36 +251,77 @@ export default function EditReminderPage() {
             <div className={styles.fieldGroup}>
               <label className={styles.label}>Embed title</label>
               <div className={styles.editorWrap}>
-                <div ref={titleEditorRef} contentEditable suppressContentEditableWarning className={styles.input}
+                <div
+                  ref={titleEditorRef}
+                  contentEditable
+                  suppressContentEditableWarning
+                  className={styles.input}
                   onFocus={() => setActiveEditor("title")}
                   onInput={(e) => setEmbedTitle(serializeDiscordEditorContent(e.currentTarget))}
                   onBlur={(e) => setEmbedTitle(serializeDiscordEditorContent(e.currentTarget))}
-                  style={{ minHeight: 44, paddingRight: 42, whiteSpace: "pre-wrap", overflowWrap: "break-word" }} />
-                <button type="button" className={styles.emojiButton}
-                  onClick={() => { setActiveEditor("title"); setShowEmojiPicker(v => !v); }}>
+                  style={{ minHeight: 44, paddingRight: 42, whiteSpace: "pre-wrap", overflowWrap: "break-word" }}
+                />
+                <button
+                  type="button"
+                  className={styles.emojiButton}
+                  onMouseDown={(e) => e.preventDefault()}
+                  onClick={() => {
+                    setActiveEditor("title");
+                    setShowEmojiPicker((current) => activeEditor === "title" ? !current : true);
+                  }}
+                >
                   <Image src="/img/icons/face.svg" alt="emoji" width={20} height={20} unoptimized />
                 </button>
+
+                {showEmojiPicker && activeEditor === "title" ? (
+                  <div className={styles.emojiPopover} onMouseDown={(e) => e.preventDefault()}>
+                    {emojiError ? <p className={styles.emptyText}>{emojiError}</p> : null}
+                    {!emojiError && emojis.length === 0 ? <p className={styles.emptyText}>No custom emojis found.</p> : null}
+                    {!emojiError && emojis.length > 0 ? (
+                      <EmojiPicker emojis={emojis} onPick={insertEmojiTag} itemClassName={styles.emojiItem} />
+                    ) : null}
+                  </div>
+                ) : null}
               </div>
             </div>
 
             <div className={styles.fieldGroup}>
               <label className={styles.label}>Embed description</label>
               <div className={styles.editorWrap}>
-                <div ref={descEditorRef} contentEditable suppressContentEditableWarning className={styles.textarea}
+                <div
+                  ref={descEditorRef}
+                  contentEditable
+                  suppressContentEditableWarning
+                  className={styles.textarea}
                   onFocus={() => setActiveEditor("description")}
                   onInput={(e) => setEmbedDescription(serializeDiscordEditorContent(e.currentTarget))}
                   onBlur={(e) => setEmbedDescription(serializeDiscordEditorContent(e.currentTarget))}
-                  style={{ paddingRight: 42 }} />
-                <button type="button" className={styles.emojiButton}
-                  onClick={() => { setActiveEditor("description"); setShowEmojiPicker(v => !v); }}>
+                  style={{ paddingRight: 42 }}
+                />
+                <button
+                  type="button"
+                  className={styles.emojiButton}
+                  onMouseDown={(e) => e.preventDefault()}
+                  onClick={() => {
+                    setActiveEditor("description");
+                    setShowEmojiPicker((current) => activeEditor === "description" ? !current : true);
+                  }}
+                >
                   <Image src="/img/icons/face.svg" alt="emoji" width={20} height={20} unoptimized />
                 </button>
+
+                {showEmojiPicker && activeEditor === "description" ? (
+                  <div className={styles.emojiPopover} onMouseDown={(e) => e.preventDefault()}>
+                    {emojiError ? <p className={styles.emptyText}>{emojiError}</p> : null}
+                    {!emojiError && emojis.length === 0 ? <p className={styles.emptyText}>No custom emojis found.</p> : null}
+                    {!emojiError && emojis.length > 0 ? (
+                      <EmojiPicker emojis={emojis} onPick={insertEmojiTag} itemClassName={styles.emojiItem} />
+                    ) : null}
+                  </div>
+                ) : null}
               </div>
             </div>
 
-            {showEmojiPicker ? (
-              <EmojiPicker emojis={emojis} onPick={insertEmojiTag} className={styles.emojiPopover} itemClassName={styles.emojiItem} />
-            ) : null}
 
             <div className={styles.fieldGroup}>
               <label className={styles.label}>Embed color</label>
