@@ -18,15 +18,16 @@ function configureWebPush() {
 
 type ReminderDoc = {
   _id: unknown;
-  userId?: string;
-  text?: string;
-  hour?: number;
-  minute?: number;
-  zone?: string;
-  frequency?: "daily" | "weekly" | "monthly";
-  dayOfWeek?: number | null;
-  dayOfMonth?: number | null;
-  reminderSentKey?: string | null;
+  type?: "guild" | "dm";
+  userId?: string | null;
+  name?: string;
+  interval?: string;
+  startDate?: Date | string;
+  dayOfWeek?: string | null;
+  embedTitle?: string;
+  embedDescription?: string;
+  timezone?: string;
+  lastSent?: Date | string | null;
 };
 
 type ZonedParts = {
@@ -35,17 +36,8 @@ type ZonedParts = {
   day: number;
   hour: number;
   minute: number;
-  weekday: number;
-};
-
-const WEEKDAY_TO_NUMBER: Record<string, number> = {
-  Sun: 0,
-  Mon: 1,
-  Tue: 2,
-  Wed: 3,
-  Thu: 4,
-  Fri: 5,
-  Sat: 6,
+  weekdayShort: string;
+  weekdayLong: string;
 };
 
 const TIMEZONE_MAP: Record<string, string> = {
@@ -56,6 +48,78 @@ const TIMEZONE_MAP: Record<string, string> = {
   "Pacific Standard Time": "America/Los_Angeles",
 };
 
+const WEEKDAY_ALIASES: Record<string, string> = {
+  sun: "Sunday",
+  sunday: "Sunday",
+  mon: "Monday",
+  monday: "Monday",
+  tue: "Tuesday",
+  tues: "Tuesday",
+  tuesday: "Tuesday",
+  wed: "Wednesday",
+  wednesday: "Wednesday",
+  thu: "Thursday",
+  thur: "Thursday",
+  thurs: "Thursday",
+  thursday: "Thursday",
+  fri: "Friday",
+  friday: "Friday",
+  sat: "Saturday",
+  saturday: "Saturday",
+};
+
+function normalizeTimezone(timezone: unknown): string {
+  const raw = String(timezone ?? "America/Chicago").trim() || "America/Chicago";
+  return TIMEZONE_MAP[raw] ?? raw;
+}
+
+function normalizeWeekday(dayOfWeek: unknown): string | null {
+  const raw = String(dayOfWeek ?? "").trim();
+  if (!raw) return null;
+  return WEEKDAY_ALIASES[raw.toLowerCase()] ?? raw;
+}
+
+function toValidDate(value: Date | string | null | undefined): Date | null {
+  if (value instanceof Date && !Number.isNaN(value.getTime())) return value;
+
+  if (typeof value === "string") {
+    const parsed = new Date(value);
+    if (!Number.isNaN(parsed.getTime())) return parsed;
+  }
+
+  return null;
+}
+
+function parseIntervalMs(interval: unknown): number | null {
+  const raw = String(interval ?? "").trim().toLowerCase();
+  const match = raw.match(/^(\d+)\s*(m|min|mins|minute|minutes|h|hr|hrs|hour|hours|d|day|days|w|week|weeks)$/);
+
+  if (!match) return null;
+
+  const amount = Number(match[1]);
+  const unit = match[2];
+
+  if (!Number.isFinite(amount) || amount <= 0) return null;
+
+  if (["m", "min", "mins", "minute", "minutes"].includes(unit)) {
+    return amount * 60 * 1000;
+  }
+
+  if (["h", "hr", "hrs", "hour", "hours"].includes(unit)) {
+    return amount * 60 * 60 * 1000;
+  }
+
+  if (["d", "day", "days"].includes(unit)) {
+    return amount * 24 * 60 * 60 * 1000;
+  }
+
+  if (["w", "week", "weeks"].includes(unit)) {
+    return amount * 7 * 24 * 60 * 60 * 1000;
+  }
+
+  return null;
+}
+
 function getZonedParts(date: Date, timeZone: string): ZonedParts {
   const parts = new Intl.DateTimeFormat("en-US", {
     timeZone,
@@ -65,7 +129,7 @@ function getZonedParts(date: Date, timeZone: string): ZonedParts {
     hour: "2-digit",
     minute: "2-digit",
     hour12: false,
-    weekday: "short",
+    weekday: "long",
   }).formatToParts(date);
 
   const getPart = (type: string) =>
@@ -73,6 +137,7 @@ function getZonedParts(date: Date, timeZone: string): ZonedParts {
 
   const rawHour = Number(getPart("hour"));
   const hour = rawHour === 24 ? 0 : rawHour;
+  const weekdayLong = getPart("weekday");
 
   return {
     year: Number(getPart("year")),
@@ -80,59 +145,61 @@ function getZonedParts(date: Date, timeZone: string): ZonedParts {
     day: Number(getPart("day")),
     hour,
     minute: Number(getPart("minute")),
-    weekday: WEEKDAY_TO_NUMBER[getPart("weekday")] ?? 0,
+    weekdayShort: weekdayLong.slice(0, 3),
+    weekdayLong,
   };
 }
 
-function isReminderDue(reminder: ReminderDoc, now: Date) {
-  let zone = String(reminder.zone ?? "UTC").trim() || "UTC";
+function isAllowedWeekday(reminder: ReminderDoc, now: Date): boolean {
+  const dayOfWeek = normalizeWeekday(reminder.dayOfWeek);
+  if (!dayOfWeek) return true;
 
-  if (TIMEZONE_MAP[zone]) {
-    zone = TIMEZONE_MAP[zone];
-  }
-
-  const hour = Number(reminder.hour);
-  const minute = Number(reminder.minute);
-
-  if (!Number.isInteger(hour) || hour < 0 || hour > 23) return null;
-  if (!Number.isInteger(minute) || minute < 0 || minute > 59) return null;
-
-  let local: ZonedParts;
+  const timezone = normalizeTimezone(reminder.timezone);
 
   try {
-    local = getZonedParts(now, zone);
+    const local = getZonedParts(now, timezone);
+    return local.weekdayLong === dayOfWeek || local.weekdayShort === dayOfWeek;
   } catch (err) {
-    console.error("Invalid timezone, falling back to UTC:", zone);
-    local = getZonedParts(now, "UTC");
+    console.error("Invalid timezone while checking weekday, falling back to UTC:", timezone, err);
+    const local = getZonedParts(now, "UTC");
+    return local.weekdayLong === dayOfWeek || local.weekdayShort === dayOfWeek;
   }
+}
 
-  const currentTotalMinutes = local.hour * 60 + local.minute;
-  const scheduledTotalMinutes = hour * 60 + minute;
-  const minutesAfterScheduled = currentTotalMinutes - scheduledTotalMinutes;
+function isReminderDue(reminder: ReminderDoc, now: Date): boolean {
+  const startDate = toValidDate(reminder.startDate);
+  if (!startDate) return false;
 
-  // Railway cron minimum is every 5 minutes, so this catches reminders whose
-  // exact minute happened within the current cron window.
-  if (minutesAfterScheduled < 0 || minutesAfterScheduled >= 5) {
-    return null;
-  }
+  if (now < startDate) return false;
+  if (!isAllowedWeekday(reminder, now)) return false;
 
-  const frequency = reminder.frequency ?? "daily";
+  const intervalMs = parseIntervalMs(reminder.interval);
+  if (!intervalMs) return false;
 
-  if (frequency === "weekly" && reminder.dayOfWeek !== local.weekday) {
-    return null;
-  }
+  const lastSent = toValidDate(reminder.lastSent);
+  const anchorDate = lastSent ?? startDate;
+  const nextDueAt = lastSent
+    ? new Date(lastSent.getTime() + intervalMs)
+    : startDate;
 
-  if (frequency === "monthly" && reminder.dayOfMonth !== local.day) {
-    return null;
-  }
+  if (now < nextDueAt) return false;
 
-  const sentKey = `${reminder.userId}:${frequency}:${local.year}-${local.month}-${local.day}:${hour}:${minute}`;
+  // If this reminder has never been sent and the start date is very old,
+  // do not spam-catch-up forever. It is due once when the cron sees it.
+  if (!lastSent && anchorDate <= now) return true;
 
-  if (reminder.reminderSentKey === sentKey) {
-    return null;
-  }
+  return true;
+}
 
-  return sentKey;
+function getPushTitle(reminder: ReminderDoc): string {
+  return String(reminder.embedTitle || reminder.name || "Reminder").replace(/[*_`~]/g, "").trim() || "Reminder";
+}
+
+function getPushBody(reminder: ReminderDoc): string {
+  return String(reminder.embedDescription || "You have a reminder due.")
+    .replace(/<a?:([a-zA-Z0-9_]+):(\d+)>/g, ":$1:")
+    .replace(/[*_`~]/g, "")
+    .trim() || "You have a reminder due.";
 }
 
 export async function runReminderPushCron() {
@@ -143,7 +210,7 @@ export async function runReminderPushCron() {
 
   const reminders = await db
     .collection<ReminderDoc>("reminders")
-    .find({ completed: { $ne: true } })
+    .find({ type: "dm", userId: { $type: "string", $ne: "" } })
     .toArray();
 
   let checked = 0;
@@ -154,8 +221,8 @@ export async function runReminderPushCron() {
   for (const reminder of reminders) {
     checked++;
 
-    const sentKey = isReminderDue(reminder, now);
-    if (!sentKey || !reminder.userId) continue;
+    if (!reminder.userId) continue;
+    if (!isReminderDue(reminder, now)) continue;
 
     due++;
 
@@ -172,8 +239,8 @@ export async function runReminderPushCron() {
             keys: sub.keys,
           },
           JSON.stringify({
-            title: "Reminder",
-            body: reminder.text || "You have a reminder due.",
+            title: getPushTitle(reminder),
+            body: getPushBody(reminder),
           }),
         );
         sent++;
@@ -187,8 +254,8 @@ export async function runReminderPushCron() {
       { _id: reminder._id },
       {
         $set: {
-          reminderSentAt: now,
-          reminderSentKey: sentKey,
+          lastSent: now,
+          updatedAt: now,
         },
       },
     );
