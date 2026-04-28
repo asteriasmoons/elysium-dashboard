@@ -110,21 +110,59 @@ export function insertDiscordEmojiTagIntoEditor(
   editor.focus();
 
   const selection = window.getSelection();
+
   if (!selection || selection.rangeCount === 0) {
     const next = `${currentValue}${tag}`;
     setValue(next);
     editor.innerHTML = renderDiscordEditorHtml(next);
+    placeCaretAtEnd(editor);
     onDone?.();
     return;
   }
 
   const range = selection.getRangeAt(0);
+
+  if (!editor.contains(range.commonAncestorContainer)) {
+    const next = `${currentValue}${tag}`;
+    setValue(next);
+    editor.innerHTML = renderDiscordEditorHtml(next);
+    placeCaretAtEnd(editor);
+    onDone?.();
+    return;
+  }
+
   range.deleteContents();
 
-  const textNode = document.createTextNode(tag);
-  range.insertNode(textNode);
+  const wrapper = document.createElement("span");
+  wrapper.setAttribute("contenteditable", "false");
+  wrapper.setAttribute("data-emoji-tag", tag);
+  wrapper.style.display = "inline-flex";
+  wrapper.style.alignItems = "center";
+  wrapper.style.verticalAlign = "-0.2em";
 
-  range.setStartAfter(textNode);
+  const emojiRegex = /^<(a)?:([a-zA-Z0-9_]+):(\d+)>$/;
+  const match = tag.match(emojiRegex);
+
+  if (match) {
+    const [, animatedFlag, name, id] = match;
+    const img = document.createElement("img");
+    img.src = getDiscordEmojiSrc(id, Boolean(animatedFlag));
+    img.alt = `:${name}:`;
+    img.title = `:${name}:`;
+    img.width = 22;
+    img.height = 22;
+    img.style.display = "block";
+    wrapper.appendChild(img);
+  } else {
+    wrapper.textContent = tag;
+  }
+
+  const spacer = document.createTextNode("\u200B");
+
+  range.insertNode(spacer);
+  range.insertNode(wrapper);
+
+  range.setStartAfter(spacer);
   range.collapse(true);
 
   selection.removeAllRanges();
@@ -132,6 +170,19 @@ export function insertDiscordEmojiTagIntoEditor(
 
   const nextValue = serializeDiscordEditorContent(editor);
   setValue(nextValue);
-  editor.innerHTML = renderDiscordEditorHtml(nextValue);
   onDone?.();
+}
+
+function placeCaretAtEnd(editor: HTMLDivElement) {
+  editor.focus();
+
+  const range = document.createRange();
+  range.selectNodeContents(editor);
+  range.collapse(false);
+
+  const selection = window.getSelection();
+  if (!selection) return;
+
+  selection.removeAllRanges();
+  selection.addRange(range);
 }
