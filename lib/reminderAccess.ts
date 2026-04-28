@@ -161,18 +161,62 @@ export async function updateReminder(
   const db = client.db();
 
   const setFields: Record<string, unknown> = { updatedAt: new Date() };
-  if (input.interval !== undefined) setFields.interval = normalizeString(input.interval);
-  if (input.startDate !== undefined) { setFields.startDate = normalizeDate(input.startDate); setFields.lastSent = null; }
-  if (input.dayOfWeek !== undefined) setFields.dayOfWeek = input.dayOfWeek ? normalizeString(input.dayOfWeek) : null;
+
+  const existingReminder = await db.collection<ReminderDoc>(REMINDER_COLLECTION).findOne({
+    _id,
+    $or: [{ userId }, { creatorId: userId }],
+  });
+
+  if (!existingReminder) return false;
+
+  function resetLastSentForReschedule() {
+    setFields.lastSent = null;
+  }
+
+  if (input.interval !== undefined) {
+    const nextInterval = normalizeString(input.interval);
+    setFields.interval = nextInterval;
+
+    if (nextInterval !== existingReminder.interval) {
+      resetLastSentForReschedule();
+    }
+  }
+  if (input.startDate !== undefined) {
+    const nextStartDate = normalizeDate(input.startDate);
+    const existingStartDateMs = existingReminder.startDate instanceof Date
+      ? existingReminder.startDate.getTime()
+      : new Date(existingReminder.startDate).getTime();
+
+    setFields.startDate = nextStartDate;
+
+    if (nextStartDate.getTime() !== existingStartDateMs) {
+      resetLastSentForReschedule();
+    }
+  }
+  if (input.dayOfWeek !== undefined) {
+    const nextDayOfWeek = input.dayOfWeek ? normalizeString(input.dayOfWeek) : null;
+    setFields.dayOfWeek = nextDayOfWeek;
+
+    if (nextDayOfWeek !== existingReminder.dayOfWeek) {
+      resetLastSentForReschedule();
+    }
+  }
   if (input.embedTitle !== undefined) setFields.embedTitle = normalizeString(input.embedTitle, "Reminder!") || "Reminder!";
   if (input.embedDescription !== undefined) setFields.embedDescription = normalizeString(input.embedDescription);
   if (input.embedColor !== undefined) setFields.embedColor = normalizeString(input.embedColor, "#8757f2") || "#8757f2";
-  if (input.timezone !== undefined) setFields.timezone = normalizeString(input.timezone, "America/Chicago") || "America/Chicago";
+  if (input.timezone !== undefined) {
+    const nextTimezone = normalizeString(input.timezone, "America/Chicago") || "America/Chicago";
+    setFields.timezone = nextTimezone;
+
+    if (nextTimezone !== existingReminder.timezone) {
+      resetLastSentForReschedule();
+    }
+  }
   if (input.ping !== undefined) setFields.ping = normalizeString(input.ping);
   if (input.channelId !== undefined) setFields.channelId = input.channelId ?? null;
 
   const result = await db.collection<ReminderDoc>(REMINDER_COLLECTION).updateOne(
-    { _id, $or: [{ userId }, { creatorId: userId }] },
+    { _id },
     { $set: setFields },
   );
 
