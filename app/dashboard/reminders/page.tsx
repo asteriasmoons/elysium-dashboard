@@ -3,6 +3,7 @@ import { revalidatePath } from "next/cache";
 import { auth } from "@/lib/auth";
 import { getSessionUserId } from "@/lib/journalAccess";
 import { deleteReminder, listUserReminders } from "@/lib/reminderAccess";
+import RenderDiscordText from "@/components/discord/RenderDiscordText";
 import styles from "./reminders.module.css";
 
 function parseIntervalMs(interval: string): number | null {
@@ -110,7 +111,7 @@ export default async function RemindersPage() {
 
                     {reminder.embedDescription ? (
                       <p className={styles.cardDescription}>
-                        {reminder.embedDescription}
+                        <RenderDiscordText text={reminder.embedDescription} />
                       </p>
                     ) : (
                       <p className={styles.cardDescriptionMuted}>No description</p>
