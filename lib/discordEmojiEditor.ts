@@ -1,3 +1,55 @@
+const savedEditorRanges = new WeakMap<HTMLDivElement, Range>();
+const trackedEditors = new WeakSet<HTMLDivElement>();
+
+function isRangeInsideEditor(editor: HTMLDivElement, range: Range): boolean {
+  return editor.contains(range.commonAncestorContainer);
+}
+
+function saveCurrentEditorRange(editor: HTMLDivElement) {
+  const selection = window.getSelection();
+  if (!selection || selection.rangeCount === 0) return;
+
+  const range = selection.getRangeAt(0);
+  if (!isRangeInsideEditor(editor, range)) return;
+
+  savedEditorRanges.set(editor, range.cloneRange());
+}
+
+function getActiveOrSavedEditorRange(editor: HTMLDivElement): Range | null {
+  const selection = window.getSelection();
+
+  if (selection && selection.rangeCount > 0) {
+    const activeRange = selection.getRangeAt(0);
+
+    if (isRangeInsideEditor(editor, activeRange)) {
+      const clonedRange = activeRange.cloneRange();
+      savedEditorRanges.set(editor, clonedRange.cloneRange());
+      return clonedRange;
+    }
+  }
+
+  const savedRange = savedEditorRanges.get(editor);
+  if (!savedRange) return null;
+
+  try {
+    if (!isRangeInsideEditor(editor, savedRange)) return null;
+    return savedRange.cloneRange();
+  } catch {
+    return null;
+  }
+}
+
+function trackEditorSelection(editor: HTMLDivElement) {
+  if (trackedEditors.has(editor)) return;
+
+  trackedEditors.add(editor);
+
+  editor.addEventListener("keyup", () => saveCurrentEditorRange(editor));
+  editor.addEventListener("mouseup", () => saveCurrentEditorRange(editor));
+  editor.addEventListener("input", () => saveCurrentEditorRange(editor));
+  editor.addEventListener("focus", () => saveCurrentEditorRange(editor));
+}
+
 export function getDiscordEmojiSrc(
   emojiId: string,
   animated?: boolean,
@@ -91,6 +143,7 @@ export function syncDiscordEditorContent(
   value: string,
 ) {
   if (!editor) return;
+  trackEditorSelection(editor);
 
   const currentSerialized = serializeDiscordEditorContent(editor);
   if (currentSerialized !== value) {
@@ -106,12 +159,14 @@ export function insertDiscordEmojiTagIntoEditor(
   onDone?: () => void,
 ) {
   if (!editor) return;
+  trackEditorSelection(editor);
 
   editor.focus();
 
   const selection = window.getSelection();
+  const savedRange = getActiveOrSavedEditorRange(editor);
 
-  if (!selection || selection.rangeCount === 0) {
+  if (!savedRange) {
     const next = `${currentValue}${tag}`;
     setValue(next);
     editor.innerHTML = renderDiscordEditorHtml(next);
@@ -120,16 +175,7 @@ export function insertDiscordEmojiTagIntoEditor(
     return;
   }
 
-  const range = selection.getRangeAt(0);
-
-  if (!editor.contains(range.commonAncestorContainer)) {
-    const next = `${currentValue}${tag}`;
-    setValue(next);
-    editor.innerHTML = renderDiscordEditorHtml(next);
-    placeCaretAtEnd(editor);
-    onDone?.();
-    return;
-  }
+  const range = savedRange;
 
   range.deleteContents();
 
@@ -165,8 +211,11 @@ export function insertDiscordEmojiTagIntoEditor(
   range.setStartAfter(spacer);
   range.collapse(true);
 
-  selection.removeAllRanges();
-  selection.addRange(range);
+  if (selection) {
+    selection.removeAllRanges();
+    selection.addRange(range);
+  }
+  savedEditorRanges.set(editor, range.cloneRange());
 
   const nextValue = serializeDiscordEditorContent(editor);
   setValue(nextValue);
