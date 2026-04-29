@@ -401,6 +401,21 @@
   outline: none;
 }
 
+.roleMentionChip {
+  display: inline-flex;
+  align-items: center;
+  max-width: 100%;
+  padding: 1px 6px;
+  border-radius: 999px;
+  background: rgba(96, 85, 247, 0.18);
+  border: 1px solid rgba(3, 227, 252, 0.35);
+  color: #dff8ff;
+  font-weight: 700;
+  cursor: pointer;
+  vertical-align: baseline;
+  white-space: nowrap;
+}
+
 .inputEmojiButton {
   position: absolute;
   right: 10px;

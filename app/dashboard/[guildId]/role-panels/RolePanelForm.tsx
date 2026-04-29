@@ -56,6 +56,7 @@ type Props = {
   initialPanel?: RolePanelData | null;
 };
 
+
 const emptyRole: PanelRole = {
   roleId: "",
   label: "",
@@ -63,6 +64,41 @@ const emptyRole: PanelRole = {
   description: "",
   order: 0,
 };
+
+function escapeHtml(value: string) {
+  return value
+    .replace(/&/g, "&amp;")
+    .replace(/</g, "&lt;")
+    .replace(/>/g, "&gt;")
+    .replace(/"/g, "&quot;")
+    .replace(/'/g, "&#039;");
+}
+
+function roleMentionHtml(role: GuildRole) {
+  return `<span contenteditable="false" data-role-mention="${role.id}" class="${styles.roleMentionChip}" title="@${escapeHtml(role.name)}">@${escapeHtml(role.name)}</span>`;
+}
+
+function renderRoleMentionsForEditor(value: string, guildRoles: GuildRole[]) {
+  if (!value) return "";
+
+  const rolesById = new Map(guildRoles.map((role) => [role.id, role]));
+
+  return escapeHtml(value).replace(/&lt;@&amp;(\d+)&gt;/g, (match, roleId) => {
+    const role = rolesById.get(roleId);
+    return role ? roleMentionHtml(role) : match;
+  });
+}
+
+function serializeRoleMentionEditorContent(editor: HTMLDivElement) {
+  const clone = editor.cloneNode(true) as HTMLDivElement;
+
+  clone.querySelectorAll<HTMLElement>("[data-role-mention]").forEach((node) => {
+    const roleId = node.dataset.roleMention;
+    node.replaceWith(document.createTextNode(roleId ? `<@&${roleId}>` : node.textContent ?? ""));
+  });
+
+  return serializeDiscordEditorContent(clone);
+}
 
 export default function RolePanelForm({
   guildId,
@@ -191,8 +227,18 @@ export default function RolePanelForm({
   }, [embedTitle]);
 
   useEffect(() => {
-    syncDiscordEditorContent(descriptionEditorRef.current, embedDescription);
-  }, [embedDescription]);
+    const editor = descriptionEditorRef.current;
+    if (!editor) return;
+
+    const renderedDescription = renderRoleMentionsForEditor(
+      embedDescription,
+      guildRoles,
+    );
+
+    if (editor.innerHTML !== renderedDescription) {
+      editor.innerHTML = renderedDescription;
+    }
+  }, [embedDescription, guildRoles]);
 
   function updateRole(index: number, patch: Partial<PanelRole>) {
     setRoles((current) =>
@@ -256,7 +302,7 @@ export default function RolePanelForm({
   }
 
   function handleDescriptionEditorInput(editor: HTMLDivElement) {
-    const nextValue = serializeDiscordEditorContent(editor);
+    const nextValue = serializeRoleMentionEditorContent(editor);
     setEmbedDescription(nextValue);
 
     const selection = window.getSelection();
@@ -293,7 +339,9 @@ export default function RolePanelForm({
 
     const selection = window.getSelection();
     if (!selection || selection.rangeCount === 0) {
-      setEmbedDescription((current) => `${current}<@&${role.id}>`);
+      editor.insertAdjacentHTML("beforeend", roleMentionHtml(role));
+      editor.append(document.createTextNode(" "));
+      setEmbedDescription(serializeRoleMentionEditorContent(editor));
       setShowRoleMentionPicker(false);
       setRoleMentionSearch("");
       return;
@@ -302,7 +350,9 @@ export default function RolePanelForm({
     const range = selection.getRangeAt(0);
 
     if (!editor.contains(range.commonAncestorContainer)) {
-      setEmbedDescription((current) => `${current}<@&${role.id}>`);
+      editor.insertAdjacentHTML("beforeend", roleMentionHtml(role));
+      editor.append(document.createTextNode(" "));
+      setEmbedDescription(serializeRoleMentionEditorContent(editor));
       setShowRoleMentionPicker(false);
       setRoleMentionSearch("");
       return;
@@ -318,16 +368,22 @@ export default function RolePanelForm({
 
     range.deleteContents();
 
-    const mentionNode = document.createTextNode(`<@&${role.id}>`);
-    range.insertNode(mentionNode);
-    range.setStartAfter(mentionNode);
-    range.collapse(true);
+    const mentionWrapper = document.createElement("span");
+    mentionWrapper.innerHTML = roleMentionHtml(role);
+    const mentionNode = mentionWrapper.firstChild;
+    const spacerNode = document.createTextNode(" ");
 
-    selection.removeAllRanges();
-    selection.addRange(range);
+    if (mentionNode) {
+      range.insertNode(spacerNode);
+      range.insertNode(mentionNode);
+      range.setStartAfter(spacerNode);
+      range.collapse(true);
 
-    const nextValue = serializeDiscordEditorContent(editor);
-    setEmbedDescription(nextValue);
+      selection.removeAllRanges();
+      selection.addRange(range);
+    }
+
+    setEmbedDescription(serializeRoleMentionEditorContent(editor));
     setShowRoleMentionPicker(false);
     setRoleMentionSearch("");
   }
@@ -537,7 +593,7 @@ export default function RolePanelForm({
               onFocus={() => setActiveEmbedEmojiField("description")}
               onInput={(e) => handleDescriptionEditorInput(e.currentTarget)}
               onBlur={(e) =>
-                setEmbedDescription(serializeDiscordEditorContent(e.currentTarget))
+                setEmbedDescription(serializeRoleMentionEditorContent(e.currentTarget))
               }
               style={{
                 paddingRight: 48,
