@@ -4,6 +4,7 @@ import { useEffect, useRef, useState } from "react";
 import Image from "next/image";
 import EmojiPicker, { type DiscordEmoji } from "@/components/discord/EmojiPicker";
 import RenderDiscordText from "@/components/discord/RenderDiscordText";
+import RoleMentionPicker from "@/components/discord/RoleMentionPicker";
 import {
   insertDiscordEmojiTagIntoEditor,
   serializeDiscordEditorContent,
@@ -100,6 +101,8 @@ export default function RolePanelForm({
   const [activeEmbedEmojiField, setActiveEmbedEmojiField] = useState<
     "title" | "description" | null
   >(null);
+  const [showRoleMentionPicker, setShowRoleMentionPicker] = useState(false);
+  const [roleMentionSearch, setRoleMentionSearch] = useState("");
 
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState("");
@@ -107,6 +110,12 @@ export default function RolePanelForm({
   const postChannels = channels.filter((channel) =>
     [0, 5, 15].includes(Number(channel.type)),
   );
+
+  const mentionableRoles = guildRoles.filter((role) => {
+    const query = roleMentionSearch.trim().toLowerCase();
+    if (!query) return true;
+    return role.name.toLowerCase().includes(query);
+  });
 
   useEffect(() => {
     async function loadOptions() {
@@ -238,6 +247,83 @@ export default function RolePanelForm({
         () => setActiveEmbedEmojiField(null),
       );
     }
+  }
+
+  function handleDescriptionEditorInput(editor: HTMLDivElement) {
+    const nextValue = serializeDiscordEditorContent(editor);
+    setEmbedDescription(nextValue);
+
+    const selection = window.getSelection();
+    if (!selection || selection.rangeCount === 0) {
+      setShowRoleMentionPicker(false);
+      return;
+    }
+
+    const range = selection.getRangeAt(0);
+    if (!descriptionEditorRef.current?.contains(range.commonAncestorContainer)) {
+      setShowRoleMentionPicker(false);
+      return;
+    }
+
+    const textBeforeCursor = range.startContainer.textContent?.slice(0, range.startOffset) ?? "";
+    const mentionMatch = textBeforeCursor.match(/@([a-zA-Z0-9_ -]*)$/);
+
+    if (!mentionMatch) {
+      setShowRoleMentionPicker(false);
+      setRoleMentionSearch("");
+      return;
+    }
+
+    setActiveEmbedEmojiField(null);
+    setRoleMentionSearch(mentionMatch[1] ?? "");
+    setShowRoleMentionPicker(true);
+  }
+
+  function insertRoleMention(role: GuildRole) {
+    const editor = descriptionEditorRef.current;
+    if (!editor) return;
+
+    editor.focus();
+
+    const selection = window.getSelection();
+    if (!selection || selection.rangeCount === 0) {
+      setEmbedDescription((current) => `${current}<@&${role.id}>`);
+      setShowRoleMentionPicker(false);
+      setRoleMentionSearch("");
+      return;
+    }
+
+    const range = selection.getRangeAt(0);
+
+    if (!editor.contains(range.commonAncestorContainer)) {
+      setEmbedDescription((current) => `${current}<@&${role.id}>`);
+      setShowRoleMentionPicker(false);
+      setRoleMentionSearch("");
+      return;
+    }
+
+    const containerText = range.startContainer.textContent ?? "";
+    const beforeCursor = containerText.slice(0, range.startOffset);
+    const mentionMatch = beforeCursor.match(/@([a-zA-Z0-9_ -]*)$/);
+
+    if (mentionMatch) {
+      range.setStart(range.startContainer, range.startOffset - mentionMatch[0].length);
+    }
+
+    range.deleteContents();
+
+    const mentionNode = document.createTextNode(`<@&${role.id}>`);
+    range.insertNode(mentionNode);
+    range.setStartAfter(mentionNode);
+    range.collapse(true);
+
+    selection.removeAllRanges();
+    selection.addRange(range);
+
+    const nextValue = serializeDiscordEditorContent(editor);
+    setEmbedDescription(nextValue);
+    setShowRoleMentionPicker(false);
+    setRoleMentionSearch("");
   }
 
   async function handleSubmit(e: React.FormEvent<HTMLFormElement>) {
@@ -443,9 +529,7 @@ export default function RolePanelForm({
               suppressContentEditableWarning
               className={styles.textarea}
               onFocus={() => setActiveEmbedEmojiField("description")}
-              onInput={(e) =>
-                setEmbedDescription(serializeDiscordEditorContent(e.currentTarget))
-              }
+              onInput={(e) => handleDescriptionEditorInput(e.currentTarget)}
               onBlur={(e) =>
                 setEmbedDescription(serializeDiscordEditorContent(e.currentTarget))
               }
@@ -460,11 +544,12 @@ export default function RolePanelForm({
               type="button"
               className={`${styles.emojiButton} ${styles.textareaEmojiButton}`}
               onMouseDown={(e) => e.preventDefault()}
-              onClick={() =>
+              onClick={() => {
+                setShowRoleMentionPicker(false);
                 setActiveEmbedEmojiField((current) =>
                   current === "description" ? null : "description",
-                )
-              }
+                );
+              }}
             >
               <Image
                 src="/img/icons/face.svg"
@@ -481,6 +566,16 @@ export default function RolePanelForm({
                 onPick={insertEmbedEmoji}
                 className={styles.emojiPopover}
                 itemClassName={styles.emojiItem}
+              />
+            )}
+
+            {showRoleMentionPicker && (
+              <RoleMentionPicker
+                roles={mentionableRoles}
+                search={roleMentionSearch}
+                onPick={insertRoleMention}
+                className={styles.roleMentionPopover}
+                itemClassName={styles.roleMentionItem}
               />
             )}
           </div>
