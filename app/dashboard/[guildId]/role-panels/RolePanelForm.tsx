@@ -1,9 +1,14 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import Image from "next/image";
 import EmojiPicker, { type DiscordEmoji } from "@/components/discord/EmojiPicker";
 import RenderDiscordText from "@/components/discord/RenderDiscordText";
+import {
+  insertDiscordEmojiTagIntoEditor,
+  serializeDiscordEditorContent,
+  syncDiscordEditorContent,
+} from "@/lib/discordEmojiEditor";
 import { useRouter } from "next/navigation";
 import styles from "./role-panels.module.css";
 
@@ -65,6 +70,8 @@ export default function RolePanelForm({
   initialPanel,
 }: Props) {
   const router = useRouter();
+  const titleEditorRef = useRef<HTMLDivElement | null>(null);
+  const descriptionEditorRef = useRef<HTMLDivElement | null>(null);
   const safeGuildId = String(guildId ?? "").trim();
 
   const [guildRoles, setGuildRoles] = useState<GuildRole[]>([]);
@@ -164,6 +171,14 @@ export default function RolePanelForm({
     loadOptions();
   }, [safeGuildId]);
 
+  useEffect(() => {
+    syncDiscordEditorContent(titleEditorRef.current, embedTitle);
+  }, [embedTitle]);
+
+  useEffect(() => {
+    syncDiscordEditorContent(descriptionEditorRef.current, embedDescription);
+  }, [embedDescription]);
+
   function updateRole(index: number, patch: Partial<PanelRole>) {
     setRoles((current) =>
       current.map((role, roleIndex) =>
@@ -204,14 +219,25 @@ export default function RolePanelForm({
 
   function insertEmbedEmoji(emoji: string) {
     if (activeEmbedEmojiField === "title") {
-      setEmbedTitle((current) => `${current}${emoji}`);
+      insertDiscordEmojiTagIntoEditor(
+        titleEditorRef.current,
+        embedTitle,
+        setEmbedTitle,
+        emoji,
+        () => setActiveEmbedEmojiField(null),
+      );
+      return;
     }
 
     if (activeEmbedEmojiField === "description") {
-      setEmbedDescription((current) => `${current}${emoji}`);
+      insertDiscordEmojiTagIntoEditor(
+        descriptionEditorRef.current,
+        embedDescription,
+        setEmbedDescription,
+        emoji,
+        () => setActiveEmbedEmojiField(null),
+      );
     }
-
-    setActiveEmbedEmojiField(null);
   }
 
   async function handleSubmit(e: React.FormEvent<HTMLFormElement>) {
@@ -359,16 +385,30 @@ export default function RolePanelForm({
           <div className={styles.fieldGroup} style={{ position: "relative" }}>
             <label className={styles.label}>Embed Title</label>
 
-            <input
+            <div
+              ref={titleEditorRef}
+              contentEditable
+              suppressContentEditableWarning
               className={styles.input}
-              value={embedTitle}
-              onChange={(e) => setEmbedTitle(e.target.value)}
-              placeholder="Age Roles!"
+              onFocus={() => setActiveEmbedEmojiField("title")}
+              onInput={(e) =>
+                setEmbedTitle(serializeDiscordEditorContent(e.currentTarget))
+              }
+              onBlur={(e) =>
+                setEmbedTitle(serializeDiscordEditorContent(e.currentTarget))
+              }
+              style={{
+                minHeight: 44,
+                paddingRight: 48,
+                whiteSpace: "pre-wrap",
+                overflowWrap: "break-word",
+              }}
             />
 
             <button
               type="button"
               className={`${styles.emojiButton} ${styles.inputEmojiButton}`}
+              onMouseDown={(e) => e.preventDefault()}
               onClick={() =>
                 setActiveEmbedEmojiField((current) =>
                   current === "title" ? null : "title",
@@ -397,16 +437,29 @@ export default function RolePanelForm({
           <div className={styles.fieldGroup} style={{ position: "relative" }}>
             <label className={styles.label}>Embed Description</label>
 
-            <textarea
+            <div
+              ref={descriptionEditorRef}
+              contentEditable
+              suppressContentEditableWarning
               className={styles.textarea}
-              value={embedDescription}
-              onChange={(e) => setEmbedDescription(e.target.value)}
-              placeholder="React to this message to get a role!"
+              onFocus={() => setActiveEmbedEmojiField("description")}
+              onInput={(e) =>
+                setEmbedDescription(serializeDiscordEditorContent(e.currentTarget))
+              }
+              onBlur={(e) =>
+                setEmbedDescription(serializeDiscordEditorContent(e.currentTarget))
+              }
+              style={{
+                paddingRight: 48,
+                whiteSpace: "pre-wrap",
+                overflowWrap: "break-word",
+              }}
             />
 
             <button
               type="button"
               className={`${styles.emojiButton} ${styles.textareaEmojiButton}`}
+              onMouseDown={(e) => e.preventDefault()}
               onClick={() =>
                 setActiveEmbedEmojiField((current) =>
                   current === "description" ? null : "description",
