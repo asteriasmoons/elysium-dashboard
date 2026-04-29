@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import Image from "next/image";
 import EmojiPicker, { type DiscordEmoji } from "@/components/discord/EmojiPicker";
 import RenderDiscordText from "@/components/discord/RenderDiscordText";
 import { useRouter } from "next/navigation";
@@ -89,6 +90,9 @@ export default function RolePanelForm({
   );
 
   const [activeEmojiIndex, setActiveEmojiIndex] = useState<number | null>(null);
+  const [activeEmbedEmojiField, setActiveEmbedEmojiField] = useState<
+    "title" | "description" | null
+  >(null);
 
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState("");
@@ -196,6 +200,18 @@ export default function RolePanelForm({
       roleId,
       label: picked?.name ?? "",
     });
+  }
+
+  function insertEmbedEmoji(emoji: string) {
+    if (activeEmbedEmojiField === "title") {
+      setEmbedTitle((current) => `${current}${emoji}`);
+    }
+
+    if (activeEmbedEmojiField === "description") {
+      setEmbedDescription((current) => `${current}${emoji}`);
+    }
+
+    setActiveEmbedEmojiField(null);
   }
 
   async function handleSubmit(e: React.FormEvent<HTMLFormElement>) {
@@ -342,22 +358,80 @@ export default function RolePanelForm({
 
           <div className={styles.fieldGroup}>
             <label className={styles.label}>Embed Title</label>
-            <input
-              className={styles.input}
-              value={embedTitle}
-              onChange={(e) => setEmbedTitle(e.target.value)}
-              placeholder="Age Roles!"
-            />
+            <div className={styles.emojiRow}>
+              <input
+                className={styles.input}
+                value={embedTitle}
+                onChange={(e) => setEmbedTitle(e.target.value)}
+                placeholder="Age Roles!"
+              />
+
+              <button
+                type="button"
+                className={styles.emojiButton}
+                onClick={() =>
+                  setActiveEmbedEmojiField((current) =>
+                    current === "title" ? null : "title",
+                  )
+                }
+              >
+                <Image
+                  src="/img/icons/face.svg"
+                  alt="emoji picker"
+                  width={20}
+                  height={20}
+                  unoptimized
+                />
+              </button>
+            </div>
+
+            {activeEmbedEmojiField === "title" && (
+              <EmojiPicker
+                emojis={emojis}
+                onPick={insertEmbedEmoji}
+                className={styles.emojiPopover}
+                itemClassName={styles.emojiItem}
+              />
+            )}
           </div>
 
           <div className={styles.fieldGroup}>
             <label className={styles.label}>Embed Description</label>
-            <textarea
-              className={styles.textarea}
-              value={embedDescription}
-              onChange={(e) => setEmbedDescription(e.target.value)}
-              placeholder="React to this message to get a role!"
-            />
+            <div className={styles.emojiRow}>
+              <textarea
+                className={styles.textarea}
+                value={embedDescription}
+                onChange={(e) => setEmbedDescription(e.target.value)}
+                placeholder="React to this message to get a role!"
+              />
+
+              <button
+                type="button"
+                className={styles.emojiButton}
+                onClick={() =>
+                  setActiveEmbedEmojiField((current) =>
+                    current === "description" ? null : "description",
+                  )
+                }
+              >
+                <Image
+                  src="/img/icons/face.svg"
+                  alt="emoji picker"
+                  width={20}
+                  height={20}
+                  unoptimized
+                />
+              </button>
+            </div>
+
+            {activeEmbedEmojiField === "description" && (
+              <EmojiPicker
+                emojis={emojis}
+                onPick={insertEmbedEmoji}
+                className={styles.emojiPopover}
+                itemClassName={styles.emojiItem}
+              />
+            )}
           </div>
 
           <div className={styles.fieldGroup}>
@@ -433,13 +507,20 @@ export default function RolePanelForm({
                       <button
                         type="button"
                         className={styles.emojiButton}
-                        onClick={() =>
+                        onClick={() => {
+                          setActiveEmbedEmojiField(null);
                           setActiveEmojiIndex((current) =>
                             current === index ? null : index,
-                          )
-                        }
+                          );
+                        }}
                       >
-                        Pick
+                        <Image
+                          src="/img/icons/face.svg"
+                          alt="emoji picker"
+                          width={20}
+                          height={20}
+                          unoptimized
+                        />
                       </button>
                     </div>
 
