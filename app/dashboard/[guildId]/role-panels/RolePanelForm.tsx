@@ -264,6 +264,7 @@ export default function RolePanelForm({
   useEffect(() => {
     const editor = descriptionEditorRef.current;
     if (!editor) return;
+    if (document.activeElement === editor) return;
 
     syncDiscordEditorContent(editor, embedDescription);
     renderRoleMentionsInsideEditor(editor, guildRoles);
