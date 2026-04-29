@@ -513,7 +513,7 @@ export default function RolePanelForm({
                             current === index ? null : index,
                           );
                         }}
-                      >
+                      > 
                         <Image
                           src="/img/icons/face.svg"
                           alt="emoji picker"
