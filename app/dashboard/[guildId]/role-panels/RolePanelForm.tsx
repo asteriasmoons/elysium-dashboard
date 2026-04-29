@@ -107,9 +107,12 @@ export default function RolePanelForm({
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState("");
 
-  const postChannels = channels.filter((channel) =>
-    [0, 5, 15].includes(Number(channel.type)),
-  );
+  const postChannels = channels.filter((channel) => {
+    if (channel.type === undefined || channel.type === null) return true;
+
+    const type = Number(channel.type);
+    return type === 0 || type === 5 || type === 15;
+  });
 
   const mentionableRoles = guildRoles.filter((role) => {
     const query = roleMentionSearch.trim().toLowerCase();
@@ -157,9 +160,12 @@ export default function RolePanelForm({
           ? emojiData.emojis
           : [];
 
-        const nextPostChannels = nextChannels.filter((channel) =>
-          [0, 5, 15].includes(Number(channel.type)),
-        );
+        const nextPostChannels = nextChannels.filter((channel) => {
+          if (channel.type === undefined || channel.type === null) return true;
+
+          const type = Number(channel.type);
+          return type === 0 || type === 5 || type === 15;
+        });
 
         setChannels(nextChannels);
         setGuildRoles(nextRoles);
