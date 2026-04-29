@@ -364,6 +364,18 @@
   background: rgba(255, 255, 255, 0.1);
 }
 
+.inputEmojiButton {
+  position: absolute;
+  right: 10px;
+  top: 31px;
+}
+
+.textareaEmojiButton {
+  position: absolute;
+  right: 10px;
+  top: 36px;
+}
+
 /* ---------- SEND STATUS ---------- */
 
 .sendStatusBox {

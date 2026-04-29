@@ -368,12 +368,7 @@ export default function RolePanelForm({
 
             <button
               type="button"
-              className={styles.emojiButton}
-              style={{
-                position: "absolute",
-                right: 10,
-                bottom: 10,
-              }}
+              className={`${styles.emojiButton} ${styles.inputEmojiButton}`}
               onClick={() =>
                 setActiveEmbedEmojiField((current) =>
                   current === "title" ? null : "title",
@@ -411,12 +406,7 @@ export default function RolePanelForm({
 
             <button
               type="button"
-              className={styles.emojiButton}
-              style={{
-                position: "absolute",
-                right: 10,
-                bottom: 10,
-              }}
+              className={`${styles.emojiButton} ${styles.textareaEmojiButton}`}
               onClick={() =>
                 setActiveEmbedEmojiField((current) =>
                   current === "description" ? null : "description",
