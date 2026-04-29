@@ -124,8 +124,8 @@ export default function RolePanelForm({
     async function loadOptions() {
       try {
         setError("");
-        if (!safeGuildId) {
-          throw new Error("Missing guild ID");
+        if (!safeGuildId || safeGuildId === "undefined" || safeGuildId === "null") {
+          return;
         }
 
         const [channelsRes, rolesRes, emojiRes] = await Promise.all([
