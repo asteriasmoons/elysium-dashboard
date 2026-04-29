@@ -78,14 +78,49 @@ function roleMentionHtml(role: GuildRole) {
   return `<span contenteditable="false" data-role-mention="${role.id}" class="${styles.roleMentionChip}" title="@${escapeHtml(role.name)}">@${escapeHtml(role.name)}</span>`;
 }
 
-function renderRoleMentionsForEditor(value: string, guildRoles: GuildRole[]) {
-  if (!value) return "";
-
+function renderRoleMentionsInsideEditor(editor: HTMLDivElement, guildRoles: GuildRole[]) {
   const rolesById = new Map(guildRoles.map((role) => [role.id, role]));
+  const walker = document.createTreeWalker(editor, NodeFilter.SHOW_TEXT);
+  const textNodes: Text[] = [];
 
-  return escapeHtml(value).replace(/&lt;@&amp;(\d+)&gt;/g, (match, roleId) => {
-    const role = rolesById.get(roleId);
-    return role ? roleMentionHtml(role) : match;
+  while (walker.nextNode()) {
+    textNodes.push(walker.currentNode as Text);
+  }
+
+  textNodes.forEach((textNode) => {
+    const parent = textNode.parentElement;
+    if (parent?.closest("[data-role-mention]")) return;
+
+    const value = textNode.nodeValue ?? "";
+    const parts = value.split(/(<@&\d+>)/g);
+    if (parts.length === 1) return;
+
+    const fragment = document.createDocumentFragment();
+
+    parts.forEach((part) => {
+      const match = part.match(/^<@&(\d+)>$/);
+
+      if (!match) {
+        fragment.append(document.createTextNode(part));
+        return;
+      }
+
+      const role = rolesById.get(match[1]);
+      if (!role) {
+        fragment.append(document.createTextNode(part));
+        return;
+      }
+
+      const wrapper = document.createElement("span");
+      wrapper.innerHTML = roleMentionHtml(role);
+      const mentionNode = wrapper.firstChild;
+
+      if (mentionNode) {
+        fragment.append(mentionNode);
+      }
+    });
+
+    textNode.replaceWith(fragment);
   });
 }
 
@@ -230,14 +265,8 @@ export default function RolePanelForm({
     const editor = descriptionEditorRef.current;
     if (!editor) return;
 
-    const renderedDescription = renderRoleMentionsForEditor(
-      embedDescription,
-      guildRoles,
-    );
-
-    if (editor.innerHTML !== renderedDescription) {
-      editor.innerHTML = renderedDescription;
-    }
+    syncDiscordEditorContent(editor, embedDescription);
+    renderRoleMentionsInsideEditor(editor, guildRoles);
   }, [embedDescription, guildRoles]);
 
   function updateRole(index: number, patch: Partial<PanelRole>) {
