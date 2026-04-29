@@ -1,10 +1,8 @@
 import NextAuth from "next-auth"
 import Discord from "next-auth/providers/discord"
-import { MongoDBAdapter } from "@auth/mongodb-adapter"
 import clientPromise from "@/lib/mongodb"
 
 export const { handlers, signIn, signOut, auth } = NextAuth({
-  adapter: MongoDBAdapter(clientPromise),
   session: {
     strategy: "jwt",
   },
@@ -74,4 +72,16 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
     error: "/login",
   },
   trustHost: true,
+  debug: process.env.NODE_ENV !== "production",
+  logger: {
+    error(error: Error) {
+      console.error("[auth][error]", error)
+    },
+    warn(code: string) {
+      console.warn("[auth][warn]", code)
+    },
+    debug(code: string, metadata?: unknown) {
+      console.debug("[auth][debug]", code, metadata)
+    },
+  },
 })
