@@ -129,10 +129,22 @@ function serializeRoleMentionEditorContent(editor: HTMLDivElement) {
 
   clone.querySelectorAll<HTMLElement>("[data-role-mention]").forEach((node) => {
     const roleId = node.dataset.roleMention;
-    node.replaceWith(document.createTextNode(roleId ? `<@&${roleId}>` : node.textContent ?? ""));
+    node.replaceWith(
+      document.createTextNode(roleId ? `<@&${roleId}>` : node.textContent ?? ""),
+    );
   });
 
-  return serializeDiscordEditorContent(clone);
+  clone.querySelectorAll("br").forEach((node) => {
+    node.replaceWith(document.createTextNode("\n"));
+  });
+
+  clone.querySelectorAll("div, p, li").forEach((node) => {
+    if (node.textContent && !node.textContent.endsWith("\n")) {
+      node.append(document.createTextNode("\n"));
+    }
+  });
+
+  return serializeDiscordEditorContent(clone).replace(/\n{3,}/g, "\n\n");
 }
 
 export default function RolePanelForm({
