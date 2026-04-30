@@ -63,6 +63,7 @@ export default function RolePanelsPage({
   const [panels, setPanels] = useState<RolePanel[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const [deleteTargetId, setDeleteTargetId] = useState<string | null>(null);
 
   const fetchPanels = useCallback(async () => {
     try {
@@ -85,6 +86,24 @@ export default function RolePanelsPage({
       setLoading(false);
     }
   }, [guildId]);
+
+  const handleDelete = async (panelId: string) => {
+    try {
+      const res = await fetch(`/api/role-panels/${panelId}`, {
+        method: "DELETE",
+      });
+
+      const data = await res.json();
+
+      if (!res.ok) {
+        throw new Error(data?.error || "Failed to delete panel");
+      }
+
+      setPanels((prev) => prev.filter((p) => p._id !== panelId));
+    } catch (err) {
+      alert(err instanceof Error ? err.message : "Delete failed");
+    }
+  };
 
   useEffect(() => {
     fetchPanels();
@@ -188,10 +207,50 @@ export default function RolePanelsPage({
               >
                 Send
               </Link>
+
+              <button
+                type="button"
+                className={styles.deleteButton}
+                onClick={() => setDeleteTargetId(panel._id)}
+              >
+                Delete
+              </button>
             </div>
           </div>
         ))}
       </div>
+
+      {deleteTargetId && (
+        <div className={styles.modalOverlay}>
+          <div className={styles.confirmModal}>
+            <h3 className={styles.confirmTitle}>Delete role panel?</h3>
+            <p className={styles.confirmText}>
+              This will permanently delete this role panel. This cannot be undone.
+            </p>
+
+            <div className={styles.confirmActions}>
+              <button
+                type="button"
+                className={styles.editButton}
+                onClick={() => setDeleteTargetId(null)}
+              >
+                Cancel
+              </button>
+
+              <button
+                type="button"
+                className={styles.deleteButton}
+                onClick={() => {
+                  handleDelete(deleteTargetId);
+                  setDeleteTargetId(null);
+                }}
+              >
+                Delete Panel
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }

@@ -282,6 +282,47 @@
   cursor: pointer;
 }
 
+.modalOverlay {
+  position: fixed;
+  inset: 0;
+  z-index: 1000;
+  display: grid;
+  place-items: center;
+  padding: 24px;
+  background: rgba(5, 6, 10, 0.72);
+  backdrop-filter: blur(14px);
+}
+
+.confirmModal {
+  width: min(420px, 100%);
+  padding: 22px;
+  border: 1px solid rgba(255, 255, 255, 0.14);
+  border-radius: 24px;
+  background: rgba(14, 16, 28, 0.92);
+  box-shadow: 0 24px 80px rgba(0, 0, 0, 0.45);
+}
+
+.confirmTitle {
+  margin: 0 0 8px;
+  color: #ffffff;
+  font-size: 1.1rem;
+  font-weight: 800;
+}
+
+.confirmText {
+  margin: 0;
+  color: rgba(255, 255, 255, 0.72);
+  line-height: 1.55;
+}
+
+.confirmActions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 10px;
+  margin-top: 18px;
+  flex-wrap: wrap;
+}
+
 /* ---------- FORM ACTIONS ---------- */
 
 .formActions {
