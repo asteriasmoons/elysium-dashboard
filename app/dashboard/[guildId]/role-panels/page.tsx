@@ -28,6 +28,30 @@ type RolePanel = {
   embedColor: string;
 };
 
+function renderRoleMentionsHtml(text: string | null, roles: Role[]) {
+  if (!text) return "";
+  const byId = new Map(roles.map(r => [r.roleId, r]));
+  return text.replace(/<@&(\d+)>/g, (_, id) => {
+    const role = byId.get(id);
+    return role
+      ? `<span class="${styles.roleMentionChip}">@${role.label}</span>`
+      : `@unknown`;
+  });
+}
+
+function renderEmojiHtml(value: string | null) {
+  if (!value) return "•";
+  // custom emoji <:name:id>
+  const m = value.match(/^<a?:([a-zA-Z0-9_]+):(\d+)>$/);
+  if (m) {
+    const animated = value.startsWith("<a:");
+    const ext = animated ? "gif" : "png";
+    return `<img alt=":${m[1]}:" src="https://cdn.discordapp.com/emojis/${m[2]}.${ext}" style="width:18px;height:18px;vertical-align:middle;" />`;
+  }
+  // unicode emoji or plain text
+  return value;
+}
+
 export default function RolePanelsPage({
   params,
 }: {
@@ -124,15 +148,23 @@ export default function RolePanelsPage({
               </span>
             </div>
 
-            <p className={styles.cardDescription}>
-              {panel.embedDescription || "No description set."}
-            </p>
+            <p
+              className={styles.cardDescription}
+              dangerouslySetInnerHTML={{
+                __html:
+                  renderRoleMentionsHtml(panel.embedDescription, panel.roles) ||
+                  "No description set.",
+              }}
+            />
 
             <div className={styles.rolesList}>
               {panel.roles.map((role) => (
                 <div key={role.roleId} className={styles.roleItem}>
-                  <span className={styles.roleEmoji}>{role.emoji || "•"}</span>
-                  <span className={styles.roleLabel}>{role.label}</span>
+                  <span
+                    className={styles.roleEmoji}
+                    dangerouslySetInnerHTML={{ __html: renderEmojiHtml(role.emoji) }}
+                  />
+                  <span className={styles.roleLabel}>@{role.label}</span>
                 </div>
               ))}
             </div>
