@@ -41,15 +41,20 @@ function renderRoleMentionsHtml(text: string | null, roles: Role[]) {
 
 function renderEmojiHtml(value: string | null) {
   if (!value) return "•";
-  // custom emoji <:name:id>
-  const m = value.match(/^<a?:([a-zA-Z0-9_]+):(\d+)>$/);
-  if (m) {
-    const animated = value.startsWith("<a:");
-    const ext = animated ? "gif" : "png";
-    return `<img alt=":${m[1]}:" src="https://cdn.discordapp.com/emojis/${m[2]}.${ext}" style="width:18px;height:18px;vertical-align:middle;" />`;
-  }
-  // unicode emoji or plain text
-  return value;
+
+  return value
+    .replace(/<a:([a-zA-Z0-9_]+):(\d+)>/g, (_match, name, id) => {
+      return `<img alt=":${name}:" src="https://cdn.discordapp.com/emojis/${id}.gif" class="${styles.previewEmojiImage}" />`;
+    })
+    .replace(/<:([a-zA-Z0-9_]+):(\d+)>/g, (_match, name, id) => {
+      return `<img alt=":${name}:" src="https://cdn.discordapp.com/emojis/${id}.png" class="${styles.previewEmojiImage}" />`;
+    })
+    .replace(/^([a-zA-Z0-9_]+):(\d+)$/g, (_match, name, id) => {
+      return `<img alt=":${name}:" src="https://cdn.discordapp.com/emojis/${id}.png" class="${styles.previewEmojiImage}" />`;
+    })
+    .replace(/^(\d{17,22})$/g, (_match, id) => {
+      return `<img alt="custom emoji" src="https://cdn.discordapp.com/emojis/${id}.png" class="${styles.previewEmojiImage}" />`;
+    });
 }
 
 export default function RolePanelsPage({

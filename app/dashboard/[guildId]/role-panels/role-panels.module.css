@@ -405,6 +405,13 @@
   background: rgba(255, 255, 255, 0.1);
 }
 
+.previewEmojiImage {
+  width: 18px;
+  height: 18px;
+  vertical-align: middle;
+  object-fit: contain;
+}
+
 .roleMentionPopover {
   position: absolute;
   right: 0;
