@@ -7,6 +7,7 @@ export type FeatureKey =
   | "tickets"
   | "role-panels"
   | "reminders"
+  | "github-feeds"
   | "prompts"
   | "sprints"
   | "buddy-reads"
@@ -69,11 +70,12 @@ export const FEATURES: FeatureItem[] = [
   {
     key: "tickets",
     title: "Ticket Panels",
-    description: "Create, edit and send ticket panels to your discord channels.",
+    description:
+      "Create, edit and send ticket panels to your discord channels.",
     href: (guildId) => `/dashboard/${guildId}/tickets`,
     scope: "guild",
     status: "ready",
-  }, 
+  },
   {
     key: "role-panels",
     title: "Role Panels",
@@ -104,6 +106,15 @@ export const FEATURES: FeatureItem[] = [
     description: "Create, edit, and audit scheduled reminders.",
     href: "/dashboard/reminders",
     scope: "user",
+    status: "ready",
+  },
+  {
+    key: "github-feeds",
+    title: "GitHub Feeds",
+    description:
+      "Watch repositories and post commit, issue, and release updates to Discord channels.",
+    href: (guildId) => `/dashboard/${guildId}/github-feeds`,
+    scope: "guild",
     status: "ready",
   },
   {
