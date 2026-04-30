@@ -45,6 +45,7 @@ export async function POST(req: Request, { params }: RouteContext) {
     guildId,
     channelId,
     panel: {
+      _id: String(panel._id),
       panelName: panel.panelName,
       type: panel.type,
       selectMode: panel.selectMode,
