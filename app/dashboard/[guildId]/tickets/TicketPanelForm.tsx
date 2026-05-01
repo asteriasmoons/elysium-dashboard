@@ -874,6 +874,7 @@ export default function TicketPanelForm({
                     className={styles.emojiButton}
                     onClick={() => {
                       setActiveEditor("greeting");
+                      setShowRolePicker(false);
                       setShowEmojiPicker((current) => !current);
                     }}
                   >
@@ -884,19 +885,6 @@ export default function TicketPanelForm({
                       height={20}
                       unoptimized
                     />
-                  </button>
-                  <button
-                    type="button"
-                    className={styles.emojiButton}
-                    onClick={() => {
-                      setActiveEditor("greeting");
-                      saveCurrentEditorRange(greetingRef.current);
-                      setRoleSearch("");
-                      setShowEmojiPicker(false);
-                      setShowRolePicker((current) => !current);
-                    }}
-                  >
-                    @
                   </button>
                 </div>
               </div>
@@ -1039,9 +1027,7 @@ export default function TicketPanelForm({
             titleRef={embedTitleRef}
             descriptionRef={embedDescriptionRef}
             setActiveEditor={setActiveEditor}
-            setRoleSearch={setRoleSearch}
             setShowEmojiPicker={setShowEmojiPicker}
-            setShowRolePicker={setShowRolePicker}
             handleRoleMentionSearch={handleRoleMentionSearch}
             saveCurrentEditorRange={saveCurrentEditorRange}
             titleEditorKey="embedTitle"
@@ -1055,9 +1041,7 @@ export default function TicketPanelForm({
             titleRef={greetingTitleRef}
             descriptionRef={greetingDescriptionRef}
             setActiveEditor={setActiveEditor}
-            setRoleSearch={setRoleSearch}
             setShowEmojiPicker={setShowEmojiPicker}
-            setShowRolePicker={setShowRolePicker}
             handleRoleMentionSearch={handleRoleMentionSearch}
             saveCurrentEditorRange={saveCurrentEditorRange}
             titleEditorKey="greetingTitle"
@@ -1151,9 +1135,7 @@ type EmbedEditorProps = {
       | null
     >
   >;
-  setRoleSearch: React.Dispatch<React.SetStateAction<string>>;
   setShowEmojiPicker: React.Dispatch<React.SetStateAction<boolean>>;
-  setShowRolePicker: React.Dispatch<React.SetStateAction<boolean>>;
   handleRoleMentionSearch: (editor: HTMLDivElement) => void;
   saveCurrentEditorRange: (editor: HTMLDivElement | null) => void;
   titleEditorKey: "embedTitle" | "greetingTitle";
@@ -1167,9 +1149,7 @@ function EmbedEditor({
   titleRef,
   descriptionRef,
   setActiveEditor,
-  setRoleSearch,
   setShowEmojiPicker,
-  setShowRolePicker,
   handleRoleMentionSearch,
   saveCurrentEditorRange,
   titleEditorKey,
@@ -1209,7 +1189,6 @@ function EmbedEditor({
                   "title",
                   serializeTicketEditorContent(e.currentTarget),
                 );
-                handleRoleMentionSearch(e.currentTarget);
               }}
               onBlur={(e) =>
                 updateEmbed(
@@ -1233,19 +1212,6 @@ function EmbedEditor({
                 height={20}
                 unoptimized
               />
-            </button>
-            <button
-              type="button"
-              className={styles.emojiButton}
-              onClick={() => {
-                setActiveEditor(titleEditorKey);
-                saveCurrentEditorRange(titleRef.current);
-                setRoleSearch("");
-                setShowEmojiPicker(false);
-                setShowRolePicker((current) => !current);
-              }}
-            >
-              @
             </button>
           </div>
         </div>
@@ -1293,19 +1259,6 @@ function EmbedEditor({
                 height={20}
                 unoptimized
               />
-            </button>
-            <button
-              type="button"
-              className={styles.emojiButton}
-              onClick={() => {
-                setActiveEditor(descriptionEditorKey);
-                saveCurrentEditorRange(descriptionRef.current);
-                setRoleSearch("");
-                setShowEmojiPicker(false);
-                setShowRolePicker((current) => !current);
-              }}
-            >
-              @
             </button>
           </div>
         </div>
