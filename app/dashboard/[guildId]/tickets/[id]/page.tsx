@@ -29,6 +29,7 @@ async function getPanel(guildId: string, id: string) {
     roleToPing: panel.roleToPing ?? null,
     embed: panel.embed,
     greetingEmbed: panel.greetingEmbed ?? null,
+    modalFields: Array.isArray(panel.modalFields) ? panel.modalFields : [],
     createdAt: panel.createdAt ? new Date(panel.createdAt).toISOString() : null,
     updatedAt: panel.updatedAt ? new Date(panel.updatedAt).toISOString() : null,
   };
