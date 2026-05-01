@@ -110,6 +110,60 @@ function createEmojiNode(tag: string): HTMLSpanElement | null {
   return span;
 }
 
+function createRoleMentionNode(role: GuildRole): HTMLSpanElement {
+  const span = document.createElement("span");
+
+  span.contentEditable = "false";
+  span.setAttribute("data-role-mention", role.id);
+  span.textContent = `@${role.name}`;
+  span.className = styles.roleMentionChip;
+
+  return span;
+}
+
+function renderRoleMentionsInsideEditor(
+  editor: HTMLDivElement,
+  roles: GuildRole[],
+) {
+  const rolesById = new Map(roles.map((role) => [role.id, role]));
+  const walker = document.createTreeWalker(editor, NodeFilter.SHOW_TEXT);
+  const textNodes: Text[] = [];
+
+  while (walker.nextNode()) {
+    textNodes.push(walker.currentNode as Text);
+  }
+
+  textNodes.forEach((textNode) => {
+    const parent = textNode.parentElement;
+    if (parent?.closest("[data-role-mention]")) return;
+
+    const value = textNode.nodeValue ?? "";
+    const parts = value.split(/(<@&\d+>)/g);
+    if (parts.length === 1) return;
+
+    const fragment = document.createDocumentFragment();
+
+    parts.forEach((part) => {
+      const match = part.match(/^<@&(\d+)>$/);
+
+      if (!match) {
+        fragment.append(document.createTextNode(part));
+        return;
+      }
+
+      const role = rolesById.get(match[1]);
+      if (!role) {
+        fragment.append(document.createTextNode(part));
+        return;
+      }
+
+      fragment.append(createRoleMentionNode(role));
+    });
+
+    textNode.replaceWith(fragment);
+  });
+}
+
 
 function cleanEditorValue(value: string) {
   return value
@@ -135,6 +189,10 @@ function serializeTicketEditorContent(editor: HTMLDivElement) {
 
     if (element.dataset?.emojiTag) {
       return element.dataset.emojiTag;
+    }
+
+    if (element.dataset?.roleMention) {
+      return `<@&${element.dataset.roleMention}>`;
     }
 
     if (element.tagName === "BR") {
@@ -271,7 +329,7 @@ export default function TicketPanelForm({
   const [showEmojiPicker, setShowEmojiPicker] = useState(false);
   const [showRolePicker, setShowRolePicker] = useState(false);
   const [roleSearch] = useState("");
-  function insertRoleMentionAtCursor(roleId: string) {
+  function insertRoleMentionAtCursor(role: GuildRole) {
     const editorMap = {
       greeting: greetingRef.current,
       embedTitle: embedTitleRef.current,
@@ -280,24 +338,47 @@ export default function TicketPanelForm({
       greetingDescription: greetingDescriptionRef.current,
     } as const;
 
-    const editor = activeEditor ? editorMap[activeEditor as keyof typeof editorMap] : null;
+    const editor = activeEditor
+      ? editorMap[activeEditor as keyof typeof editorMap]
+      : null;
     if (!editor) return;
 
     editor.focus();
 
     const selection = window.getSelection();
-    if (!selection || selection.rangeCount === 0) return;
+    const range = savedRangeRef.current;
+    const mentionNode = createRoleMentionNode(role);
+    const spacer = document.createTextNode("\u200B");
 
-    const range = selection.getRangeAt(0);
+    if (range && editor.contains(range.commonAncestorContainer)) {
+      range.deleteContents();
+      range.insertNode(spacer);
+      range.insertNode(mentionNode);
+      range.setStartAfter(spacer);
+      range.collapse(true);
+      selection?.removeAllRanges();
+      selection?.addRange(range);
+      savedRangeRef.current = range.cloneRange();
+    } else if (selection && selection.rangeCount > 0) {
+      const liveRange = selection.getRangeAt(0);
 
-    const textNode = document.createTextNode(`<@&${roleId}>`);
-    range.deleteContents();
-    range.insertNode(textNode);
-    range.setStartAfter(textNode);
-    range.collapse(true);
-
-    selection.removeAllRanges();
-    selection.addRange(range);
+      if (editor.contains(liveRange.commonAncestorContainer)) {
+        liveRange.deleteContents();
+        liveRange.insertNode(spacer);
+        liveRange.insertNode(mentionNode);
+        liveRange.setStartAfter(spacer);
+        liveRange.collapse(true);
+        selection.removeAllRanges();
+        selection.addRange(liveRange);
+        savedRangeRef.current = liveRange.cloneRange();
+      } else {
+        editor.appendChild(mentionNode);
+        editor.appendChild(spacer);
+      }
+    } else {
+      editor.appendChild(mentionNode);
+      editor.appendChild(spacer);
+    }
 
     const value = serializeTicketEditorContent(editor);
 
@@ -388,35 +469,40 @@ export default function TicketPanelForm({
     if (!editor) return;
     if (document.activeElement === editor) return;
     syncDiscordEditorContent(editor, greeting);
-  }, [greeting]);
+    renderRoleMentionsInsideEditor(editor, roles);
+  }, [greeting, roles]);
 
   useEffect(() => {
     const editor = embedTitleRef.current;
     if (!editor) return;
     if (document.activeElement === editor) return;
     syncDiscordEditorContent(editor, embed.title ?? "");
-  }, [embed.title]);
+    renderRoleMentionsInsideEditor(editor, roles);
+  }, [embed.title, roles]);
 
   useEffect(() => {
     const editor = embedDescriptionRef.current;
     if (!editor) return;
     if (document.activeElement === editor) return;
     syncDiscordEditorContent(editor, embed.description ?? "");
-  }, [embed.description]);
+    renderRoleMentionsInsideEditor(editor, roles);
+  }, [embed.description, roles]);
 
   useEffect(() => {
     const editor = greetingTitleRef.current;
     if (!editor) return;
     if (document.activeElement === editor) return;
     syncDiscordEditorContent(editor, greetingEmbed.title ?? "");
-  }, [greetingEmbed.title]);
+    renderRoleMentionsInsideEditor(editor, roles);
+  }, [greetingEmbed.title, roles]);
 
   useEffect(() => {
     const editor = greetingDescriptionRef.current;
     if (!editor) return;
     if (document.activeElement === editor) return;
     syncDiscordEditorContent(editor, greetingEmbed.description ?? "");
-  }, [greetingEmbed.description]);
+    renderRoleMentionsInsideEditor(editor, roles);
+  }, [greetingEmbed.description, roles]);
 
   function updateEmbedField<K extends keyof TicketEmbedData>(
     key: K,
@@ -807,7 +893,7 @@ export default function TicketPanelForm({
             <RoleMentionPicker
               roles={roles}
               search={roleSearch}
-              onPick={(role) => insertRoleMentionAtCursor(role.id)}
+              onPick={(role) => insertRoleMentionAtCursor(role)}
               className={styles.emojiPopover}
               itemClassName={styles.emojiItem}
             />
