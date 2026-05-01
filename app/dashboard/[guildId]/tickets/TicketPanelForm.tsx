@@ -33,6 +33,13 @@ type TicketEmbedData = {
   image: string | null;
 };
 
+type ModalField = {
+  label: string;
+  placeholder: string;
+  style: "short" | "paragraph";
+  required: boolean;
+};
+
 type TicketPanelData = {
   _id?: string;
   panelName: string;
@@ -45,6 +52,7 @@ type TicketPanelData = {
   roleToPing: string | null;
   embed: TicketEmbedData;
   greetingEmbed: TicketEmbedData | null;
+  modalFields: ModalField[];
 };
 
 type GuildChannel = {
@@ -333,6 +341,12 @@ export default function TicketPanelForm({
   );
   const [greetingEmbed, setGreetingEmbed] = useState<TicketEmbedData>(
     initialPanel?.greetingEmbed ?? emptyEmbed,
+  );
+
+  const [modalFields, setModalFields] = useState<ModalField[]>(
+    initialPanel?.modalFields && initialPanel.modalFields.length > 0
+      ? initialPanel.modalFields
+      : [{ label: "Describe your issue", placeholder: "", style: "paragraph", required: true }],
   );
 
   const [showEmojiPicker, setShowEmojiPicker] = useState(false);
@@ -657,6 +671,7 @@ export default function TicketPanelForm({
         roleToPing: roleToPing || null,
         embed,
         greetingEmbed,
+        modalFields,
       };
 
       const res = await fetch(
@@ -885,6 +900,135 @@ export default function TicketPanelForm({
                   </button>
                 </div>
               </div>
+            </div>
+          </div>
+
+          {/* ─── Modal Fields Builder ─────────────────────────────────── */}
+            <div className={styles.card}>
+            <div className={styles.formStack}>
+              <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
+                <h2 className={styles.cardTitle}>Modal Form Fields</h2>
+                {modalFields.length < 5 && (
+                  <button
+                    type="button"
+                    className={styles.editLink}
+                    onClick={() =>
+                      setModalFields((prev) => [
+                        ...prev,
+                        { label: "", placeholder: "", style: "paragraph", required: true },
+                      ])
+                    }
+                  >
+                    + Add Field
+                  </button>
+                )}
+              </div>
+              <p className={styles.cardDescriptionMuted} style={{ margin: 0 }}>
+                Customize the popup form users see when opening a ticket. Up to 5 fields.
+              </p>
+
+              {modalFields.map((field, index) => (
+                <div
+                  key={index}
+                  className={styles.card}
+                  style={{ background: "rgba(255,255,255,0.03)", marginTop: 0 }}
+                >
+                  <div className={styles.formStack}>
+                    <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
+                      <span className={styles.label}>Field {index + 1}</span>
+                      {modalFields.length > 1 && (
+                        <button
+                          type="button"
+                          className={styles.deleteButton}
+                          onClick={() =>
+                            setModalFields((prev) => prev.filter((_, i) => i !== index))
+                          }
+                        >
+                          Remove
+                        </button>
+                      )}
+                    </div>
+
+                    <div className={styles.rowFields}>
+                      <div className={styles.fieldGroup}>
+                        <label className={styles.label}>Label</label>
+                        <input
+                          className={styles.input}
+                          value={field.label}
+                          maxLength={45}
+                          placeholder="Describe your issue"
+                          onChange={(e) =>
+                            setModalFields((prev) =>
+                              prev.map((f, i) =>
+                                i === index ? { ...f, label: e.target.value } : f
+                              )
+                            )
+                          }
+                        />
+                      </div>
+
+                      <div className={styles.fieldGroup}>
+                        <label className={styles.label}>Placeholder</label>
+                        <input
+                          className={styles.input}
+                          value={field.placeholder}
+                          maxLength={100}
+                          placeholder="Be as detailed as possible..."
+                          onChange={(e) =>
+                            setModalFields((prev) =>
+                              prev.map((f, i) =>
+                                i === index ? { ...f, placeholder: e.target.value } : f
+                              )
+                            )
+                          }
+                        />
+                      </div>
+                    </div>
+
+                    <div className={styles.rowFields}>
+                      <div className={styles.fieldGroup}>
+                        <label className={styles.label}>Style</label>
+                        <select
+                          className={styles.glassSelect}
+                          value={field.style}
+                          onChange={(e) =>
+                            setModalFields((prev) =>
+                              prev.map((f, i) =>
+                                i === index
+                                  ? { ...f, style: e.target.value as "short" | "paragraph" }
+                                  : f
+                              )
+                            )
+                          }
+                        >
+                          <option value="paragraph">Paragraph (multi-line)</option>
+                          <option value="short">Short (single line)</option>
+                        </select>
+                      </div>
+
+                      <div className={styles.fieldGroup}>
+                        <label className={styles.label}>Required</label>
+                        <select
+                          className={styles.glassSelect}
+                          value={field.required ? "true" : "false"}
+                          onChange={(e) =>
+                            setModalFields((prev) =>
+                              prev.map((f, i) =>
+                                i === index
+                                  ? { ...f, required: e.target.value === "true" }
+                                  : f
+                              )
+                            )
+                          }
+                        >
+                          <option value="true">Required</option>
+                          <option value="false">Optional</option>
+                        </select>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              ))}
             </div>
           </div>
 
