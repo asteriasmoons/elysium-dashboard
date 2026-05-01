@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useRef, useState } from "react";
+import RoleMentionPicker from "@/components/discord/RoleMentionPicker";
 import Image from "next/image";
 import { useRouter } from "next/navigation";
 import styles from "./tickets.module.css";
@@ -268,6 +269,46 @@ export default function TicketPanelForm({
   );
 
   const [showEmojiPicker, setShowEmojiPicker] = useState(false);
+  const [showRolePicker, setShowRolePicker] = useState(false);
+  const [roleSearch] = useState("");
+  function insertRoleMentionAtCursor(roleId: string) {
+    const editorMap = {
+      greeting: greetingRef.current,
+      embedTitle: embedTitleRef.current,
+      embedDescription: embedDescriptionRef.current,
+      greetingTitle: greetingTitleRef.current,
+      greetingDescription: greetingDescriptionRef.current,
+    } as const;
+
+    const editor = activeEditor ? editorMap[activeEditor as keyof typeof editorMap] : null;
+    if (!editor) return;
+
+    editor.focus();
+
+    const selection = window.getSelection();
+    if (!selection || selection.rangeCount === 0) return;
+
+    const range = selection.getRangeAt(0);
+
+    const textNode = document.createTextNode(`<@&${roleId}>`);
+    range.deleteContents();
+    range.insertNode(textNode);
+    range.setStartAfter(textNode);
+    range.collapse(true);
+
+    selection.removeAllRanges();
+    selection.addRange(range);
+
+    const value = serializeTicketEditorContent(editor);
+
+    if (activeEditor === "greeting") setGreeting(value);
+    if (activeEditor === "embedTitle") updateEmbedField("title", value);
+    if (activeEditor === "embedDescription") updateEmbedField("description", value);
+    if (activeEditor === "greetingTitle") updateGreetingEmbedField("title", value);
+    if (activeEditor === "greetingDescription") updateGreetingEmbedField("description", value);
+
+    setShowRolePicker(false);
+  }
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState("");
 
@@ -685,6 +726,15 @@ export default function TicketPanelForm({
                       unoptimized
                     />
                   </button>
+                  <button
+                    type="button"
+                    className={styles.emojiButton}
+                    onClick={() => {
+                      setShowRolePicker((c) => !c);
+                    }}
+                  >
+                    @
+                  </button>
                 </div>
               </div>
             </div>
@@ -698,6 +748,7 @@ export default function TicketPanelForm({
             descriptionRef={embedDescriptionRef}
             setActiveEditor={setActiveEditor}
             setShowEmojiPicker={setShowEmojiPicker}
+            setShowRolePicker={setShowRolePicker}
             saveCurrentEditorRange={saveCurrentEditorRange}
             titleEditorKey="embedTitle"
             descriptionEditorKey="embedDescription"
@@ -711,6 +762,7 @@ export default function TicketPanelForm({
             descriptionRef={greetingDescriptionRef}
             setActiveEditor={setActiveEditor}
             setShowEmojiPicker={setShowEmojiPicker}
+            setShowRolePicker={setShowRolePicker}
             saveCurrentEditorRange={saveCurrentEditorRange}
             titleEditorKey="greetingTitle"
             descriptionEditorKey="greetingDescription"
@@ -747,6 +799,15 @@ export default function TicketPanelForm({
             <EmojiPicker
               emojis={emojis}
               onPick={insertEmojiTag}
+              className={styles.emojiPopover}
+              itemClassName={styles.emojiItem}
+            />
+          ) : null}
+          {showRolePicker ? (
+            <RoleMentionPicker
+              roles={roles}
+              search={roleSearch}
+              onPick={(role) => insertRoleMentionAtCursor(role.id)}
               className={styles.emojiPopover}
               itemClassName={styles.emojiItem}
             />
@@ -791,6 +852,7 @@ type EmbedEditorProps = {
     >
   >;
   setShowEmojiPicker: React.Dispatch<React.SetStateAction<boolean>>;
+  setShowRolePicker: React.Dispatch<React.SetStateAction<boolean>>;
   saveCurrentEditorRange: (editor: HTMLDivElement | null) => void;
   titleEditorKey: "embedTitle" | "greetingTitle";
   descriptionEditorKey: "embedDescription" | "greetingDescription";
@@ -804,6 +866,7 @@ function EmbedEditor({
   descriptionRef,
   setActiveEditor,
   setShowEmojiPicker,
+  setShowRolePicker,
   saveCurrentEditorRange,
   titleEditorKey,
   descriptionEditorKey,
@@ -851,7 +914,6 @@ function EmbedEditor({
                 )
               }
             />
-
             <button
               type="button"
               className={styles.emojiButton}
@@ -867,6 +929,15 @@ function EmbedEditor({
                 height={20}
                 unoptimized
               />
+            </button>
+            <button
+              type="button"
+              className={styles.emojiButton}
+              onClick={() => {
+                setShowRolePicker((c) => !c);
+              }}
+            >
+              @
             </button>
           </div>
         </div>
@@ -899,7 +970,6 @@ function EmbedEditor({
                 )
               }
             />
-
             <button
               type="button"
               className={styles.emojiButton}
@@ -915,6 +985,15 @@ function EmbedEditor({
                 height={20}
                 unoptimized
               />
+            </button>
+            <button
+              type="button"
+              className={styles.emojiButton}
+              onClick={() => {
+                setShowRolePicker((c) => !c);
+              }}
+            >
+              @
             </button>
           </div>
         </div>
