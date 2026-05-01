@@ -10,7 +10,6 @@ import EmojiPicker, {
 import RenderDiscordText from "@/components/discord/RenderDiscordText";
 import {
   getDiscordEmojiSrc,
-  serializeDiscordEditorContent,
   syncDiscordEditorContent,
 } from "@/lib/discordEmojiEditor";
 
@@ -344,32 +343,38 @@ export default function TicketPanelForm({
   }, [guildId]);
 
   useEffect(() => {
-    syncDiscordEditorContent(greetingRef.current, greeting);
+    const editor = greetingRef.current;
+    if (!editor) return;
+    if (document.activeElement === editor) return;
+    syncDiscordEditorContent(editor, greeting);
   }, [greeting]);
 
   useEffect(() => {
-    syncDiscordEditorContent(embedTitleRef.current, embed.title ?? "");
+    const editor = embedTitleRef.current;
+    if (!editor) return;
+    if (document.activeElement === editor) return;
+    syncDiscordEditorContent(editor, embed.title ?? "");
   }, [embed.title]);
 
   useEffect(() => {
-    syncDiscordEditorContent(
-      embedDescriptionRef.current,
-      embed.description ?? "",
-    );
+    const editor = embedDescriptionRef.current;
+    if (!editor) return;
+    if (document.activeElement === editor) return;
+    syncDiscordEditorContent(editor, embed.description ?? "");
   }, [embed.description]);
 
   useEffect(() => {
-    syncDiscordEditorContent(
-      greetingTitleRef.current,
-      greetingEmbed.title ?? "",
-    );
+    const editor = greetingTitleRef.current;
+    if (!editor) return;
+    if (document.activeElement === editor) return;
+    syncDiscordEditorContent(editor, greetingEmbed.title ?? "");
   }, [greetingEmbed.title]);
 
   useEffect(() => {
-    syncDiscordEditorContent(
-      greetingDescriptionRef.current,
-      greetingEmbed.description ?? "",
-    );
+    const editor = greetingDescriptionRef.current;
+    if (!editor) return;
+    if (document.activeElement === editor) return;
+    syncDiscordEditorContent(editor, greetingEmbed.description ?? "");
   }, [greetingEmbed.description]);
 
   function updateEmbedField<K extends keyof TicketEmbedData>(
