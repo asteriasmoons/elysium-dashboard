@@ -231,6 +231,15 @@ function serializeTicketEditorContent(editor: HTMLDivElement) {
   return cleanEditorValue(output);
 }
 
+function renderRoleMentionsForPreview(text: string | null, roles: GuildRole[]) {
+  if (!text) return "";
+
+  return text.replace(/<@&(\d+)>/g, (_match, roleId) => {
+    const role = roles.find((r) => r.id === roleId);
+    return role ? `@${role.name}` : "@unknown-role";
+  });
+}
+
 function insertEmojiNodeAtCursor(
   editor: HTMLDivElement | null,
   tag: string,
@@ -328,7 +337,7 @@ export default function TicketPanelForm({
 
   const [showEmojiPicker, setShowEmojiPicker] = useState(false);
   const [showRolePicker, setShowRolePicker] = useState(false);
-  const [roleSearch] = useState("");
+  const [roleSearch, setRoleSearch] = useState("");
   function insertRoleMentionAtCursor(role: GuildRole) {
     const editorMap = {
       greeting: greetingRef.current,
@@ -350,7 +359,23 @@ export default function TicketPanelForm({
     const mentionNode = createRoleMentionNode(role);
     const spacer = document.createTextNode("\u200B");
 
+    function trimTypedMention(rangeToTrim: Range) {
+      const startContainer = rangeToTrim.startContainer;
+      if (startContainer.nodeType !== Node.TEXT_NODE) return;
+
+      const text = startContainer.textContent ?? "";
+      const beforeCursor = text.slice(0, rangeToTrim.startOffset);
+      const match = beforeCursor.match(/@([a-zA-Z0-9_ -]*)$/);
+      if (!match) return;
+
+      rangeToTrim.setStart(
+        startContainer,
+        rangeToTrim.startOffset - match[0].length,
+      );
+    }
+
     if (range && editor.contains(range.commonAncestorContainer)) {
+      trimTypedMention(range);
       range.deleteContents();
       range.insertNode(spacer);
       range.insertNode(mentionNode);
@@ -363,6 +388,7 @@ export default function TicketPanelForm({
       const liveRange = selection.getRangeAt(0);
 
       if (editor.contains(liveRange.commonAncestorContainer)) {
+        trimTypedMention(liveRange);
         liveRange.deleteContents();
         liveRange.insertNode(spacer);
         liveRange.insertNode(mentionNode);
@@ -407,6 +433,38 @@ export default function TicketPanelForm({
     const range = selection.getRangeAt(0);
     if (!editor.contains(range.commonAncestorContainer)) return;
     savedRangeRef.current = range.cloneRange();
+  }
+
+  function handleRoleMentionSearch(editor: HTMLDivElement) {
+    saveCurrentEditorRange(editor);
+
+    const selection = window.getSelection();
+    if (!selection || selection.rangeCount === 0) {
+      setShowRolePicker(false);
+      setRoleSearch("");
+      return;
+    }
+
+    const range = selection.getRangeAt(0);
+    if (!editor.contains(range.commonAncestorContainer)) {
+      setShowRolePicker(false);
+      setRoleSearch("");
+      return;
+    }
+
+    const textBeforeCursor =
+      range.startContainer.textContent?.slice(0, range.startOffset) ?? "";
+    const match = textBeforeCursor.match(/@([a-zA-Z0-9_ -]*)$/);
+
+    if (!match) {
+      setShowRolePicker(false);
+      setRoleSearch("");
+      return;
+    }
+
+    setShowEmojiPicker(false);
+    setRoleSearch(match[1] ?? "");
+    setShowRolePicker(true);
   }
 
   const postChannels = channels.filter((channel) =>
@@ -788,7 +846,7 @@ export default function TicketPanelForm({
                       setGreeting(
                         serializeTicketEditorContent(e.currentTarget)
                       );
-                      saveCurrentEditorRange(e.currentTarget);
+                      handleRoleMentionSearch(e.currentTarget);
                     }}
                     onBlur={(e) =>
                       setGreeting(
@@ -816,7 +874,11 @@ export default function TicketPanelForm({
                     type="button"
                     className={styles.emojiButton}
                     onClick={() => {
-                      setShowRolePicker((c) => !c);
+                      setActiveEditor("greeting");
+                      saveCurrentEditorRange(greetingRef.current);
+                      setRoleSearch("");
+                      setShowEmojiPicker(false);
+                      setShowRolePicker((current) => !current);
                     }}
                   >
                     @
@@ -833,8 +895,10 @@ export default function TicketPanelForm({
             titleRef={embedTitleRef}
             descriptionRef={embedDescriptionRef}
             setActiveEditor={setActiveEditor}
+            setRoleSearch={setRoleSearch}
             setShowEmojiPicker={setShowEmojiPicker}
             setShowRolePicker={setShowRolePicker}
+            handleRoleMentionSearch={handleRoleMentionSearch}
             saveCurrentEditorRange={saveCurrentEditorRange}
             titleEditorKey="embedTitle"
             descriptionEditorKey="embedDescription"
@@ -847,8 +911,10 @@ export default function TicketPanelForm({
             titleRef={greetingTitleRef}
             descriptionRef={greetingDescriptionRef}
             setActiveEditor={setActiveEditor}
+            setRoleSearch={setRoleSearch}
             setShowEmojiPicker={setShowEmojiPicker}
             setShowRolePicker={setShowRolePicker}
+            handleRoleMentionSearch={handleRoleMentionSearch}
             saveCurrentEditorRange={saveCurrentEditorRange}
             titleEditorKey="greetingTitle"
             descriptionEditorKey="greetingDescription"
@@ -865,13 +931,17 @@ export default function TicketPanelForm({
                 <div className={styles.discordEmbedInner}>
                   {embed.title ? (
                     <p className={styles.previewTitle}>
-                      <RenderDiscordText text={embed.title} />
+                      <RenderDiscordText
+                        text={renderRoleMentionsForPreview(embed.title, roles)}
+                      />
                     </p>
                   ) : null}
 
                   {embed.description ? (
                     <p className={styles.previewDescription}>
-                      <RenderDiscordText text={embed.description} />
+                      <RenderDiscordText
+                        text={renderRoleMentionsForPreview(embed.description, roles)}
+                      />
                     </p>
                   ) : (
                     <p className={styles.previewMuted}>No embed description</p>
@@ -937,8 +1007,10 @@ type EmbedEditorProps = {
       | null
     >
   >;
+  setRoleSearch: React.Dispatch<React.SetStateAction<string>>;
   setShowEmojiPicker: React.Dispatch<React.SetStateAction<boolean>>;
   setShowRolePicker: React.Dispatch<React.SetStateAction<boolean>>;
+  handleRoleMentionSearch: (editor: HTMLDivElement) => void;
   saveCurrentEditorRange: (editor: HTMLDivElement | null) => void;
   titleEditorKey: "embedTitle" | "greetingTitle";
   descriptionEditorKey: "embedDescription" | "greetingDescription";
@@ -951,8 +1023,10 @@ function EmbedEditor({
   titleRef,
   descriptionRef,
   setActiveEditor,
+  setRoleSearch,
   setShowEmojiPicker,
   setShowRolePicker,
+  handleRoleMentionSearch,
   saveCurrentEditorRange,
   titleEditorKey,
   descriptionEditorKey,
@@ -991,7 +1065,7 @@ function EmbedEditor({
                   "title",
                   serializeTicketEditorContent(e.currentTarget),
                 );
-                saveCurrentEditorRange(e.currentTarget);
+                handleRoleMentionSearch(e.currentTarget);
               }}
               onBlur={(e) =>
                 updateEmbed(
@@ -1020,7 +1094,11 @@ function EmbedEditor({
               type="button"
               className={styles.emojiButton}
               onClick={() => {
-                setShowRolePicker((c) => !c);
+                setActiveEditor(titleEditorKey);
+                saveCurrentEditorRange(titleRef.current);
+                setRoleSearch("");
+                setShowEmojiPicker(false);
+                setShowRolePicker((current) => !current);
               }}
             >
               @
@@ -1047,7 +1125,7 @@ function EmbedEditor({
                   "description",
                   serializeTicketEditorContent(e.currentTarget),
                 );
-                saveCurrentEditorRange(e.currentTarget);
+                handleRoleMentionSearch(e.currentTarget);
               }}
               onBlur={(e) =>
                 updateEmbed(
@@ -1076,7 +1154,11 @@ function EmbedEditor({
               type="button"
               className={styles.emojiButton}
               onClick={() => {
-                setShowRolePicker((c) => !c);
+                setActiveEditor(descriptionEditorKey);
+                saveCurrentEditorRange(descriptionRef.current);
+                setRoleSearch("");
+                setShowEmojiPicker(false);
+                setShowRolePicker((current) => !current);
               }}
             >
               @
