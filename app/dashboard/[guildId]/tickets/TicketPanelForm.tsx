@@ -298,6 +298,26 @@ function insertEmojiNodeAtCursor(
   setValue(serializeTicketEditorContent(editor));
 }
 
+function handlePlainTextPaste(
+  e: React.ClipboardEvent<HTMLDivElement>,
+  onInput: () => void,
+) {
+  e.preventDefault();
+  const text = e.clipboardData.getData("text/plain");
+  if (!text) return;
+  const selection = window.getSelection();
+  if (!selection || selection.rangeCount === 0) return;
+  const range = selection.getRangeAt(0);
+  range.deleteContents();
+  const textNode = document.createTextNode(text);
+  range.insertNode(textNode);
+  range.setStartAfter(textNode);
+  range.collapse(true);
+  selection.removeAllRanges();
+  selection.addRange(range);
+  onInput();
+}
+
 export default function TicketPanelForm({
   guildId,
   mode,
@@ -868,6 +888,11 @@ export default function TicketPanelForm({
                         serializeTicketEditorContent(e.currentTarget)
                       )
                     }
+                    onPaste={(e) =>
+                      handlePlainTextPaste(e, () =>
+                        setGreeting(serializeTicketEditorContent(greetingRef.current!))
+                      )
+                    }
                   />
                   <button
                     type="button"
@@ -1216,6 +1241,11 @@ function EmbedEditor({
                   serializeTicketEditorContent(e.currentTarget),
                 )
               }
+              onPaste={(e) =>
+                handlePlainTextPaste(e, () =>
+                  updateEmbed("title", serializeTicketEditorContent(titleRef.current!))
+                )
+              }
             />
             <button
               type="button"
@@ -1261,6 +1291,11 @@ function EmbedEditor({
                 updateEmbed(
                   "description",
                   serializeTicketEditorContent(e.currentTarget),
+                )
+              }
+              onPaste={(e) =>
+                handlePlainTextPaste(e, () =>
+                  updateEmbed("description", serializeTicketEditorContent(descriptionRef.current!))
                 )
               }
             />
