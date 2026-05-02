@@ -783,7 +783,7 @@ export default function TicketPanelForm({
                     }}
                   >
                     <Image
-                      src="/img/icons/face.svg"
+                      src="/img/icons/deadkat.svg"
                       alt=""
                       width={20}
                       height={20}
@@ -923,7 +923,7 @@ export default function TicketPanelForm({
                     }}
                   >
                     <Image
-                      src="/img/icons/face.svg"
+                      src="/img/icons/deadkat.svg"
                       alt=""
                       width={20}
                       height={20}
@@ -1356,7 +1356,7 @@ function EmbedEditor({
               }}
             >
               <Image
-                src="/img/icons/face.svg"
+                src="/img/icons/deadkat.svg"
                 alt=""
                 width={20}
                 height={20}
@@ -1408,7 +1408,7 @@ function EmbedEditor({
               }}
             >
               <Image
-                src="/img/icons/face.svg"
+                src="/img/icons/deadkat.svg"
                 alt=""
                 width={20}
                 height={20}
