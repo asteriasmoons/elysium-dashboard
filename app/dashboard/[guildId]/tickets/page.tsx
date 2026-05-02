@@ -136,6 +136,14 @@ export default function TicketsPage() {
     return role ? `@${role.name}` : roleId;
   }
 
+  function resolveRoleMentions(text: string | null): string {
+    if (!text) return "";
+    return text.replace(/<@&(\d+)>/g, (_match, id) => {
+      const role = roles.find((r) => r.id === id);
+      return role ? `@${role.name}` : `@unknown-role`;
+    });
+  }
+
   async function deletePanel(panelId: string) {
     try {
       setError("");
@@ -292,7 +300,7 @@ export default function TicketsPage() {
                 <div className={styles.spacingLg}>
                   <p className={styles.cardDescription}>
                     <RenderDiscordText
-                      text={panel.greeting || "No greeting message set."}
+                      text={resolveRoleMentions(panel.greeting) || "No greeting message set."}
                     />
                   </p>
                 </div>
@@ -321,7 +329,7 @@ export default function TicketsPage() {
 
                           <span className={styles.embedAuthorName}>
                             <RenderDiscordText
-                              text={panel.embed?.author?.name || "Author"}
+                              text={resolveRoleMentions(panel.embed?.author?.name || "Author")}
                             />
                           </span>
                         </div>
@@ -331,14 +339,14 @@ export default function TicketsPage() {
                         <div className={styles.embedMain}>
                           {panel.embed?.title ? (
                             <p className={styles.previewTitle}>
-                              <RenderDiscordText text={panel.embed.title} />
+                              <RenderDiscordText text={resolveRoleMentions(panel.embed.title)} />
                             </p>
                           ) : null}
 
                           {panel.embed?.description ? (
                             <p className={styles.previewDescription}>
                               <RenderDiscordText
-                                text={panel.embed.description}
+                                text={resolveRoleMentions(panel.embed.description)}
                               />
                             </p>
                           ) : (
@@ -388,7 +396,7 @@ export default function TicketsPage() {
 
                           <span className={styles.embedFooterText}>
                             <RenderDiscordText
-                              text={panel.embed?.footer?.text || "Footer"}
+                              text={resolveRoleMentions(panel.embed?.footer?.text || "Footer")}
                             />
                             {panel.embed?.footer?.timestamp
                               ? ` • ${new Date().toLocaleString()}`

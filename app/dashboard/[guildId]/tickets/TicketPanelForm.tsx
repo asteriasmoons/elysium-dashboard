@@ -442,11 +442,11 @@ export default function TicketPanelForm({
 
     const value = serializeTicketEditorContent(editor);
 
-    if (activeEditor === "greeting") setGreeting(value);
-    if (activeEditor === "embedTitle") updateEmbedField("title", value);
-    if (activeEditor === "embedDescription") updateEmbedField("description", value);
-    if (activeEditor === "greetingTitle") updateGreetingEmbedField("title", value);
-    if (activeEditor === "greetingDescription") updateGreetingEmbedField("description", value);
+    if (activeEditor === "greeting") { setGreeting(value); renderRoleMentionsInsideEditor(editor, roles); }
+    if (activeEditor === "embedTitle") { updateEmbedField("title", value); renderRoleMentionsInsideEditor(editor, roles); }
+    if (activeEditor === "embedDescription") { updateEmbedField("description", value); renderRoleMentionsInsideEditor(editor, roles); }
+    if (activeEditor === "greetingTitle") { updateGreetingEmbedField("title", value); renderRoleMentionsInsideEditor(editor, roles); }
+    if (activeEditor === "greetingDescription") { updateGreetingEmbedField("description", value); renderRoleMentionsInsideEditor(editor, roles); }
 
     setShowRolePicker(false);
   }
@@ -1118,6 +1118,59 @@ export default function TicketPanelForm({
                   ) : (
                     <p className={styles.previewMuted}>No embed description</p>
                   )}
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <div className={styles.card}>
+            <h2 className={styles.cardTitle}>Greeting Embed Preview</h2>
+
+            <div className={styles.discordPreviewShell}>
+              <div
+                className={styles.discordEmbed}
+                style={{ borderLeftColor: greetingEmbed.color || "#5865F2" }}
+              >
+                <div className={styles.discordEmbedInner}>
+                  {greetingEmbed.title ? (
+                    <p className={styles.previewTitle}>
+                      <RenderDiscordText
+                        text={renderRoleMentionsForPreview(greetingEmbed.title, roles)}
+                      />
+                    </p>
+                  ) : null}
+
+                  {greetingEmbed.description ? (
+                    <p className={styles.previewDescription}>
+                      <RenderDiscordText
+                        text={renderRoleMentionsForPreview(greetingEmbed.description, roles)}
+                      />
+                    </p>
+                  ) : (
+                    <p className={styles.previewMuted}>No greeting embed description</p>
+                  )}
+
+                  {greetingEmbed.thumbnail ? (
+                    <Image
+                      src={greetingEmbed.thumbnail}
+                      alt=""
+                      width={80}
+                      height={80}
+                      unoptimized
+                      className={styles.embedThumbnail}
+                    />
+                  ) : null}
+
+                  {greetingEmbed.image ? (
+                    <Image
+                      src={greetingEmbed.image}
+                      alt=""
+                      width={420}
+                      height={220}
+                      unoptimized
+                      className={styles.embedImage}
+                    />
+                  ) : null}
                 </div>
               </div>
             </div>
