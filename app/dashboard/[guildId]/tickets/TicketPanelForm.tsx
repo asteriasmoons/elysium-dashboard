@@ -1094,30 +1094,55 @@ export default function TicketPanelForm({
 
           <div className={styles.card}>
             <h2 className={styles.cardTitle}>Preview</h2>
-
             <div className={styles.discordPreviewShell}>
               <div
                 className={styles.discordEmbed}
                 style={{ borderLeftColor: embed.color || "#5865F2" }}
               >
                 <div className={styles.discordEmbedInner}>
-                  {embed.title ? (
-                    <p className={styles.previewTitle}>
-                      <RenderDiscordText
-                        text={renderRoleMentionsForPreview(embed.title, roles)}
-                      />
-                    </p>
+                  {(embed.author?.name || embed.author?.icon_url) ? (
+                    <div className={styles.embedAuthorRow}>
+                      {embed.author?.icon_url ? (
+                        <Image src={embed.author.icon_url} alt="" width={20} height={20} unoptimized className={styles.embedAuthorIcon} />
+                      ) : null}
+                      <span className={styles.embedAuthorName}>
+                        <RenderDiscordText text={renderRoleMentionsForPreview(embed.author?.name || "", roles)} />
+                      </span>
+                    </div>
                   ) : null}
-
-                  {embed.description ? (
-                    <p className={styles.previewDescription}>
-                      <RenderDiscordText
-                        text={renderRoleMentionsForPreview(embed.description, roles)}
-                      />
-                    </p>
-                  ) : (
-                    <p className={styles.previewMuted}>No embed description</p>
-                  )}
+                  <div className={styles.embedBodyRow}>
+                    <div className={styles.embedMain}>
+                      {embed.title ? (
+                        <p className={styles.previewTitle}>
+                          <RenderDiscordText text={renderRoleMentionsForPreview(embed.title, roles)} />
+                        </p>
+                      ) : null}
+                      {embed.description ? (
+                        <p className={styles.previewDescription}>
+                          <RenderDiscordText text={renderRoleMentionsForPreview(embed.description, roles)} />
+                        </p>
+                      ) : (
+                        <p className={styles.previewMuted}>No embed description</p>
+                      )}
+                    </div>
+                    {embed.thumbnail ? (
+                      <Image src={embed.thumbnail} alt="" width={80} height={80} unoptimized className={styles.embedThumbnail} />
+                    ) : null}
+                  </div>
+                  {embed.image ? (
+                    <Image src={embed.image} alt="" width={420} height={220} unoptimized className={styles.embedImage} />
+                  ) : null}
+                  {(embed.footer?.text || embed.footer?.icon_url || embed.footer?.timestamp) ? (
+                    <div className={styles.embedFooterRow}>
+                      {embed.footer?.icon_url ? (
+                        <Image src={embed.footer.icon_url} alt="" width={20} height={20} unoptimized className={styles.embedFooterIcon} />
+                      ) : null}
+                      <span className={styles.embedFooterText}>
+                        <RenderDiscordText text={renderRoleMentionsForPreview(embed.footer?.text || "", roles)} />
+                        {embed.footer?.timestamp ? ` • ${new Date().toLocaleString()}` : ""}
+                      </span>
+                    </div>
+                  ) : null}
                 </div>
               </div>
             </div>
@@ -1125,51 +1150,54 @@ export default function TicketPanelForm({
 
           <div className={styles.card}>
             <h2 className={styles.cardTitle}>Greeting Embed Preview</h2>
-
             <div className={styles.discordPreviewShell}>
               <div
                 className={styles.discordEmbed}
                 style={{ borderLeftColor: greetingEmbed.color || "#5865F2" }}
               >
                 <div className={styles.discordEmbedInner}>
-                  {greetingEmbed.title ? (
-                    <p className={styles.previewTitle}>
-                      <RenderDiscordText
-                        text={renderRoleMentionsForPreview(greetingEmbed.title, roles)}
-                      />
-                    </p>
+                  {(greetingEmbed.author?.name || greetingEmbed.author?.icon_url) ? (
+                    <div className={styles.embedAuthorRow}>
+                      {greetingEmbed.author?.icon_url ? (
+                        <Image src={greetingEmbed.author.icon_url} alt="" width={20} height={20} unoptimized className={styles.embedAuthorIcon} />
+                      ) : null}
+                      <span className={styles.embedAuthorName}>
+                        <RenderDiscordText text={renderRoleMentionsForPreview(greetingEmbed.author?.name || "", roles)} />
+                      </span>
+                    </div>
                   ) : null}
-
-                  {greetingEmbed.description ? (
-                    <p className={styles.previewDescription}>
-                      <RenderDiscordText
-                        text={renderRoleMentionsForPreview(greetingEmbed.description, roles)}
-                      />
-                    </p>
-                  ) : (
-                    <p className={styles.previewMuted}>No greeting embed description</p>
-                  )}
-
-                  {greetingEmbed.thumbnail ? (
-                    <Image
-                      src={greetingEmbed.thumbnail}
-                      alt=""
-                      width={80}
-                      height={80}
-                      unoptimized
-                      className={styles.embedThumbnail}
-                    />
-                  ) : null}
-
+                  <div className={styles.embedBodyRow}>
+                    <div className={styles.embedMain}>
+                      {greetingEmbed.title ? (
+                        <p className={styles.previewTitle}>
+                          <RenderDiscordText text={renderRoleMentionsForPreview(greetingEmbed.title, roles)} />
+                        </p>
+                      ) : null}
+                      {greetingEmbed.description ? (
+                        <p className={styles.previewDescription}>
+                          <RenderDiscordText text={renderRoleMentionsForPreview(greetingEmbed.description, roles)} />
+                        </p>
+                      ) : (
+                        <p className={styles.previewMuted}>No greeting embed description</p>
+                      )}
+                    </div>
+                    {greetingEmbed.thumbnail ? (
+                      <Image src={greetingEmbed.thumbnail} alt="" width={80} height={80} unoptimized className={styles.embedThumbnail} />
+                    ) : null}
+                  </div>
                   {greetingEmbed.image ? (
-                    <Image
-                      src={greetingEmbed.image}
-                      alt=""
-                      width={420}
-                      height={220}
-                      unoptimized
-                      className={styles.embedImage}
-                    />
+                    <Image src={greetingEmbed.image} alt="" width={420} height={220} unoptimized className={styles.embedImage} />
+                  ) : null}
+                  {(greetingEmbed.footer?.text || greetingEmbed.footer?.icon_url || greetingEmbed.footer?.timestamp) ? (
+                    <div className={styles.embedFooterRow}>
+                      {greetingEmbed.footer?.icon_url ? (
+                        <Image src={greetingEmbed.footer.icon_url} alt="" width={20} height={20} unoptimized className={styles.embedFooterIcon} />
+                      ) : null}
+                      <span className={styles.embedFooterText}>
+                        <RenderDiscordText text={renderRoleMentionsForPreview(greetingEmbed.footer?.text || "", roles)} />
+                        {greetingEmbed.footer?.timestamp ? ` • ${new Date().toLocaleString()}` : ""}
+                      </span>
+                    </div>
                   ) : null}
                 </div>
               </div>
@@ -1408,6 +1436,67 @@ function EmbedEditor({
             onChange={(e) => updateEmbed("image", e.target.value)}
           />
         </div>
+
+        <div className={styles.rowFields}>
+          <div className={styles.fieldGroup}>
+            <label className={styles.label}>Author Name</label>
+            <input
+              className={styles.input}
+              value={embed.author?.name ?? ""}
+              placeholder="Author name"
+              onChange={(e) =>
+                updateEmbed("author", { ...embed.author, name: e.target.value })
+              }
+            />
+          </div>
+          <div className={styles.fieldGroup}>
+            <label className={styles.label}>Author Icon URL</label>
+            <input
+              className={styles.input}
+              value={embed.author?.icon_url ?? ""}
+              placeholder="https://..."
+              onChange={(e) =>
+                updateEmbed("author", { ...embed.author, icon_url: e.target.value })
+              }
+            />
+          </div>
+        </div>
+
+        <div className={styles.rowFields}>
+          <div className={styles.fieldGroup}>
+            <label className={styles.label}>Footer Text</label>
+            <input
+              className={styles.input}
+              value={embed.footer?.text ?? ""}
+              placeholder="Footer text"
+              onChange={(e) =>
+                updateEmbed("footer", { ...embed.footer, text: e.target.value })
+              }
+            />
+          </div>
+          <div className={styles.fieldGroup}>
+            <label className={styles.label}>Footer Icon URL</label>
+            <input
+              className={styles.input}
+              value={embed.footer?.icon_url ?? ""}
+              placeholder="https://..."
+              onChange={(e) =>
+                updateEmbed("footer", { ...embed.footer, icon_url: e.target.value })
+              }
+            />
+          </div>
+        </div>
+
+        <label className={styles.checkboxRow}>
+          <input
+            type="checkbox"
+            checked={embed.footer?.timestamp ?? false}
+            onChange={(e) =>
+              updateEmbed("footer", { ...embed.footer, timestamp: e.target.checked })
+            }
+          />
+          Show timestamp in footer
+        </label>
       </div>
     </div>
   );
