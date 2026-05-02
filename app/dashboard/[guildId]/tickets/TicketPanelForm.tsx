@@ -47,6 +47,7 @@ type TicketPanelData = {
   greeting: string;
   postChannelId: string;
   ticketCategoryId: string;
+  ticketSlug: string;
   transcriptsEnabled: boolean;
   transcriptChannelId: string | null;
   roleToPing: string | null;
@@ -347,6 +348,9 @@ export default function TicketPanelForm({
   );
   const [ticketCategoryId, setTicketCategoryId] = useState(
     initialPanel?.ticketCategoryId ?? "",
+  );
+  const [ticketSlug, setTicketSlug] = useState(
+    initialPanel?.ticketSlug ?? "",
   );
   const [transcriptsEnabled, setTranscriptsEnabled] = useState(
     Boolean(initialPanel?.transcriptsEnabled),
@@ -686,6 +690,7 @@ export default function TicketPanelForm({
         greeting,
         postChannelId,
         ticketCategoryId,
+        ticketSlug,
         transcriptsEnabled,
         transcriptChannelId: transcriptChannelId || null,
         roleToPing: roleToPing || null,
@@ -818,6 +823,20 @@ export default function TicketPanelForm({
                     ))}
                   </select>
                 </div>
+              </div>
+
+              <div className={styles.fieldGroup}>
+                <label className={styles.label}>Ticket Slug</label>
+                <input
+                  className={styles.input}
+                  value={ticketSlug}
+                  onChange={(e) => setTicketSlug(e.target.value.toLowerCase().replace(/[^a-z0-9-]/g, ""))}
+                  placeholder="support, devapp, bug..."
+                  maxLength={20}
+                />
+                <p className={styles.cardDescriptionMuted} style={{ margin: "4px 0 0", fontSize: "0.78rem" }}>
+                  Channel names: <code style={{ fontSize: "0.78rem" }}>{`username-${ticketSlug || "slug"}1`}</code>
+                </p>
               </div>
 
               <div className={styles.rowFields}>

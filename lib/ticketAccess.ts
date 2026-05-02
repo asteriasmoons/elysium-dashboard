@@ -36,6 +36,7 @@ export interface TicketPanelDoc extends Document {
   greeting: string;
   postChannelId: string;
   ticketCategoryId: string;
+  ticketSlug: string;
   transcriptsEnabled: boolean;
   transcriptChannelId?: string | null;
   roleToPing?: string | null;
@@ -55,6 +56,7 @@ export type TicketPanelInput = {
   greeting?: string;
   postChannelId: string;
   ticketCategoryId: string;
+  ticketSlug?: string;
   transcriptsEnabled?: boolean;
   transcriptChannelId?: string | null;
   roleToPing?: string | null;
@@ -150,6 +152,7 @@ export async function createTicketPanel(
     greeting: String(input.greeting ?? "").trim(),
     postChannelId,
     ticketCategoryId,
+    ticketSlug: normalizeOptional(input.ticketSlug) ?? "",
     transcriptsEnabled: Boolean(input.transcriptsEnabled),
     transcriptChannelId: normalizeOptional(input.transcriptChannelId),
     roleToPing: normalizeOptional(input.roleToPing),
@@ -194,6 +197,7 @@ export async function updateTicketPanel(
         greeting: String(input.greeting ?? "").trim(),
         postChannelId,
         ticketCategoryId,
+        ticketSlug: normalizeOptional(input.ticketSlug) ?? "",
         transcriptsEnabled: Boolean(input.transcriptsEnabled),
         transcriptChannelId: normalizeOptional(input.transcriptChannelId),
         roleToPing: normalizeOptional(input.roleToPing),

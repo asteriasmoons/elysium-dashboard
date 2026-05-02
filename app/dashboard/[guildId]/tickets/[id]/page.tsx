@@ -24,6 +24,7 @@ async function getPanel(guildId: string, id: string) {
     greeting: panel.greeting ?? "",
     postChannelId: panel.postChannelId,
     ticketCategoryId: panel.ticketCategoryId,
+    ticketSlug: panel.ticketSlug ?? "",
     transcriptsEnabled: Boolean(panel.transcriptsEnabled),
     transcriptChannelId: panel.transcriptChannelId ?? null,
     roleToPing: panel.roleToPing ?? null,

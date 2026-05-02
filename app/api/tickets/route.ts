@@ -62,6 +62,7 @@ export async function POST(req: Request) {
     greeting: body.greeting ?? "",
     postChannelId: body.postChannelId,
     ticketCategoryId: body.ticketCategoryId,
+    ticketSlug: body.ticketSlug ?? "",
     transcriptsEnabled: Boolean(body.transcriptsEnabled),
     transcriptChannelId: body.transcriptChannelId ?? null,
     roleToPing: body.roleToPing ?? null,
