@@ -6,7 +6,7 @@ export const TICKET_PANEL_COLLECTION = "ticketpanels";
 export type ModalField = {
   label: string;
   placeholder: string;
-  style: string;
+  style: "short" | "paragraph";
   required: boolean;
 };
 
