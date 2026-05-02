@@ -1092,8 +1092,8 @@ export default function TicketPanelForm({
               roles={roles}
               search={roleSearch}
               onPick={(role) => insertRoleMentionAtCursor(role)}
-              className={styles.emojiPopover}
-              itemClassName={styles.emojiItem}
+              className={styles.rolePopover}
+              itemClassName={styles.roleItem}
             />
           ) : null}
 
