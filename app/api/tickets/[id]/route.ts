@@ -45,6 +45,7 @@ export async function GET(
     roleToPing: panel.roleToPing ?? null,
     embed: panel.embed,
     greetingEmbed: panel.greetingEmbed ?? null,
+    modalFields: Array.isArray(panel.modalFields) ? panel.modalFields : [],
     createdAt: panel.createdAt ? new Date(panel.createdAt).toISOString() : null,
     updatedAt: panel.updatedAt ? new Date(panel.updatedAt).toISOString() : null,
   });
@@ -81,6 +82,7 @@ export async function PATCH(
     roleToPing: body.roleToPing ?? null,
     embed: body.embed,
     greetingEmbed: body.greetingEmbed,
+    modalFields: Array.isArray(body.modalFields) ? body.modalFields : [],
   });
 
   if (!success) {

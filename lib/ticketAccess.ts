@@ -3,6 +3,13 @@ import { ObjectId, type Document } from "mongodb";
 
 export const TICKET_PANEL_COLLECTION = "ticketpanels";
 
+export type ModalField = {
+  label: string;
+  placeholder: string;
+  style: string;
+  required: boolean;
+};
+
 export type TicketEmbedData = {
   title: string | null;
   description: string | null;
@@ -34,6 +41,7 @@ export interface TicketPanelDoc extends Document {
   roleToPing?: string | null;
   embed: TicketEmbedData;
   greetingEmbed?: TicketEmbedData;
+  modalFields?: ModalField[];
   createdAt: Date;
   updatedAt: Date;
   __v?: number;
@@ -52,6 +60,7 @@ export type TicketPanelInput = {
   roleToPing?: string | null;
   embed: TicketEmbedData;
   greetingEmbed?: TicketEmbedData;
+  modalFields?: ModalField[];
 };
 
 function requireValue(value: string | null | undefined, name: string): string {
@@ -146,6 +155,7 @@ export async function createTicketPanel(
     roleToPing: normalizeOptional(input.roleToPing),
     embed: normalizeEmbed(input.embed),
     greetingEmbed: normalizeEmbed(input.greetingEmbed),
+    modalFields: Array.isArray(input.modalFields) ? input.modalFields : [],
     createdAt: now,
     updatedAt: now,
   });
@@ -189,6 +199,7 @@ export async function updateTicketPanel(
         roleToPing: normalizeOptional(input.roleToPing),
         embed: normalizeEmbed(input.embed),
         greetingEmbed: normalizeEmbed(input.greetingEmbed),
+        modalFields: Array.isArray(input.modalFields) ? input.modalFields : [],
         updatedAt: new Date(),
       },
     },

@@ -67,6 +67,7 @@ export async function POST(req: Request) {
     roleToPing: body.roleToPing ?? null,
     embed: body.embed,
     greetingEmbed: body.greetingEmbed,
+    modalFields: Array.isArray(body.modalFields) ? body.modalFields : [],
   });
 
   return NextResponse.json({ id });
