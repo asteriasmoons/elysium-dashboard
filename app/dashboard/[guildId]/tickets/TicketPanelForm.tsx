@@ -886,6 +886,15 @@ export default function TicketPanelForm({
                       unoptimized
                     />
                   </button>
+                  {showRolePicker && activeEditor === "greeting" ? (
+                    <RoleMentionPicker
+                      roles={roles}
+                      search={roleSearch}
+                      onPick={(role) => insertRoleMentionAtCursor(role)}
+                      className={styles.rolePopover}
+                      itemClassName={styles.roleItem}
+                    />
+                  ) : null}
                 </div>
               </div>
             </div>
@@ -1032,6 +1041,11 @@ export default function TicketPanelForm({
             saveCurrentEditorRange={saveCurrentEditorRange}
             titleEditorKey="embedTitle"
             descriptionEditorKey="embedDescription"
+            showRolePicker={showRolePicker}
+            roleSearch={roleSearch}
+            roles={roles}
+            activeEditor={activeEditor}
+            onPickRole={insertRoleMentionAtCursor}
           />
 
           <EmbedEditor
@@ -1046,6 +1060,11 @@ export default function TicketPanelForm({
             saveCurrentEditorRange={saveCurrentEditorRange}
             titleEditorKey="greetingTitle"
             descriptionEditorKey="greetingDescription"
+            showRolePicker={showRolePicker}
+            roleSearch={roleSearch}
+            roles={roles}
+            activeEditor={activeEditor}
+            onPickRole={insertRoleMentionAtCursor}
           />
 
           <div className={styles.card}>
@@ -1085,15 +1104,6 @@ export default function TicketPanelForm({
               onPick={insertEmojiTag}
               className={styles.emojiPopover}
               itemClassName={styles.emojiItem}
-            />
-          ) : null}
-          {showRolePicker ? (
-            <RoleMentionPicker
-              roles={roles}
-              search={roleSearch}
-              onPick={(role) => insertRoleMentionAtCursor(role)}
-              className={styles.rolePopover}
-              itemClassName={styles.roleItem}
             />
           ) : null}
 
@@ -1140,6 +1150,11 @@ type EmbedEditorProps = {
   saveCurrentEditorRange: (editor: HTMLDivElement | null) => void;
   titleEditorKey: "embedTitle" | "greetingTitle";
   descriptionEditorKey: "embedDescription" | "greetingDescription";
+  showRolePicker: boolean;
+  roleSearch: string;
+  roles: { id: string; name: string }[];
+  activeEditor: string | null;
+  onPickRole: (role: { id: string; name: string }) => void;
 };
 
 function EmbedEditor({
@@ -1154,6 +1169,11 @@ function EmbedEditor({
   saveCurrentEditorRange,
   titleEditorKey,
   descriptionEditorKey,
+  showRolePicker,
+  roleSearch,
+  roles,
+  activeEditor,
+  onPickRole,
 }: EmbedEditorProps) {
   function updateEmbed<K extends keyof TicketEmbedData>(
     key: K,
@@ -1260,6 +1280,15 @@ function EmbedEditor({
                 unoptimized
               />
             </button>
+            {showRolePicker && activeEditor === descriptionEditorKey ? (
+              <RoleMentionPicker
+                roles={roles}
+                search={roleSearch}
+                onPick={onPickRole}
+                className={styles.rolePopover}
+                itemClassName={styles.roleItem}
+              />
+            ) : null}
           </div>
         </div>
 

@@ -489,9 +489,9 @@
 }
 
 .rolePopover {
-  position: fixed;
-  right: 32px;
-  bottom: 32px;
+  position: absolute;
+  left: 0;
+  bottom: calc(100% + 6px);
   z-index: 999;
   background: #0b0f1f;
   border: 1px solid rgba(255, 255, 255, 0.12);
